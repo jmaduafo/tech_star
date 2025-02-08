@@ -8,7 +8,7 @@ function MainPage() {
         <div className="flex-1 flex justify-center items-center">
           <p>23:45</p>
         </div>
-        <div className="flex-1 bg-light35 backdrop-blur-lg rounded-tl-customLg rounded-bl-customLg">
+        <div className="flex-1 bg-light20 backdrop-blur-xl rounded-tl-customLg rounded-bl-customLg">
           <div className="w-[60%] mx-auto mt-16">
             <LoginSignup />
           </div>

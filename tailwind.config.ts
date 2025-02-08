@@ -12,6 +12,7 @@ export default {
         darkText: "#141414",
         lightText: "#ececec",
         accent: "hsl(41, 68, 63, 100%)",
+        dark50: "rgba(20, 20, 20, .5)",
         light70: "rgba(236, 236, 236, 0.7)",
         light40: "rgba(236, 236, 236, 0.4)",
         light35: "rgba(236, 236, 236, 0.35)",

@@ -1,3 +1,5 @@
+import Header5 from "@/components/fontsize/Header5";
+import Header6 from "@/components/fontsize/Header6";
 import React from "react";
 
 function FormSwitch({
@@ -21,7 +23,7 @@ function FormSwitch({
             isLogin ? "text-lightText" : "text-darkText"
           } duration-300 flex-1 flex justify-center items-center z-[1] cursor-pointer`}
         >
-          <p>Login</p>
+          <Header5 text="Login"/>
         </div>
         <div
           onClick={() => setIsLogin(false)}
@@ -29,7 +31,7 @@ function FormSwitch({
             !isLogin ? "text-lightText" : "text-darkText"
           } duration-300 flex-1 flex justify-center items-center z-[1] cursor-pointer`}
         >
-          <p>Sign Up</p>
+          <Header5 text="Sign Up"/>
         </div>
       </div>
     </div>
