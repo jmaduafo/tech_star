@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    // redirect("/login")
+    redirect("/")
   }
 })
 
