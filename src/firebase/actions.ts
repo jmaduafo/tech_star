@@ -20,7 +20,13 @@ import {
   signOut,
 } from "firebase/auth";
 
-import { User, Project, Contractor, Contract } from "@/types/types";
+import {
+  User,
+  Project,
+  Contractor,
+  Contract,
+  NonContract,
+} from "@/types/types";
 import { redirect } from "next/navigation";
 
 const usersRef = collection(db, "users");
@@ -43,7 +49,7 @@ if (auth) {
 // Add user to auth table and "users" collection
 
 export async function createUser(password: string, data: User) {
-  let error = "";
+  let error = null;
   let loading = true;
 
   createUserWithEmailAndPassword(auth, data.email, password)
@@ -99,7 +105,7 @@ export async function createUser(password: string, data: User) {
 }
 
 export async function login(email: string, password: string) {
-  let error = "";
+  let error = null;
   let loading = true;
 
   signInWithEmailAndPassword(auth, email, password)
@@ -140,7 +146,7 @@ export async function login(email: string, password: string) {
 // Logout
 
 export async function logout() {
-  let error = "";
+  let error = null;
   let loading = true;
 
   signOut(auth)
@@ -165,12 +171,13 @@ export async function logout() {
 export async function getAllProjects() {
   let result: Project[] = [];
   let loading = true;
-  let error = "";
+  let error = null;
 
   try {
     // Display only projects by a specific team
     const allProjectsRef = query(projectsRef, where("team_id", "==", team_id));
 
+    let array = [];
     const unsub = onSnapshot(allProjectsRef, (doc) => {
       doc.forEach((item) => {
         result.push(item.data() as Project);
@@ -190,7 +197,7 @@ export async function getAllProjects() {
 export async function getOneProject(id: string) {
   let result = {};
   let loading = true;
-  let error = "";
+  let error = null;
 
   try {
     const oneProjectRef = doc(db, "projects", id);
@@ -210,37 +217,36 @@ export async function getOneProject(id: string) {
 // Get all contractors
 
 export async function getAllContractors() {
-    let result: Contractor[] = [];
-    let loading = true;
-    let error = "";
-  
-    try {
+  let result: Contractor[] = [];
+  let loading = true;
+  let error = null;
 
-      const allContractorsRef = query(
-        contractorsRef,
-        where("team_id", "==", team_id)
-      );
-  
-      const unsub = onSnapshot(allContractorsRef, (doc) => {
-        doc.forEach((item) => {
-          result.push(item.data() as Contractor);
-        });
+  try {
+    const allContractorsRef = query(
+      contractorsRef,
+      where("team_id", "==", team_id)
+    );
+
+    const unsub = onSnapshot(allContractorsRef, (doc) => {
+      doc.forEach((item) => {
+        result.push(item.data() as Contractor);
       });
-    } catch (err: any) {
-      error = err.message;
-    } finally {
-      loading = false;
-    }
-  
-    return { result, loading, error };
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
   }
+
+  return { result, loading, error };
+}
 
 // Get all contractors under one project
 
 export async function getContractorsByProject(project_id: string) {
   let result: Contractor[] = [];
   let loading = true;
-  let error = "";
+  let error = null;
 
   try {
     // Display only projects by a specific team
@@ -269,7 +275,7 @@ export async function getContractorsByProject(project_id: string) {
 export async function getOneContractor(id: string) {
   let result = {};
   let loading = true;
-  let error = "";
+  let error = null;
 
   try {
     const oneContractorRef = doc(db, "contractors", id);
@@ -289,37 +295,102 @@ export async function getOneContractor(id: string) {
 // Get all contracts under one contractor
 
 export async function getContractsByContractor(contractor_id: string) {
-    let result: Contract[] = [];
-    let loading = true;
-    let error = "";
-  
-    try {
-        
-      const allContractsRef = query(
-        contractsRef,
-        where("team_id", "==", team_id),
-        where("contractor_id", "==", contractor_id)
-      );
-  
-      const unsub = onSnapshot(allContractsRef, (doc) => {
-        doc.forEach((item) => {
-          result.push(item.data() as Contract);
-        });
+  let result: Contract[] = [];
+  let loading = true;
+  let error = "";
+
+  try {
+    const allContractsRef = query(
+      contractsRef,
+      where("team_id", "==", team_id),
+      where("contractor_id", "==", contractor_id)
+    );
+
+    const unsub = onSnapshot(allContractsRef, (doc) => {
+      doc.forEach((item) => {
+        result.push(item.data() as Contract);
       });
-    } catch (err: any) {
-      error = err.message;
-    } finally {
-      loading = false;
-    }
-  
-    return { result, loading, error };
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
   }
+
+  return { result, loading, error };
+}
 
 // Get all non-contracts under one contractor
 
+export async function getNonContractsByContractor(non_contractor_id: string) {
+  let result: NonContract[] = [];
+  let loading = true;
+  let error = "";
+
+  try {
+    const allNonContractsRef = query(
+      noncontractsRef,
+      where("team_id", "==", team_id),
+      where("non_contractor_id", "==", non_contractor_id)
+    );
+
+    const unsub = onSnapshot(allNonContractsRef, (doc) => {
+      doc.forEach((item) => {
+        result.push(item.data() as NonContract);
+      });
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
+  }
+
+  return { result, loading, error };
+}
+
 // Get one contract
 
+export async function getOneContract(id: string) {
+  let result = {};
+  let loading = true;
+  let error = null;
+
+  try {
+    const oneContractRef = doc(db, "contract", id);
+
+    const unsub = onSnapshot(oneContractRef, (doc) => {
+      result = doc?.data() as Contract;
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
+  }
+
+  return { result, loading, error };
+}
+
 // Get one non-contract
+
+export async function getOneNonContract(id: string) {
+  let result = {};
+  let loading = true;
+  let error = null;
+
+  try {
+    const oneNonContractRef = doc(db, "noncontract", id);
+
+    const unsub = onSnapshot(oneNonContractRef, (doc) => {
+      result = doc?.data() as NonContract;
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
+  }
+
+  return { result, loading, error };
+}
 
 // Get all payments under one contract
 
