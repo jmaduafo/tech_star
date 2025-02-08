@@ -17,7 +17,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut,
+  signOut
 } from "firebase/auth";
 
 import {
@@ -28,6 +28,8 @@ import {
   NonContract,
 } from "@/types/types";
 import { redirect } from "next/navigation";
+
+import { CreateUserSchema, LoginUserSchema } from "@/zod/validation";
 
 const usersRef = collection(db, "users");
 const projectsRef = collection(db, "projects");
@@ -48,11 +50,56 @@ if (auth) {
 
 // Add user to auth table and "users" collection
 
-export async function createUser(password: string, data: User) {
+export async function checkUniqueUser(newEmail: string) {
+  let error = null;
+
+  try {
+    // Check if there is an email in the schema that is the same as the entered email
+    const findEmail = query(usersRef, where("email", "==", newEmail));
+
+    const notUnique = [];
+    const unsub = onSnapshot(findEmail, (doc) => {
+      doc.forEach((item) => {
+        notUnique.push(item.data().email);
+      });
+    });
+
+    if (notUnique.length) {
+      error = "This email address is already in use.";
+    }
+  } catch (err: any) {
+    error = err.message;
+  }
+
+  return error;
+}
+
+export async function createUser(data: User) {
   let error = null;
   let loading = true;
 
-  createUserWithEmailAndPassword(auth, data.email, password)
+  // Validates the entered data with zod
+  const userResult = CreateUserSchema.safeParse(data);
+
+  if (!userResult.success) {
+    error = userResult.error.message;
+    loading = false
+    return { loading, error };
+  }
+
+  // Deconstruct object
+  const { email, password, first_name, last_name } = userResult.data
+
+  // Checks to see if the email entered has already been used
+  error = await checkUniqueUser(email);
+
+  if (error) {
+    loading = false
+    return { loading, error };
+  }
+
+  // Finally create new user if validations are successful
+  createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed up
 
@@ -60,27 +107,24 @@ export async function createUser(password: string, data: User) {
 
       async () => {
         try {
-          // newly authenticated user should relate to "users" collection with same id
-          const newUserRef = doc(db, "users", user.uid);
-
-          await setDoc(newUserRef, {
-            id: user?.uid,
-            first_name: data.first_name,
-            last_name: data.last_name,
-            email: data.email,
-            is_admin: true,
-            created_at: serverTimestamp(),
-          });
-
           // Instantly create a new team after user is registered
           const newTeam = await addDoc(teamsRef, {
-            team_name: data.first_name + "'s team",
+            team_name: first_name + "'s team",
           });
 
-          // If new team is created, add team_id to the newly added user's document
+          // If new team is created, add new team id to the new user's document in "users" schema
           if (newTeam) {
-            await updateDoc(newUserRef, {
+            // newly authenticated user should relate to "users" collection with same id
+            const newUserRef = doc(db, "users", user.uid);
+
+            await setDoc(newUserRef, {
+              id: user?.uid,
+              first_name,
+              last_name,
+              email,
               team_id: newTeam?.id,
+              is_admin: true,
+              created_at: serverTimestamp(),
             });
 
             // Take user to dashboard
@@ -89,11 +133,12 @@ export async function createUser(password: string, data: User) {
         } catch (err: any) {
           error = err.code + ": " + err.message;
         } finally {
-          loading = true;
+          loading = false;
         }
       };
       // ...
     })
+
     .catch((err) => {
       error = err.code + ": " + err.message;
     })
@@ -104,9 +149,20 @@ export async function createUser(password: string, data: User) {
   return { loading, error };
 }
 
-export async function login(email: string, password: string) {
+export async function login(data: User) {
   let error = null;
   let loading = true;
+
+  // Validates the entered data with zod
+  const userResult = LoginUserSchema.safeParse(data);
+
+  if (!userResult.success) {
+    error = userResult.error.message;
+    loading = false
+    return { loading, error };
+  }
+
+  const { email, password } = userResult.data
 
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -121,7 +177,7 @@ export async function login(email: string, password: string) {
           const oldUser = await getDoc(oldUserRef);
 
           // Set their team_id to route
-          redirect(`/team/${oldUser?.data()?.team_id}/dashbaord`);
+          redirect(`/team/${oldUser?.data()?.team_id}/dashboard`);
         } catch (err: any) {
           error = err.code + ": " + err.message;
         } finally {

@@ -3,6 +3,7 @@ export type User = {
   first_name: string;
   last_name: string;
   email: string;
+  password: string;
   occupation: string;
   is_admin: boolean;
   team_id?: string;
