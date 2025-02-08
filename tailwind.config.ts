@@ -12,6 +12,7 @@ export default {
         darkText: "#141414",
         lightText: "#ececec",
         accent: "hsl(41, 68, 63, 100%)",
+        dark75: "rgba(20, 20, 20, .75)",
         dark50: "rgba(20, 20, 20, .5)",
         dark35: "rgba(20, 20, 20, .35)",
         light70: "rgba(236, 236, 236, 0.7)",
@@ -33,5 +34,7 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+   
+  ],
 } satisfies Config;
