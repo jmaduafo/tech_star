@@ -15,15 +15,13 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 
-import { User } from "@/types/types";
+import { User, Project, Contractor, Contract } from "@/types/types";
 import { redirect } from "next/navigation";
-import { Project } from "next/dist/build/swc/types";
 
 const usersRef = collection(db, "users");
 const projectsRef = collection(db, "projects");
@@ -34,7 +32,7 @@ const noncontractsRef = collection(db, "noncontracts");
 const paymentsRef = collection(db, "payments");
 const teamsRef = collection(db, "teams");
 
-let team_id = ""
+let team_id = "";
 
 if (auth) {
   team_id = window.location.pathname.split("/")[1];
@@ -45,12 +43,12 @@ if (auth) {
 // Add user to auth table and "users" collection
 
 export async function createUser(password: string, data: User) {
+  let error = "";
+  let loading = true;
+
   createUserWithEmailAndPassword(auth, data.email, password)
     .then((userCredential) => {
       // Signed up
-
-      let error = "";
-      let loading = true;
 
       const user = userCredential.user;
 
@@ -83,17 +81,27 @@ export async function createUser(password: string, data: User) {
             redirect(`/team/${newTeam?.id}/dashboard`);
           }
         } catch (err: any) {
-          return { message: err.code + ": " + err.message };
+          error = err.code + ": " + err.message;
+        } finally {
+          loading = true;
         }
       };
       // ...
     })
-    .catch((error) => {
-      return { message: error.code + ": " + error.message };
+    .catch((err) => {
+      error = err.code + ": " + err.message;
+    })
+    .finally(() => {
+      loading = false;
     });
+
+  return { loading, error };
 }
 
 export async function login(email: string, password: string) {
+  let error = "";
+  let loading = true;
+
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in
@@ -109,13 +117,20 @@ export async function login(email: string, password: string) {
           // Set their team_id to route
           redirect(`/team/${oldUser?.data()?.team_id}/dashbaord`);
         } catch (err: any) {
-          return { message: err.code + ": " + err.message };
+          error = err.code + ": " + err.message;
+        } finally {
+          loading = false;
         }
       };
     })
-    .catch((error) => {
-      return { message: error.code + ": " + error.message };
+    .catch((err) => {
+      error = err.code + ": " + err.message;
+    })
+    .finally(() => {
+      loading = false;
     });
+
+  return { loading, error };
 }
 
 // Update user from auth table and "users" collection
@@ -126,18 +141,19 @@ export async function login(email: string, password: string) {
 
 export async function logout() {
   let error = "";
-  let loading = false;
+  let loading = true;
 
-  loading = true;
   signOut(auth)
     .then(() => {
       redirect("/");
     })
-    .catch((error) => {
+    .catch((err) => {
       // An error happened.
-      error = error.code + ": " + error.message;
+      error = err.code + ": " + err.message;
+    })
+    .finally(() => {
+      loading = false;
     });
-  loading = false;
 
   return { loading, error };
 }
@@ -148,23 +164,21 @@ export async function logout() {
 
 export async function getAllProjects() {
   let result: Project[] = [];
-  let loading = false;
+  let loading = true;
   let error = "";
 
   try {
-    loading = true;
-    
+    // Display only projects by a specific team
     const allProjectsRef = query(projectsRef, where("team_id", "==", team_id));
 
-    const unsub = onSnapshot(allProjectsRef, (projects) => {
-      projects.forEach((item) => {
+    const unsub = onSnapshot(allProjectsRef, (doc) => {
+      doc.forEach((item) => {
         result.push(item.data() as Project);
       });
     });
-
-    loading = false;
   } catch (err: any) {
     error = err.message;
+  } finally {
     loading = false;
   }
 
@@ -173,34 +187,133 @@ export async function getAllProjects() {
 
 // Get one project
 
-export async function getOneProject() {
-  let result: Project[] = [];
-  let loading = false;
+export async function getOneProject(id: string) {
+  let result = {};
+  let loading = true;
   let error = "";
 
   try {
-    loading = true;
+    const oneProjectRef = doc(db, "projects", id);
 
-    const unsub = onSnapshot(projectsRef, (projects) => {
-      projects.forEach((item) => {
-        result.push(item.data() as Project);
-      });
+    const unsub = onSnapshot(oneProjectRef, (doc) => {
+      result = doc?.data() as Project;
     });
-
-    loading = false;
   } catch (err: any) {
     error = err.message;
+  } finally {
     loading = false;
   }
 
   return { result, loading, error };
 }
 
+// Get all contractors
+
+export async function getAllContractors() {
+    let result: Contractor[] = [];
+    let loading = true;
+    let error = "";
+  
+    try {
+
+      const allContractorsRef = query(
+        contractorsRef,
+        where("team_id", "==", team_id)
+      );
+  
+      const unsub = onSnapshot(allContractorsRef, (doc) => {
+        doc.forEach((item) => {
+          result.push(item.data() as Contractor);
+        });
+      });
+    } catch (err: any) {
+      error = err.message;
+    } finally {
+      loading = false;
+    }
+  
+    return { result, loading, error };
+  }
+
 // Get all contractors under one project
+
+export async function getContractorsByProject(project_id: string) {
+  let result: Contractor[] = [];
+  let loading = true;
+  let error = "";
+
+  try {
+    // Display only projects by a specific team
+    const allContractorsRef = query(
+      contractorsRef,
+      where("team_id", "==", team_id),
+      where("project_id", "==", project_id)
+    );
+
+    const unsub = onSnapshot(allContractorsRef, (doc) => {
+      doc.forEach((item) => {
+        result.push(item.data() as Contractor);
+      });
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
+  }
+
+  return { result, loading, error };
+}
 
 // Get one contractor
 
+export async function getOneContractor(id: string) {
+  let result = {};
+  let loading = true;
+  let error = "";
+
+  try {
+    const oneContractorRef = doc(db, "contractors", id);
+
+    const unsub = onSnapshot(oneContractorRef, (doc) => {
+      result = doc?.data() as Contractor;
+    });
+  } catch (err: any) {
+    error = err.message;
+  } finally {
+    loading = false;
+  }
+
+  return { result, loading, error };
+}
+
 // Get all contracts under one contractor
+
+export async function getContractsByContractor(contractor_id: string) {
+    let result: Contract[] = [];
+    let loading = true;
+    let error = "";
+  
+    try {
+        
+      const allContractsRef = query(
+        contractsRef,
+        where("team_id", "==", team_id),
+        where("contractor_id", "==", contractor_id)
+      );
+  
+      const unsub = onSnapshot(allContractsRef, (doc) => {
+        doc.forEach((item) => {
+          result.push(item.data() as Contract);
+        });
+      });
+    } catch (err: any) {
+      error = err.message;
+    } finally {
+      loading = false;
+    }
+  
+    return { result, loading, error };
+  }
 
 // Get all non-contracts under one contractor
 
