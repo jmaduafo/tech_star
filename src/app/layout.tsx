@@ -1,20 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import { auth } from "@/firebase/config";
-import { onAuthStateChanged } from "firebase/auth";
-import { redirect } from 'next/navigation'
-import { Toaster } from "@/components/ui/toaster"
+import { Plus_Jakarta_Sans } from "next/font/google";
+import CheckAuth from "@/components/CheckAuth";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -32,8 +20,6 @@ export const metadata: Metadata = {
 //   }
 // })
 
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,8 +30,8 @@ export default function RootLayout({
       <body
         className={`${plusJakarta.className} tracking-tight text-lightText`}
       >
-        {children}
-        <Toaster/>
+        <CheckAuth>{children}</CheckAuth>
+        <Toaster />
       </body>
     </html>
   );
