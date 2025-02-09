@@ -1,7 +1,6 @@
 import React from "react";
 import { HiChevronRight } from "react-icons/hi2";
 import Loading from "../Loading";
-import { useToast } from "@/hooks/use-toast";
 
 function Submit({
   setIsClicked,
@@ -10,7 +9,6 @@ function Submit({
   setIsClicked: React.Dispatch<React.SetStateAction<boolean>>;
   isClicked: boolean;
 }) {
-  const { toast } = useToast();
 
   return (
     <button
@@ -21,11 +19,6 @@ function Submit({
       <span
         onClick={() => {
           setIsClicked((prev) => !prev);
-          toast({
-            variant: "destructive",
-            title: "Scheduled: Catch up ",
-            description: "Friday, February 10, 2023 at 5:57 PM",
-          });
         }}
         className={`${
           isClicked ? "w-full" : "w-[60px]"
