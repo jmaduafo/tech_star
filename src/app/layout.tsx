@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { auth } from "@/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import { redirect } from 'next/navigation'
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
         className={`${plusJakarta.className} tracking-tight text-lightText`}
       >
         {children}
+        <Toaster/>
       </body>
     </html>
   );
