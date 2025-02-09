@@ -11,8 +11,11 @@ import {
   addDoc,
   collection,
   doc,
+  onSnapshot,
+  query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
 import IconInput from "@/components/ui/input/IconInput";
 import { CiLock, CiMail } from "react-icons/ci";
@@ -41,6 +44,40 @@ function SignUp() {
     });
   }
 
+  async function checkUniqueUser(newEmail: string) {
+    const usersRef = collection(db, "users")
+
+    try {
+      // Check if there is an email in the schema that is the same as the entered email
+      const findEmail = query(usersRef, where("email", "==", newEmail));
+  
+      const notUnique = [];
+      const unsub = onSnapshot(findEmail, (doc) => {
+        doc.forEach((item) => {
+          notUnique.push(item.data().email);
+        });
+      });
+  
+      if (notUnique.length) {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong!",
+          description: "This email address is already in use.",
+        });
+
+        return;
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong!",
+        description: err.message,
+      });
+
+      return;
+    }
+  }
+
   async function handleSubmit(formData: FormData) {
     const data = {
       first_name: formData.get("first_name"),
@@ -64,6 +101,8 @@ function SignUp() {
     const { first_name, last_name, email, password } = userResult.data;
 
     setIsClicked(true);
+
+    await checkUniqueUser(email);
 
     await createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
