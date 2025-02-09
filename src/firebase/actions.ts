@@ -17,7 +17,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
 } from "firebase/auth";
 
 import {
@@ -41,10 +41,11 @@ const paymentsRef = collection(db, "payments");
 const teamsRef = collection(db, "teams");
 
 let team_id = "";
+// console.log(window.location.pathname)
 
-if (auth) {
-  team_id = window.location.pathname.split("/")[1];
-}
+// // if (auth) {
+// //   team_id = window.location.pathname.split("/")[1];
+// // }
 
 // /Authentication
 
@@ -83,18 +84,18 @@ export async function createUser(data: User) {
 
   if (!userResult.success) {
     error = userResult.error.message;
-    loading = false
+    loading = false;
     return { loading, error };
   }
 
   // Deconstruct object
-  const { email, password, first_name, last_name } = userResult.data
+  const { email, password, first_name, last_name } = userResult.data;
 
   // Checks to see if the email entered has already been used
   error = await checkUniqueUser(email);
 
   if (error) {
-    loading = false
+    loading = false;
     return { loading, error };
   }
 
@@ -105,7 +106,7 @@ export async function createUser(data: User) {
 
       const user = userCredential.user;
 
-      async () => {
+      async function create() {
         try {
           // Instantly create a new team after user is registered
           const newTeam = await addDoc(teamsRef, {
@@ -135,7 +136,9 @@ export async function createUser(data: User) {
         } finally {
           loading = false;
         }
-      };
+      }
+
+      create();
       // ...
     })
 
@@ -149,28 +152,33 @@ export async function createUser(data: User) {
   return { loading, error };
 }
 
-export async function login(data: User) {
-  let error = null;
+type Login = {
+  email: string;
+  password: string;
+};
+
+export async function login(data: Login) {
+  let error: string | null = null;
   let loading = true;
-
   // Validates the entered data with zod
-  const userResult = LoginUserSchema.safeParse(data);
+  // const userResult = LoginUserSchema.safeParse(data);
 
-  if (!userResult.success) {
-    error = userResult.error.message;
-    loading = false
-    return { loading, error };
-  }
+  // if (!userResult.success) {
+  //   error = userResult.error.message;
+  //   loading = false;
 
-  const { email, password } = userResult.data
+  //   return
+  // }
+
+  const { email, password } = data;
 
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in
       const user = userCredential.user;
 
-      async () => {
-        try {
+      async function login() {
+      try {
           // Make reference to an already existing user in "users" collection
           const oldUserRef = doc(db, "users", user?.uid);
 
@@ -178,21 +186,23 @@ export async function login(data: User) {
 
           // Set their team_id to route
           redirect(`/team/${oldUser?.data()?.team_id}/dashboard`);
-        } catch (err: any) {
-          error = err.code + ": " + err.message;
-        } finally {
-          loading = false;
-        }
-      };
-    })
-    .catch((err) => {
-      error = err.code + ": " + err.message;
-    })
-    .finally(() => {
-      loading = false;
-    });
+        
+      } catch (err: any) {
+        error += err.code + ": " + err.message;
+      } finally {
+        loading = false;
+      }
+    }
 
-  return { loading, error };
+    login()
+})
+    .catch((err) => {
+      error += err.code + ": " + err.message;
+    });
+    // .finally(() => {
+      //   loading = false;
+      // });
+      return { loading, error }
 }
 
 // Update user from auth table and "users" collection

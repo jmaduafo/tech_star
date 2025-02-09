@@ -6,8 +6,8 @@ function Submit({
   setIsClicked,
   isClicked,
 }: {
-  setIsClicked: React.Dispatch<React.SetStateAction<boolean>>;
-  isClicked: boolean;
+  readonly setIsClicked: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly isClicked: boolean;
 }) {
 
   return (
@@ -17,9 +17,6 @@ function Submit({
       disabled={isClicked ?? false}
     >
       <span
-        onClick={() => {
-          setIsClicked((prev) => !prev);
-        }}
         className={`${
           isClicked ? "w-full" : "w-[60px]"
         } duration-300 rounded-full flex justify-end items-center h-full bg-darkText px-1 group-hover:bg-dark75`}

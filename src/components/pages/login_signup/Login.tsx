@@ -8,47 +8,91 @@ import { HiEye, HiEyeSlash } from "react-icons/hi2";
 import Submit from "@/components/ui/buttons/Submit";
 import { LoginUserSchema } from "@/zod/validation";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 function Login() {
   const [isClicked, setIsClicked] = useState(false);
   const [viewPass, setViewPass] = useState(false);
-  const [ userInfo, setUserInfo ] = useState({
+  const [userInfo, setUserInfo] = useState({
     email: "",
     password: "",
-  })
+  });
 
   const { toast } = useToast();
-  
+  const route = useRouter()
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const { name, value } = e.target
-    
-        setUserInfo({
-          ...userInfo,
-          [name]: value
-        })
-      }
-    
+    const { name, value } = e.target;
+
+    setUserInfo({
+      ...userInfo,
+      [name]: value,
+    });
+  }
 
   async function handleSubmit(formData: FormData) {
     const data = {
-        email: formData.get("email"),
-        password: formData.get("password"),
-    }
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
 
     const userResult = LoginUserSchema.safeParse(data);
 
     if (!userResult.success) {
-        toast({
-            variant: "destructive",
-            title: "Scheduled: Catch up ",
-            description: "Friday, February 10, 2023 at 5:57 PM",
-          })
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong!",
+        description: userResult.error.issues[0].message,
+      });
+
+      return;
     }
 
+    const { email, password } = userResult.data;
 
+    setIsClicked(true)
 
+    await signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
 
+        async function login() {
+          try {
+            // Make reference to an already existing user in "users" collection
+            const oldUserRef = doc(db, "users", user?.uid);
+
+            const oldUser = await getDoc(oldUserRef);
+
+            // Set their team_id to route
+            route.push(`/team/${oldUser?.data()?.team_id}/dashboard`);
+          } catch (err: any) {
+            toast({
+              variant: "destructive",
+              title: "Uh oh! Something went wrong!",
+              description: err.message,
+            });
     
+          } finally {
+            setIsClicked(false);
+          }
+        }
+
+        login();
+      })
+      .catch((err) => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong!",
+          description: "You are not a registered user. Please sign up instead. (" + err.message + ")" ,
+        });
+      })
+      .finally(() => {
+        setIsClicked(false);
+      });
   }
 
   return (
@@ -69,7 +113,7 @@ function Login() {
                 name="email"
                 value={userInfo.email}
                 onChange={handleChange}
-                className="p-2 placeholder-dark50 text-darkText w-full h-full rounded-full bg-transparent outline-none border-none"
+                className="placeholder-dark50"
               />
             }
           />
@@ -84,11 +128,12 @@ function Login() {
                 name="password"
                 value={userInfo.password}
                 onChange={handleChange}
-                className="p-2 placeholder-dark50 text-darkText w-full h-full rounded-full bg-transparent outline-none border-none"
+                className="placeholder-dark50"
               />
             }
             otherLogic={
-              <div
+              <button
+                type="button"
                 className="text-darkText pr-3 cursor-pointer"
                 onClick={() => setViewPass((prev) => !prev)}
               >
@@ -97,7 +142,7 @@ function Login() {
                 ) : (
                   <HiEyeSlash className="w-5 h-5" />
                 )}
-              </div>
+              </button>
             }
           />
         </div>
