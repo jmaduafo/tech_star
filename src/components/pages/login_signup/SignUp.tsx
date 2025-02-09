@@ -32,6 +32,8 @@ function SignUp() {
   const [isClicked, setIsClicked] = useState(false);
   const [viewPass, setViewPass] = useState(false);
 
+  const [ loading, setLoading ] = useState(false)
+
   const { toast } = useToast();
   const route = useRouter();
 
@@ -64,8 +66,6 @@ function SignUp() {
           title: "Uh oh! Something went wrong!",
           description: "This email address is already in use.",
         });
-
-        return;
       }
     } catch (err: any) {
       toast({
@@ -74,11 +74,12 @@ function SignUp() {
         description: err.message,
       });
 
-      return;
     }
   }
 
   async function handleSubmit(formData: FormData) {
+    setLoading(true)
+
     const data = {
       first_name: formData.get("first_name"),
       last_name: formData.get("last_name"),
@@ -95,14 +96,17 @@ function SignUp() {
         description: userResult.error.issues[0].message,
       });
 
+      setLoading(false)
+
       return;
     }
 
     const { first_name, last_name, email, password } = userResult.data;
 
-    setIsClicked(true);
-
+    
     await checkUniqueUser(email);
+    
+    setLoading(true)
 
     await createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
@@ -143,7 +147,7 @@ function SignUp() {
               description: err.message,
             });
           } finally {
-            setIsClicked(false);
+            setLoading(false);
           }
         }
 
@@ -158,9 +162,10 @@ function SignUp() {
         });
       })
       .finally(() => {
-        setIsClicked(false);
+        setLoading(false);
       });
   }
+
   return (
     <div>
       <Header1 text="Join us today!" />
@@ -245,7 +250,7 @@ function SignUp() {
           />
         </div>
         <div className="mt-[6em] flex justify-center">
-          <Submit isClicked={isClicked} setIsClicked={setIsClicked} />
+          <Submit isClicked={loading} setIsClicked={setLoading} />
         </div>
       </form>
     </div>

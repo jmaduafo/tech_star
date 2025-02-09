@@ -14,7 +14,7 @@ import { auth, db } from "@/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 
 function Login() {
-  const [isClicked, setIsClicked] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [viewPass, setViewPass] = useState(false);
   const [userInfo, setUserInfo] = useState({
     email: "",
@@ -47,13 +47,15 @@ function Login() {
         title: "Uh oh! Something went wrong!",
         description: userResult.error.issues[0].message,
       });
+      
+      setLoading(false)
 
       return;
     }
 
     const { email, password } = userResult.data;
 
-    setIsClicked(true)
+    setLoading(true)
 
     await signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
@@ -77,7 +79,7 @@ function Login() {
             });
     
           } finally {
-            setIsClicked(false);
+            setLoading(false);
           }
         }
 
@@ -91,7 +93,7 @@ function Login() {
         });
       })
       .finally(() => {
-        setIsClicked(false);
+        setLoading(false);
       });
   }
 
@@ -147,7 +149,7 @@ function Login() {
           />
         </div>
         <div className="mt-[6em] flex justify-center">
-          <Submit isClicked={isClicked} setIsClicked={setIsClicked} />
+          <Submit isClicked={loading} setIsClicked={setLoading} />
         </div>
       </form>
     </div>

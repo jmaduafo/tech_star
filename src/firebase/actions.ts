@@ -1,4 +1,3 @@
-"use server";
 import { db, auth } from "./config";
 import {
   getDocs,
@@ -29,7 +28,7 @@ import {
 } from "@/types/types";
 import { redirect } from "next/navigation";
 
-import { CreateUserSchema, LoginUserSchema } from "@/zod/validation";
+import { CreateUserSchema } from "@/zod/validation";
 
 const usersRef = collection(db, "users");
 const projectsRef = collection(db, "projects");
@@ -52,7 +51,7 @@ let team_id = "";
 // Add user to auth table and "users" collection
 
 export async function checkUniqueUser(newEmail: string) {
-  let error = null;
+  let error : string | null = null;
 
   try {
     // Check if there is an email in the schema that is the same as the entered email
@@ -75,32 +74,41 @@ export async function checkUniqueUser(newEmail: string) {
   return error;
 }
 
-export async function createUser(data: User) {
-  let error = null;
-  let loading = true;
+type Signup = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+};
 
-  // Validates the entered data with zod
-  const userResult = CreateUserSchema.safeParse(data);
+export async function createUser(data: Signup, setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>) {
+   // Validates the entered data with zod
 
-  if (!userResult.success) {
-    error = userResult.error.message;
-    loading = false;
-    return { loading, error };
-  }
+  setLoading(true)
 
-  // Deconstruct object
-  const { email, password, first_name, last_name } = userResult.data;
+  // const userResult = CreateUserSchema.safeParse(data);
 
-  // Checks to see if the email entered has already been used
-  error = await checkUniqueUser(email);
+  // if (!userResult.success) {
+  //   setError(userResult.error.issues[0].message)
+  //   setLoading(false)
+  //   return;
+  // }
 
-  if (error) {
-    loading = false;
-    return { loading, error };
-  }
+  // // Deconstruct object
+  // const { email, password, first_name, last_name } = userResult.data;
+
+  // // Checks to see if the email entered has already been used
+  // const error = await checkUniqueUser(email);
+
+  // if (error) {
+  //   setError(error)
+  //   setLoading(false)
+  //   return;
+  // }
 
   // Finally create new user if validations are successful
-  createUserWithEmailAndPassword(auth, email, password)
+  createUserWithEmailAndPassword(auth, data.email, data.password)
     .then((userCredential) => {
       // Signed up
 
@@ -110,7 +118,7 @@ export async function createUser(data: User) {
         try {
           // Instantly create a new team after user is registered
           const newTeam = await addDoc(teamsRef, {
-            team_name: first_name + "'s team",
+            team_name: data.first_name + "'s team",
           });
 
           // If new team is created, add new team id to the new user's document in "users" schema
@@ -120,9 +128,9 @@ export async function createUser(data: User) {
 
             await setDoc(newUserRef, {
               id: user?.uid,
-              first_name,
-              last_name,
-              email,
+              first_name: data.first_name,
+              last_name: data.last_name,
+              email: data.email,
               team_id: newTeam?.id,
               is_admin: true,
               created_at: serverTimestamp(),
@@ -132,9 +140,9 @@ export async function createUser(data: User) {
             redirect(`/team/${newTeam?.id}/dashboard`);
           }
         } catch (err: any) {
-          error = err.code + ": " + err.message;
+          setError(err.message);
         } finally {
-          loading = false;
+          setLoading(false)
         }
       }
 
@@ -143,13 +151,11 @@ export async function createUser(data: User) {
     })
 
     .catch((err) => {
-      error = err.code + ": " + err.message;
+      setError(err.message);
     })
     .finally(() => {
-      loading = false;
+      setLoading(false)
     });
-
-  return { loading, error };
 }
 
 type Login = {
@@ -211,9 +217,9 @@ export async function login(data: Login) {
 
 // Logout
 
-export async function logout() {
-  let error = null;
-  let loading = true;
+export async function logout(setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+) {
 
   signOut(auth)
     .then(() => {
@@ -221,13 +227,12 @@ export async function logout() {
     })
     .catch((err) => {
       // An error happened.
-      error = err.code + ": " + err.message;
+      setError(err.code + ": " + err.message)
     })
     .finally(() => {
-      loading = false;
+      setLoading(false);
     });
 
-  return { loading, error };
 }
 
 // /Projects
