@@ -29,13 +29,13 @@ function SignUp() {
     email: "",
     password: "",
   });
-  const [isClicked, setIsClicked] = useState(false);
   const [viewPass, setViewPass] = useState(false);
 
   const [ loading, setLoading ] = useState(false)
 
   const { toast } = useToast();
   const route = useRouter();
+
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -45,6 +45,7 @@ function SignUp() {
       [name]: value,
     });
   }
+
 
   async function checkUniqueUser(newEmail: string) {
     const usersRef = collection(db, "users")
@@ -77,6 +78,7 @@ function SignUp() {
     }
   }
 
+  
   async function handleSubmit(formData: FormData) {
     setLoading(true)
 
@@ -105,7 +107,7 @@ function SignUp() {
 
     
     await checkUniqueUser(email);
-    
+
     setLoading(true)
 
     await createUserWithEmailAndPassword(auth, email, password)

@@ -51,7 +51,7 @@ let team_id = "";
 // Add user to auth table and "users" collection
 
 export async function checkUniqueUser(newEmail: string) {
-  let error : string | null = null;
+  let error: string | null = null;
 
   try {
     // Check if there is an email in the schema that is the same as the entered email
@@ -81,11 +81,14 @@ type Signup = {
   password: string;
 };
 
-export async function createUser(data: Signup, setError: React.Dispatch<React.SetStateAction<string | null>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>) {
-   // Validates the entered data with zod
+export async function createUser(
+  data: Signup,
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  // Validates the entered data with zod
 
-  setLoading(true)
+  setLoading(true);
 
   // const userResult = CreateUserSchema.safeParse(data);
 
@@ -142,7 +145,7 @@ export async function createUser(data: Signup, setError: React.Dispatch<React.Se
         } catch (err: any) {
           setError(err.message);
         } finally {
-          setLoading(false)
+          setLoading(false);
         }
       }
 
@@ -154,7 +157,7 @@ export async function createUser(data: Signup, setError: React.Dispatch<React.Se
       setError(err.message);
     })
     .finally(() => {
-      setLoading(false)
+      setLoading(false);
     });
 }
 
@@ -184,7 +187,7 @@ export async function login(data: Login) {
       const user = userCredential.user;
 
       async function login() {
-      try {
+        try {
           // Make reference to an already existing user in "users" collection
           const oldUserRef = doc(db, "users", user?.uid);
 
@@ -192,23 +195,22 @@ export async function login(data: Login) {
 
           // Set their team_id to route
           redirect(`/team/${oldUser?.data()?.team_id}/dashboard`);
-        
-      } catch (err: any) {
-        error += err.code + ": " + err.message;
-      } finally {
-        loading = false;
+        } catch (err: any) {
+          error += err.code + ": " + err.message;
+        } finally {
+          loading = false;
+        }
       }
-    }
 
-    login()
-})
+      login();
+    })
     .catch((err) => {
       error += err.code + ": " + err.message;
     });
-    // .finally(() => {
-      //   loading = false;
-      // });
-      return { loading, error }
+  // .finally(() => {
+  //   loading = false;
+  // });
+  return { loading, error };
 }
 
 // Update user from auth table and "users" collection
@@ -217,50 +219,50 @@ export async function login(data: Login) {
 
 // Logout
 
-export async function logout(setError: React.Dispatch<React.SetStateAction<string | null>>,
+export async function logout(
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-
   signOut(auth)
     .then(() => {
       redirect("/");
     })
     .catch((err) => {
       // An error happened.
-      setError(err.code + ": " + err.message)
+      setError(err.code + ": " + err.message);
     })
     .finally(() => {
       setLoading(false);
     });
-
 }
 
 // /Projects
 
 // Get all projects
 
-export async function getAllProjects() {
-  let result: Project[] = [];
-  let loading = true;
-  let error = null;
-
+export async function getAllProjects(
+  setResult: React.Dispatch<React.SetStateAction<Project[] | undefined>>,
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+) {
   try {
     // Display only projects by a specific team
     const allProjectsRef = query(projectsRef, where("team_id", "==", team_id));
 
-    let array = [];
+    let array: Project[] = [];
+
     const unsub = onSnapshot(allProjectsRef, (doc) => {
       doc.forEach((item) => {
-        result.push(item.data() as Project);
+        array.push(item.data() as Project);
       });
     });
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
 
-  return { result, loading, error };
+    setResult(array);
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
 }
 
 // Get one project
