@@ -1,7 +1,7 @@
 import React from 'react'
 
 
-function IconInput({ icon, input, otherLogic }: { icon: React.ReactNode, input: React.ReactNode, otherLogic?: React.ReactNode}) {
+function IconInput({ icon, input, otherLogic }: { readonly icon: React.ReactNode, readonly input: React.ReactNode, readonly otherLogic?: React.ReactNode}) {
   return (
     <div className='rounded-full flex items-center gap-1 p-1 bg-light35 backdrop-blur-xl w-full'>
         <div className='p-2 rounded-full bg-darkText text-lightText'>
@@ -11,10 +11,7 @@ function IconInput({ icon, input, otherLogic }: { icon: React.ReactNode, input: 
             {input}
         </div>
         {
-            otherLogic ?
-            otherLogic
-            :
-            null
+            otherLogic || null
         }
     </div>
   )

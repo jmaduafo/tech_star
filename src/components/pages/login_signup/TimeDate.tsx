@@ -5,8 +5,8 @@ import { fullDate, fullTime } from '@/utils/dateAndTime'
 function TimeDate() {
     const [ date, setDate ] = useState("")
     const [ time, setTime ] = useState({
-        hour: "",
-        minutes: ""
+        hour: "00",
+        minutes: "00"
     })
 
     useEffect(() => {

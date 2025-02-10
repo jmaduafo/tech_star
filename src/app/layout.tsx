@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${urbanist.className} text-lightText`}
+        className={`${urbanist.className} bg-lightText text-lightText`}
       >
         <CheckAuth>{children}</CheckAuth>
         <Toaster />

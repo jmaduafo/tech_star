@@ -1,13 +1,12 @@
 import Header5 from "@/components/fontsize/Header5";
-import Header6 from "@/components/fontsize/Header6";
 import React from "react";
 
 function FormSwitch({
   isLogin,
   setIsLogin,
 }: {
-  isLogin: boolean;
-  setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly isLogin: boolean;
+  readonly setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
     <div className="w-full bg-lightText relative rounded-full h-[60px] z-[0]">
