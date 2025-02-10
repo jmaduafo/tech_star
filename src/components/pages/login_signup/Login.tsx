@@ -34,6 +34,8 @@ function Login() {
   }
 
   async function handleSubmit(formData: FormData) {
+    setLoading(true)
+    
     const data = {
       email: formData.get("email"),
       password: formData.get("password"),
@@ -47,7 +49,7 @@ function Login() {
         title: "Uh oh! Something went wrong!",
         description: userResult.error.issues[0].message,
       });
-      
+
       setLoading(false)
 
       return;
