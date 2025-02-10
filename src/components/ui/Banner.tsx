@@ -17,7 +17,7 @@ function Banner({ text }: { readonly text: string}) {
         }
     }
   return (
-    <p className={`px-5 py-1 ${colorPalette(text)}`}>{text}</p>
+    <p className={`px-4 py-1 rounded-full ${colorPalette(text)}`}>{text}</p>
   )
 }
 

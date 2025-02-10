@@ -10,7 +10,7 @@ import { User } from "@/types/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function Greeting() {
-  const [greet, setGreet] = useState("---");
+  const [greet, setGreet] = useState("");
   const [userData, setUserData] = useState<User | undefined>();
 
   onAuthStateChanged(auth, (user) => {
@@ -37,7 +37,13 @@ function Greeting() {
   return (
     <div className="h-full flex flex-col">
       <div className="">
-        <Header4 text={`Good ${greet},`} />
+        {
+          greet.length ? 
+          <Header4 text={`Good ${greet},`} />
+          :
+          <Skeleton className="w-[65%] h-[18px]"/>
+
+        }
         {userData?.first_name ? (
           <Header2
             text={userData?.first_name}

@@ -23,10 +23,6 @@ function CheckAuth({ children }: { readonly children: React.ReactNode }) {
           const userRef = doc(db, "users", user?.uid)
           const docSnap = await getDoc(userRef)
 
-          // if (docSnap?.data()?.team_id !== team_id) {
-          //   route.push("/");
-          // }
-
           if (pathname === "/") {
             route.push(`/team/${docSnap?.data()?.team_id}/dashboard`)
           }
