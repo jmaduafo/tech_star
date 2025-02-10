@@ -1,5 +1,5 @@
 import React from 'react'
-import Card from '@/components/ui/Card'
+import Card from '@/components/ui/MyCard'
 import Header2 from '@/components/fontsize/Header2'
 import Header3 from '@/components/fontsize/Header3'
 

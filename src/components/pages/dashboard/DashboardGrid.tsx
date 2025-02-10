@@ -1,5 +1,7 @@
 import React from "react";
-import Card from "@/components/ui/Card";
+import Card from "@/components/ui/MyCard";
+import Header3 from "@/components/fontsize/Header3";
+import AmountDisplay from "./AmountDisplay";
 
 function DashboardGrid() {
   return (
@@ -10,16 +12,13 @@ function DashboardGrid() {
         </Card>
         {/* Amount Display */}
         <div className="calc backdrop-blur-0">
-          <div className="">
-            <p>hi</p>
-            <p>hi</p>
-            <p>hi</p>
-            <p>hi</p>
-          </div>
+            <AmountDisplay/>
         </div>
         {/* Line chart */}
         <Card className="line">
-          <div></div>
+          <div>
+            <Header3 text="At a Glance"/>
+          </div>
         </Card>
         {/* Pie chart */}
         <Card className="pie">
