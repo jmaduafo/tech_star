@@ -2,13 +2,14 @@ import React from "react";
 import Card from "@/components/ui/MyCard";
 import Header3 from "@/components/fontsize/Header3";
 import AmountDisplay from "./AmountDisplay";
+import Greeting from "./Greeting";
 
 function DashboardGrid() {
   return (
       <div className="dashGrid h-[80vh] gap-6">
         {/* Greeting */}
         <Card className="greeting">
-          <div></div>
+          <Greeting/>
         </Card>
         {/* Amount Display */}
         <div className="calc backdrop-blur-0">
