@@ -1,17 +1,14 @@
-import { User } from "@/types/types";
 import React from "react";
 import { HiUser, HiMiniCog8Tooth } from "react-icons/hi2";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-function TopBar({ user }: { readonly user: User | undefined }) {
+function TopBar() {
   return (
     <div className="flex justify-between items-center">
       <div>

@@ -127,7 +127,7 @@ function SignUp() {
             // If new team is created, add new team id to the new user's document in "users" schema
             if (newTeam) {
               // newly authenticated user should relate to "users" collection with same id
-              const newUserRef = doc(db, "users", user.uid);
+              const newUserRef = doc(db, "users", user?.uid);
 
               await setDoc(newUserRef, {
                 id: user?.uid,
@@ -140,7 +140,7 @@ function SignUp() {
               });
 
               // Take user to dashboard
-              route.push(`/team/${newTeam?.id}/dashboard`);
+              route.push('/dashboard');
             }
           } catch (err: any) {
             toast({

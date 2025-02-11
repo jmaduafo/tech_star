@@ -10,8 +10,7 @@ import { LoginUserSchema } from "@/zod/validation";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/firebase/config";
-import { doc, getDoc } from "firebase/firestore";
+import { auth } from "@/firebase/config";
 
 function Login() {
   const [loading, setLoading] = useState(false);
@@ -64,28 +63,10 @@ function Login() {
         // Signed in
         const user = userCredential.user;
 
-        async function login() {
-          try {
-            // Make reference to an already existing user in "users" collection
-            const oldUserRef = doc(db, "users", user?.uid);
-
-            const oldUser = await getDoc(oldUserRef);
-
-            // Set their team_id to route
-            route.push(`/team/${oldUser?.data()?.team_id}/dashboard`);
-          } catch (err: any) {
-            toast({
-              variant: "destructive",
-              title: "Uh oh! Something went wrong!",
-              description: err.message,
-            });
-    
-          } finally {
-            setLoading(false);
-          }
+        if (user) {
+          route.push('/dashboard');
         }
 
-        login();
       })
       .catch((err) => {
         toast({

@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import IconTextButton from "../buttons/IconTextButton";
 import {
@@ -8,9 +9,8 @@ import {
   BsBarChartFill,
 } from "react-icons/bs";
 import Link from "next/link";
-import { User } from "@/types/types";
 
-function BottomBar({ user }: { readonly user: User | undefined }) {
+function BottomBar() {
   const [nav, setNav] = useState("Dashboard");
 
   const navLinks = [
@@ -31,7 +31,7 @@ function BottomBar({ user }: { readonly user: User | undefined }) {
       icon: <BsBarChartFill className="w-4 h-4" />,
     },
     {
-      text: "Members",
+      text: "Team",
       icon: <BsPeopleFill className="w-4 h-4" />,
     },
   ];
@@ -40,12 +40,7 @@ function BottomBar({ user }: { readonly user: User | undefined }) {
     <nav className="flex justify-center item-center gap-8">
       {navLinks.map((item) => {
         return (
-          <Link
-            key={item.text}
-            href={
-              user ? `/team/${user?.team_id}/${item.text.toLowerCase()}` : ""
-            }
-          >
+          <Link key={item.text} href={`/${item.text.toLowerCase()}`}>
             <IconTextButton
               textNav={nav}
               setText={setNav}
