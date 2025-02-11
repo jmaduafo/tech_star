@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { fullDate, fullTime } from "@/utils/dateAndTime";
-import { CiCloudSun, CiCloudMoon, CiCloud } from "react-icons/ci";
 import { WiHorizonAlt, WiDayCloudy, WiNightAltCloudy } from "react-icons/wi";
 
 function TimeDate({
@@ -30,11 +29,11 @@ function TimeDate({
 
   function timeIcon(hour: string) {
     if (+hour >= 0 && +hour < 12) {
-      return <WiHorizonAlt className={`${timeFontSize === "dashboard" ? 'w-14 h-14' : ''}`}/>
+      return <WiHorizonAlt className={timeFontSize === "dashboard" ? 'w-14 h-14' : ''}/>
     } else if (+hour >= 12 && +hour < 17) {
-      return <WiDayCloudy className={`${timeFontSize === "dashboard" ? 'w-14 h-14' : ''}`}/>
+      return <WiDayCloudy className={timeFontSize === "dashboard" ? 'w-14 h-14' : ''}/>
     } else if (+hour >=17 && +hour <= 23) {
-      return <WiNightAltCloudy className={`${timeFontSize === "dashboard" ? 'w-14 h-14' : ''}`}/>
+      return <WiNightAltCloudy className={timeFontSize === "dashboard" ? 'w-14 h-14' : ''}/>
     }
   }
 

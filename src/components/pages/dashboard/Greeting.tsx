@@ -14,20 +14,20 @@ function Greeting() {
   const [greet, setGreet] = useState("");
   const [userData, setUserData] = useState<User | undefined>();
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      const userRef = doc(db, "users", user?.uid);
-
-      async function auth() {
-        const docSnap = await getDoc(userRef);
-        setUserData(docSnap?.data() as User);
-      }
-
-      auth();
-    }
-  });
-
   useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userRef = doc(db, "users", user?.uid);
+  
+        async function auth() {
+          const docSnap = await getDoc(userRef);
+          setUserData(docSnap?.data() as User);
+        }
+  
+        auth();
+      }
+    });
+    
     const userGreet = setInterval(() => {
       setGreet(greeting());
     }, 1000);
