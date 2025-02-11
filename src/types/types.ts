@@ -1,3 +1,9 @@
+export type Currency = {
+  name: string;
+  code: string;
+  symbol: string;
+}
+
 export type User = {
   id: string;
   first_name: string;
