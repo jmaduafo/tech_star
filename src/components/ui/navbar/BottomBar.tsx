@@ -27,12 +27,12 @@ function BottomBar({ user }: { readonly user: User | undefined }) {
       icon: <BsCashStack className="w-4 h-4" />,
     },
     {
-      text: "Members",
-      icon: <BsPeopleFill className="w-4 h-4" />,
-    },
-    {
       text: "Charts",
       icon: <BsBarChartFill className="w-4 h-4" />,
+    },
+    {
+      text: "Members",
+      icon: <BsPeopleFill className="w-4 h-4" />,
     },
   ];
 
