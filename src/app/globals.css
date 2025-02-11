@@ -59,5 +59,7 @@ input {
 @layer base {
   :root {
     --radius: 0.5rem;
+
+    --color-accent1: hsl(41, 68, 63, 100%) 
   }
 }

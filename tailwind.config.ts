@@ -12,7 +12,8 @@ export default {
   		colors: {
   			darkText: '#141414',
   			lightText: '#ececec',
-  			accent: 'hsl(41, 68, 63, 100%)',
+			accent1: "#E1B860",
+			accent2: "",
   			dark75: 'rgba(20, 20, 20, .75)',
   			dark50: 'rgba(20, 20, 20, .5)',
   			dark35: 'rgba(20, 20, 20, .35)',
@@ -21,6 +22,7 @@ export default {
   			light50: 'rgba(236, 236, 236, 0.5)',
   			light40: 'rgba(236, 236, 236, 0.4)',
   			light35: 'rgba(236, 236, 236, 0.35)',
+  			light25: 'rgba(236, 236, 236, 0.25)',
   			light20: 'rgba(236, 236, 236, 0.2)',
   			pendingBg: 'rgba(214, 112, 64, .4)',
   			pendingBorder: 'rgb(214, 112, 64)',
@@ -39,7 +41,10 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+		accentColor: {
+			accent: 'var(--color-accent1)',
+		}
   	}
   },
   plugins: [

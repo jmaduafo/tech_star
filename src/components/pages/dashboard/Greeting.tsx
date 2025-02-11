@@ -4,10 +4,11 @@ import { greeting } from "@/utils/greeting";
 import Header4 from "@/components/fontsize/Header4";
 import Header2 from "@/components/fontsize/Header2";
 import { auth, db } from "@/firebase/config";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { User } from "@/types/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import TimeDate from "../login_signup/TimeDate";
 
 function Greeting() {
   const [greet, setGreet] = useState("");
@@ -63,8 +64,8 @@ function Greeting() {
           ) : null}
         </div>
       </div>
-      <div className="mt-auto">
-        <p>hu</p>
+      <div className="mt-auto max-w-fit">
+        <TimeDate timeFontSize="dashboard" dateFontSize="dashboard"/>
       </div>
     </div>
   );
