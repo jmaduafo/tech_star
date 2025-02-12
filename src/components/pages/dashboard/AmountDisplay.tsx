@@ -1,10 +1,10 @@
 import React from "react";
+import { currency_list } from "@/utils/dataTools";
 import { SelectItem } from "@/components/ui/select";
 import SelectBar from "@/components/ui/input/SelectBar";
 import Header1 from "@/components/fontsize/Header1";
 import Header5 from "@/components/fontsize/Header5";
 import Header2 from "@/components/fontsize/Header2";
-import Header3 from "@/components/fontsize/Header3";
 import Header4 from "@/components/fontsize/Header4";
 
 function AmountDisplay() {
@@ -30,10 +30,10 @@ function AmountDisplay() {
           })}
         </SelectBar>
         <SelectBar value="Select a currency" label="Currencies">
-          {["Pear", "Corn"].map((item) => {
+          {currency_list.map((item) => {
             return (
-              <SelectItem key={item} value={item}>
-                {item}
+              <SelectItem className="cursor-pointer" key={item.code} value={item.code}>
+                {item.name}
               </SelectItem>
             );
           })}

@@ -3,6 +3,8 @@ import Card from "@/components/ui/MyCard";
 import Header3 from "@/components/fontsize/Header3";
 import AmountDisplay from "./AmountDisplay";
 import Greeting from "./Greeting";
+import ContractorCount from "./ContractorCount";
+import ProjectCount from "./ProjectCount";
 
 function DashboardGrid() {
   return (
@@ -27,11 +29,11 @@ function DashboardGrid() {
         </Card>
         {/* Contractors */}
         <Card className="contractors">
-          <div></div>
+          <ContractorCount/>
         </Card>
         {/* Project */}
         <Card className="project">
-          <div></div>
+          <ProjectCount/>
         </Card>
       </div>
   );
