@@ -26,7 +26,7 @@ input {
 .dashGrid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: auto 1.4fr 1fr;
+  grid-template-rows: auto 1.4fr .8fr;
   grid-template-areas: "greeting calc calc calc calc calc"
     "greeting lines lines lines pie pie"
     "greeting lines lines lines contractors project";
@@ -58,8 +58,6 @@ input {
 
 @layer base {
   :root {
-    --radius: 0.5rem;
-
-    --color-accent1: hsl(41, 68, 63, 100%) 
+    --radius: 0.5rem; 
   }
 }

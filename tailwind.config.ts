@@ -36,6 +36,7 @@ export default {
   			completedBorder: 'rgb(140, 185, 227)',
 			destructiveBg: 'rgba(168, 15, 15, 0.4)',
 			destructiveBorder: '#A80F0F',
+			
   		},
   		borderRadius: {
   			customLg: '6%',

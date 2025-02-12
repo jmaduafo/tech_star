@@ -20,41 +20,44 @@ function PaymentDisplay() {
       paymentStatus: "Paid",
       totalAmount: "$250.00",
       projectName: "Credit Card",
-      date: "Jan. 4, 2025"
+      date: "Jan. 4, 2025",
     },
     {
       contractor: "INV002",
       paymentStatus: "Pending",
       totalAmount: "$150.00",
       projectName: "PayPal",
-      date: "Dec. 25, 2024"
+      date: "Dec. 25, 2024",
     },
     {
       contractor: "INV003",
       paymentStatus: "Unpaid",
       totalAmount: "$350.00",
       projectName: "Bank Transfer",
-      date: "Nov. 17, 2024"
+      date: "Nov. 17, 2024",
     },
     {
       contractor: "INV004",
       paymentStatus: "Paid",
       totalAmount: "$450.00",
       projectName: "Credit Card",
-      date: "Nov. 1, 2024"
+      date: "Nov. 1, 2024",
     },
     {
       contractor: "INV005",
       paymentStatus: "Paid",
       totalAmount: "$550.00",
       projectName: "PayPal",
-      date: "Oct. 19, 2024"
+      date: "Oct. 19, 2024",
     },
   ];
 
   return (
     <Card className="w-full">
-      <Header3 text="Latest Payments" />
+      <div className="flex items-start gap-3">
+        <Header3 text="Latest Payments" />
+        <p>Max. 5</p>
+      </div>
       <div className="mt-6">
         <Table>
           <TableCaption></TableCaption>
@@ -70,10 +73,14 @@ function PaymentDisplay() {
           <TableBody>
             {invoices.map((invoice) => (
               <TableRow key={invoice.contractor}>
-                <TableCell className="font-medium">{invoice.contractor}</TableCell>
+                <TableCell className="font-medium">
+                  {invoice.contractor}
+                </TableCell>
                 <TableCell>{invoice.projectName}</TableCell>
                 <TableCell>{invoice.date}</TableCell>
-                <TableCell><Banner text={invoice.paymentStatus}/></TableCell>
+                <TableCell>
+                  <Banner text={invoice.paymentStatus} />
+                </TableCell>
                 <TableCell className="text-right">
                   {invoice.totalAmount}
                 </TableCell>
