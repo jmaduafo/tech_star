@@ -80,6 +80,8 @@ export type NonContract = {
   contract_id?: null;
   team_id: string;
   stage_id: string;
+  project_name: string;
+  contractor_name: string;
   description: string;
   comment?: string | null;
   amount: number;
@@ -99,9 +101,11 @@ export type Payment = {
   contract_id: string | null;
   stage_id: string;
   team_id: string;
+  project_name: string;
+  contractor_name: string;
   description: string;
   comment: string | null;
-  amount: number | null;
+  amount: number;
   currency: string;
   is_contract: boolean;
   contract_code: string | null;

@@ -1,16 +1,24 @@
-"use client";
+"use client"
 import React, { useState } from "react";
 import Header3 from "@/components/fontsize/Header3";
 import Paragraph from "@/components/fontsize/Paragraph";
 import TextButton from "@/components/ui/buttons/TextButton";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
+import LineData from "./LineData";
 
 function LineChartDisplay() {
-  const [projectName, setProjectName] = useState<string>("");
-  const [range, setRange] = useState("last 7 days");
+  const [ projectName, setProjectName ] = useState("")
+  const [ range, setRange ] = useState("")
+  const [ submit, setSubmit ] = useState({
+    name: "",
+    dateRange: ""
+  })
+
+
+  
   return (
-    <div>
+    <div className="h-full">
       <div className="flex justify-end">
         <TextButton href="/charts" text="See more" iconDirection="right" />
       </div>
@@ -52,10 +60,14 @@ function LineChartDisplay() {
                 );
               })}
             </SelectBar>
+            <button onClick={() => setSubmit({
+              name: projectName,
+              dateRange: range
+            })} className="p-1">o</button>
           </div>
         </div>
       </div>
-      {/*  */}
+      <LineData projectName={submit.name} timeRange={submit.dateRange}/>
     </div>
   );
 }
