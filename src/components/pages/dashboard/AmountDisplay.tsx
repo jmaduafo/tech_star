@@ -7,16 +7,21 @@ import Header1 from "@/components/fontsize/Header1";
 import Header5 from "@/components/fontsize/Header5";
 import Header2 from "@/components/fontsize/Header2";
 import Header4 from "@/components/fontsize/Header4";
-import { getAllItems } from "@/firebase/actions";
+import { getAllItems, getQueriedItems } from "@/firebase/actions";
 import { HiCheckCircle } from "react-icons/hi2";
 import { Contractor, Project } from "@/types/types";
 import NotAvailable from "@/components/ui/NotAvailable";
+import { collection, query, where } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { totalSum } from "@/utils/currencies";
 
 function AmountDisplay() {
   const [projectName, setProjectName] = useState("");
   const [contractorName, setContractorName] = useState("");
   const [currencyTitle, setCurrencyTitle] = useState("");
   const [currencySymbol, setCurrencySymbol] = useState("");
+
+  const [loading, setLoading ] = useState(false);
 
   const [allProjects, setAllProjects] = useState<Project[]>();
   const [allContractors, setAllContractors] = useState<Contractor[]>();
@@ -26,7 +31,13 @@ function AmountDisplay() {
     currency: "",
   });
 
-  function totalAmount() {
+  const [ allTotals, setAllTotals ] = useState({
+    noncontractPayments: 0,
+    contractPayments: 0,
+    contracts: 0,
+  })
+
+  async function totalAmount() {
     projectName.length &&
       contractorName.length &&
       currencyTitle.length &&
@@ -38,19 +49,71 @@ function AmountDisplay() {
 
     const symbol = currency_list.find((item) => item.name === submit.currency);
     symbol && setCurrencySymbol(symbol?.symbol);
+
+    setLoading(true)
+
+    const paymentq = query(
+      collection(db, "payments"),
+      where("project_name", "==", submit.project),
+      where("contract_name", "==", submit.contractor),
+      where("currency", "==", submit.currency)
+    );
+
+    const contractq = query(
+      collection(db, "contracts"),
+      where("project_name", "==", submit.project),
+      where("contract_name", "==", submit.contractor),
+      where("currency", "array-contains", submit.currency)
+    );
+
+    const paymentQuery = await getQueriedItems(paymentq);
+    const contractQuery = await getQueriedItems(contractq);
+
+    const contract: number[] = [];
+    const contractPayments: number[] = [];
+    const noncontractPayments: number[] = [];
+
+    paymentQuery?.forEach((item) => {
+      item?.contract_id
+        ? contractPayments.push(item?.amount)
+        : noncontractPayments.push(item?.amount);
+    });
+
+    contractQuery?.forEach((item) => {
+      const index = item?.currency?.findIndex((i: string | null) => i && i === submit.currency)
+      contract.push(item?.amount[index])
+    });
+
+    let contractTotals;
+    let contractPaymentsTotals;
+    let noncontractPaymentsTotals;
+
+    contractTotals = totalSum(contract)
+    contractPaymentsTotals = totalSum(contractPayments)
+    noncontractPaymentsTotals = totalSum(noncontractPayments)
+
+    setAllTotals({
+      contractPayments: contractPaymentsTotals,
+      contracts: contractTotals,
+      noncontractPayments: noncontractPaymentsTotals
+    })
+
+    setLoading(false)
+
+
   }
 
   async function allData() {
-    const projects = await getAllItems("projects")
-    const contractors = await getAllItems("contractors")
+    const projects = await getAllItems("projects");
+    const contractors = await getAllItems("contractors");
 
-    contractors?.length && setAllContractors(contractors as Contractor[])
-    projects?.length && setAllProjects(projects as Project[])
+    contractors?.length && setAllContractors(contractors as Contractor[]);
+    projects?.length && setAllProjects(projects as Project[]);
   }
 
   useEffect(() => {
-    allData()
-  }, [])
+    allData();
+  }, []);
 
   return (
     <div className="">
@@ -60,32 +123,30 @@ function AmountDisplay() {
           value="Select a project"
           label="Projects"
         >
-          {allProjects?.length ? allProjects.map((item) => {
-            return (
-              <SelectItem key={item?.id} value={item?.name}>
-                {item?.name}
-              </SelectItem>
-            );
-          })
-          :
-          null
-        }
+          {allProjects?.length
+            ? allProjects.map((item) => {
+                return (
+                  <SelectItem key={item?.id} value={item?.name}>
+                    {item?.name}
+                  </SelectItem>
+                );
+              })
+            : null}
         </SelectBar>
         <SelectBar
           valueChange={setContractorName}
           value="Select a contractor"
           label="Contractors"
         >
-          {allContractors?.length ? allContractors.map((item) => {
-            return (
-              <SelectItem key={item?.id} value={item?.name}>
-                {item?.name}
-              </SelectItem>
-            );
-          })
-          :
-          null
-        }
+          {allContractors?.length
+            ? allContractors.map((item) => {
+                return (
+                  <SelectItem key={item?.id} value={item?.name}>
+                    {item?.name}
+                  </SelectItem>
+                );
+              })
+            : null}
         </SelectBar>
         <SelectBar
           valueChange={setCurrencyTitle}
@@ -106,6 +167,13 @@ function AmountDisplay() {
         </SelectBar>
         <button
           onClick={totalAmount}
+          className={`${
+            !contractorName.length ||
+            !projectName.length ||
+            !currencyTitle.length
+              ? "opacity-70 cursor-not-allowed"
+              : "opacity-100 cursor-pointer"
+          }`}
           disabled={
             !contractorName.length ||
             !projectName.length ||
@@ -115,47 +183,51 @@ function AmountDisplay() {
           <HiCheckCircle className="text-darkText w-7 h-7" />
         </button>
       </div>
-      {
-        allProjects?.length && allContractors?.length ?
-
-      <div className="mt-6 flex justify-between items-end">
-        <div>
-          <div className="flex items-start gap-3">
-            <Header1 text="9.32b" className="font-semibold" />
-            {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
+      {allProjects?.length && allContractors?.length ? (
+        <div className="mt-6 flex justify-between items-end">
+          <div>
+            <div className="flex items-start gap-3">
+              <Header1 text={(allTotals.contractPayments + allTotals.noncontractPayments).toString()} className="font-semibold" />
+              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
+            </div>
+            <Header5 text="Total Payment Made" />
           </div>
-          <Header5 text="Total Payment Made" />
+          <div className="flex gap-16">
+            <div>
+              <div className="flex items-start gap-3">
+                <Header2 text={allTotals.contracts.toString()} className="font-medium" />
+                {currencySymbol.length ? (
+                  <Header4 text={currencySymbol} />
+                ) : null}
+              </div>
+              <Header5 text="Total Revised Contracts" />
+            </div>
+            <div>
+              <div className="flex items-start gap-3">
+                <Header2 text={allTotals.contractPayments.toString()} className="font-medium" />
+                {currencySymbol.length ? (
+                  <Header4 text={currencySymbol} />
+                ) : null}
+              </div>
+              <Header5 text="Total Within Contract" />
+            </div>
+            <div>
+              <div className="flex items-start gap-3">
+                <Header2 text={allTotals.noncontractPayments.toString()} className="font-medium" />
+                {currencySymbol.length ? (
+                  <Header4 text={currencySymbol} />
+                ) : null}
+              </div>
+              <Header5 text="Total Outside Contract" />
+            </div>
+          </div>
         </div>
-        <div className="flex gap-16">
-          <div>
-            <div className="flex items-start gap-3">
-              <Header2 text="10.27b" className="font-medium" />
-              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
-            </div>
-            <Header5 text="Total Revised Contracts" />
-          </div>
-          <div>
-            <div className="flex items-start gap-3">
-              <Header2 text="8.56b" className="font-medium" />
-              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
-            </div>
-            <Header5 text="Total Within Contract" />
-          </div>
-          <div>
-            <div className="flex items-start gap-3">
-              <Header2 text="445.37m" className="font-medium" />
-              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
-            </div>
-            <Header5 text="Total Outside Contract" />
-          </div>
-        </div>
-      </div>
-        :
+      ) : (
         <div className="py-6 flex justify-center items-center">
-          <NotAvailable text="No payments available"/>
+          <NotAvailable text="No payments available" />
           <p></p>
         </div>
-      }
+      )}
     </div>
   );
 }

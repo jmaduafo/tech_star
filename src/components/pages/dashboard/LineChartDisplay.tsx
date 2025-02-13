@@ -50,7 +50,7 @@ function LineChartDisplay() {
           <Header3 text="At a Glance" />
           <Paragraph
             className="opacity-80"
-            text={`All payments made within the ${range}`}
+            text={`All payments made within the ${range ?? "..."}`}
           />
         </div>
         <div className="flex-[2]">

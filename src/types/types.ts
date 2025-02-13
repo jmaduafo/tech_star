@@ -53,6 +53,11 @@ export type Contractor = {
   updated_at: number;
 };
 
+type ContractAmount = {
+  amount: number;
+  currency: string;
+}
+
 export type Contract = {
   id: string;
   date: string;
@@ -60,12 +65,15 @@ export type Contract = {
   contractor_id: string;
   team_id: string;
   stage_id: string;
+  project_name: string;
+  contractor_name: string;
   contract_code: string;
   status: "paid" | "pending";
   description: string;
   comment?: string | null;
-  amount: number | null;
-  currency: string;
+  currency: string | null[];
+  amount: number | null[];
+  currencies: string[];
   is_contract: boolean;
   created_at: number;
   updated_at: number;
