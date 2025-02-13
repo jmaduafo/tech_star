@@ -5,7 +5,7 @@ import TextButton from "@/components/ui/buttons/TextButton";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 
-function LineChart() {
+function LineChartDisplay() {
   return (
     <div>
       <div className="flex gap-3 justify-between items-start">
@@ -46,4 +46,4 @@ function LineChart() {
   );
 }
 
-export default LineChart;
+export default LineChartDisplay;

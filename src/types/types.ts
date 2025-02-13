@@ -16,7 +16,6 @@ export type User = {
   created_at: number;
 };
 
-// Example: url -> techstar/[team_id]/dashboard/...
 // When a new user logs in for the first time, they are put into a brand new team
 // and are automatically set as an admin. They are the only ones that can add, edit,
 // and remove users as well as assign the role of admin

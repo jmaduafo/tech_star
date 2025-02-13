@@ -4,7 +4,8 @@ import AmountDisplay from "./AmountDisplay";
 import Greeting from "./Greeting";
 import ContractorCount from "./ContractorCount";
 import ProjectCount from "./ProjectCount";
-import LineChart from "./LineChart";
+import PieChartDisplay from "./PieChartDisplay";
+import LineChartDisplay from "./LineChartDisplay";
 
 function DashboardGrid() {
   return (
@@ -19,10 +20,11 @@ function DashboardGrid() {
       </div>
       {/* Line chart */}
       <Card className="line">
-        <LineChart />
+        <LineChartDisplay />
       </Card>
       {/* Pie chart */}
       <Card className="pie">
+        {/* <PieChartDisplay /> */}
         <div></div>
       </Card>
       {/* Contractors */}

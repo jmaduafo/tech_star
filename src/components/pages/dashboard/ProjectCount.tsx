@@ -3,6 +3,7 @@ import Header6 from "@/components/fontsize/Header6";
 import TextButton from "@/components/ui/buttons/TextButton";
 import { getCount } from "@/firebase/actions";
 import Loading from "@/components/ui/Loading";
+import { optionalS } from "@/utils/optionalS";
 
 async function ProjectCount() {
   const count = await getCount("projects");
@@ -22,7 +23,7 @@ async function ProjectCount() {
             <p className="text-center font-semibold text-[4vw] leading-[1]">
               {count ?? 0}
             </p>
-            <Header6 text="Total projects" className="text-center mt-3" />
+            <Header6 text={`Total project${optionalS(count)}`} className="text-center mt-3" />
           </div>
         </div>
       ) : (
