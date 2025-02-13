@@ -21,14 +21,17 @@ export async function getAllItems(
   try {
     // Display only projects by a specific team
     const allItems: DocumentData[] = []
-    onSnapshot(queryRef, (snap) => {
+    const unsub = onSnapshot(queryRef, (snap) => {
       snap.forEach(item => {
         allItems.push(item.data())
       })
+
     })
-    
+
+    unsub()
+
     return allItems
-  
+
     
   } catch (err: any) {
     console.error(err.message)
@@ -45,10 +48,11 @@ export async function getQueriedItems(
       snap.forEach(item => {
         allItems.push(item.data())
       })
-      return allItems
     })
     
-    return () => unsub
+    unsub()
+    
+    return allItems
     
   } catch (err: any) {
     throw new err.message

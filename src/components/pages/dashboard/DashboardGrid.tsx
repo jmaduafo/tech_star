@@ -24,8 +24,8 @@ function DashboardGrid() {
       </Card>
       {/* Pie chart */}
       <Card className="pie">
-        {/* <PieChartDisplay /> */}
-        <div></div>
+        <PieChartDisplay />
+        {/* <div></div> */}
       </Card>
       {/* Contractors */}
       <Card className="contractors">

@@ -8,10 +8,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-function SelectBar({ children, value, label, className }: { readonly className?: string, readonly children: React.ReactNode, readonly value: string, readonly label: string}) {
+function SelectBar({
+  valueChange,
+  children,
+  value,
+  label,
+  className,
+}: {
+  readonly valueChange?: (value: string) => void ;
+  readonly className?: string;
+  readonly children: React.ReactNode;
+  readonly value: string;
+  readonly label: string;
+}) {
   return (
-    <Select>
-      <SelectTrigger className={`w-[180px] ${className }`}>
+    <Select onValueChange={valueChange}>
+      <SelectTrigger className={`w-[180px] ${className}`}>
         <SelectValue placeholder={`${value}`} />
       </SelectTrigger>
       <SelectContent>
