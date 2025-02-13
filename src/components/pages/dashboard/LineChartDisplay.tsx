@@ -1,22 +1,45 @@
-"use client"
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import Header3 from "@/components/fontsize/Header3";
 import Paragraph from "@/components/fontsize/Paragraph";
 import TextButton from "@/components/ui/buttons/TextButton";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 import LineData from "./LineData";
+import { Chart } from "@/types/types";
+import { getAllItems } from "@/firebase/actions";
+import { HiCheckCircle } from "react-icons/hi2";
+
 
 function LineChartDisplay() {
-  const [ projectName, setProjectName ] = useState("")
-  const [ range, setRange ] = useState("")
-  const [ submit, setSubmit ] = useState({
+  const [chartData, setChartData] = useState<Chart[] | undefined>();
+  const [projectName, setProjectName] = useState("");
+  const [range, setRange] = useState("");
+  const [submit, setSubmit] = useState({
     name: "",
-    dateRange: ""
-  })
+    dateRange: "",
+  });
 
+  async function showPayments() {
+    const allPayments = await getAllItems("payments");
 
-  
+    const arr: Chart[] = [];
+    allPayments?.forEach((paymentDoc, i) => {
+      arr.push({
+        id: paymentDoc?.id,
+        project_name: paymentDoc?.project_name,
+        date: paymentDoc?.date,
+        amount: paymentDoc?.amount,
+      });
+    });
+
+    setChartData(arr);
+  }
+
+  useEffect(() => {
+    showPayments();
+  }, []);
+
   return (
     <div className="h-full">
       <div className="flex justify-end">
@@ -31,20 +54,22 @@ function LineChartDisplay() {
           />
         </div>
         <div className="flex-[2]">
-          <div className="flex gap-3 justify-end mt-2">
+          <div className="flex gap-2 justify-end mt-2">
             <SelectBar
               valueChange={(val: string) => setProjectName(val)}
               className="w-[150px]"
               value="Select a project"
               label="Project"
             >
-              {["ice", "cream"].map((item) => {
-                return (
-                  <SelectItem value={item} key={item}>
-                    {item}
-                  </SelectItem>
-                );
-              })}
+              {chartData?.length
+                ? chartData?.map((item) => {
+                    return (
+                      <SelectItem value={item.project_name} key={item.id}>
+                        {item.project_name}
+                      </SelectItem>
+                    );
+                  })
+                : null}
             </SelectBar>
             <SelectBar
               valueChange={(val: string) => setRange(val.toLowerCase())}
@@ -60,14 +85,29 @@ function LineChartDisplay() {
                 );
               })}
             </SelectBar>
-            <button onClick={() => setSubmit({
-              name: projectName,
-              dateRange: range
-            })} className="p-1">o</button>
+            <button
+              onClick={() =>
+                chartData?.length &&
+                projectName.length &&
+                range.length &&
+                setSubmit({
+                  name: projectName,
+                  dateRange: range,
+                })
+              }
+              disabled={!chartData?.length || !projectName.length || !range.length}
+              className=""
+            >
+              <HiCheckCircle className="text-darkText w-7 h-7"/>
+            </button>
           </div>
         </div>
       </div>
-      <LineData projectName={submit.name} timeRange={submit.dateRange}/>
+      <LineData
+        data={chartData}
+        projectName={submit.name}
+        timeRange={submit.dateRange}
+      />
     </div>
   );
 }

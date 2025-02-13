@@ -122,3 +122,10 @@ export type Stage = {
   created_at: number;
   updated_at: number;
 };
+
+export type Chart = {
+  id: string;
+  date: string;
+  amount: string;
+  project_name: string;
+};

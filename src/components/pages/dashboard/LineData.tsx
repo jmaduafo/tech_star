@@ -4,59 +4,35 @@ import { getAllItems } from "@/firebase/actions";
 import LineChart from "../charts/LineChart";
 import React, { useState, useEffect } from "react";
 import NotAvailable from "@/components/ui/NotAvailable";
+import { Chart } from "@/types/types";
 
-type Chart = {
-  date: string;
-  amount: string;
-  project_name: string;
-};
 function LineData({
   timeRange,
   projectName,
+  data,
 }: {
   readonly timeRange: string;
   readonly projectName: string;
+  readonly data: Chart[] | undefined;
 }) {
-    
-    // payment vs date
-    
-    const [chartData, setChartData] = useState<Chart[] | undefined>();
-    const [filteredData, setFilteredData] = useState<Chart[] | undefined>();
-    
-    let chartConfig = {
-      amount: {
-        label: "Amount",
-        color: "text-amber-400",
-      },
-    } satisfies ChartConfig;
-  // [... { projectId: 45, }]
+  // payment vs date
+  const [filteredData, setFilteredData] = useState<Chart[] | undefined>();
 
-  async function showPayments() {
-    const allPayments = await getAllItems("payments");
-
-    const arr: Chart[] = [];
-    allPayments?.forEach((paymentDoc, i) => {
-      arr.push({
-        project_name: paymentDoc?.project_name,
-        date: paymentDoc?.date,
-        amount: paymentDoc?.amount,
-      });
-    });
-
-    setChartData(arr)
-  }
-
-  useEffect(() => {
-    showPayments();
-  }, []);
+  let chartConfig = {
+    amount: {
+      label: "Amount",
+      color: "text-amber-400",
+    },
+  } satisfies ChartConfig;
 
   function showFilter() {
-      const projects = chartData?.filter(
-        (item) => item?.project_name?.toLowerCase() === projectName?.toLowerCase()
-      );
-    
-      if (projects?.length) {
-        setFilteredData(projects?.filter((item) => {
+    const projects = data?.filter(
+      (item) => item?.project_name?.toLowerCase() === projectName?.toLowerCase()
+    );
+
+    if (projects?.length) {
+      setFilteredData(
+        projects?.filter((item) => {
           const date = new Date(item.date);
           const referenceDate = new Date();
 
@@ -70,11 +46,11 @@ function LineData({
           }
           const startDate = new Date(referenceDate);
           startDate.setDate(startDate.getDate() - daysToSubtract);
-    
-          return date >= startDate;
-        }))
-      }
 
+          return date >= startDate;
+        })
+      );
+    }
   }
 
   useEffect(() => {
