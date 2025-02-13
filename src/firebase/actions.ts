@@ -1,243 +1,161 @@
-import { db, auth } from "./config";
+import { db } from "./config";
 import {
-  getDocs,
-  getDoc,
   collection,
   deleteDoc,
-  doc,
   updateDoc,
   addDoc,
-  setDoc,
-  serverTimestamp,
-  where,
-  query,
   onSnapshot,
+  DocumentData,
+  Query,
+  getCountFromServer,
+  CollectionReference,
+  doc,
+  DocumentReference,
 } from "firebase/firestore";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
 
-import {
-  User,
-  Project,
-  Contractor,
-  Contract,
-  NonContract,
-} from "@/types/types";
-import { redirect } from "next/navigation";
-
-const usersRef = collection(db, "users");
-const projectsRef = collection(db, "projects");
-const stagesRef = collection(db, "stages");
-const contractorsRef = collection(db, "contractors");
-const contractsRef = collection(db, "contracts");
-const noncontractsRef = collection(db, "noncontracts");
-const paymentsRef = collection(db, "payments");
-const teamsRef = collection(db, "teams");
-
-
-
-export async function logout(
-  setError: React.Dispatch<React.SetStateAction<string | null>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+export async function getAllItems(
+  collectionName: string
 ) {
-  signOut(auth)
-    .then(() => {
-      redirect("/");
+  const queryRef = collection(db, collectionName)
+
+  try {
+    // Display only projects by a specific team
+    const allItems: DocumentData[] = []
+    const unsub = onSnapshot(queryRef, (snap) => {
+      snap.forEach(item => {
+        allItems.push(item.data())
+      })
+      return allItems
     })
-    .catch((err) => {
-      // An error happened.
-      setError(err.code + ": " + err.message);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
+    
+    return () => unsub
+    
+  } catch (err: any) {
+    console.error(err.message)
+  } 
 }
 
-// /Projects
-
-// Get all projects
-
-export async function getAllProjects(
-  setResult: React.Dispatch<React.SetStateAction<Project[] | undefined>>,
-  setError: React.Dispatch<React.SetStateAction<string | null>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+export async function getQueriedItems(
+  ref: Query<DocumentData, DocumentData>
 ) {
   try {
     // Display only projects by a specific team
+    const allItems: DocumentData[] = []
+    const unsub = onSnapshot(ref, (snap) => {
+      snap.forEach(item => {
+        allItems.push(item.data())
+      })
+      return allItems
+    })
+    
+    return () => unsub
     
   } catch (err: any) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
+    throw new err.message
+  } 
+}
+
+export async function getCount(
+  collectionName: string
+) {
+  const queryRef = collection(db, collectionName)
+
+  try {
+    // Display only projects by a specific team
+    const snapshot = await getCountFromServer(queryRef)
+    return snapshot?.data()?.count
+    
+  } catch (err: any) {
+    console.error(err.message)
+  } 
+}
+
+export async function getQueriedCount(
+  ref: Query<DocumentData, DocumentData>
+) {
+  try {
+    // Display only projects by a specific team
+    const snapshot = await getCountFromServer(ref)
+    return snapshot?.data()?.count
+    
+  } catch (err: any) {
+    console.log(err.message);
+  } 
+}
+
+export async function addItem(
+  collectionName: string,
+  items: object
+) {
+  try {
+    // Display only projects by a specific team
+    const ref = collection(db, collectionName)
+
+    await addDoc(ref, items)
+    
+  } catch (err: any) {
+    return err
+  } 
+}
+
+export async function addQueriedItem(
+  ref: CollectionReference<object, DocumentData>,
+  items: object
+) {
+  try {
+    
+    await addDoc(ref, items)
+    
+  } catch (err: any) {
+    return err
+  } 
+}
+
+export async function updateItem(
+  collectionName: string,
+  id: string,
+  items: object
+) {
+  try {
+    // Display only projects by a specific team
+    const ref = doc(db, collectionName, id)
+
+    await updateDoc(ref, items)
+    
+  } catch (err: any) {
+    return err
+  } 
+}
+
+export async function deleteItem(
+  collectionName: string,
+  id: string
+) {
+  try {
+    // Display only projects by a specific team
+    const ref = doc(db, collectionName, id)
+
+    await deleteDoc(ref)
+    
+  } catch (err: any) {
+    return err
+  } 
+}
+
+export async function updateQueriedItem(
+  ref: DocumentReference<DocumentData, object>,
+  items: object
+) {
+  try {
+
+    await updateDoc(ref, items)
+    
+  } catch (err: any) {
+    return err
+  } 
 }
 
 // Get one project
-
-export async function getOneProject(id: string) {
-  let result = {};
-  let loading = true;
-  let error = null;
-
-  try {
-    const oneProjectRef = doc(db, "projects", id);
-
-    const unsub = onSnapshot(oneProjectRef, (doc) => {
-      result = doc?.data() as Project;
-    });
-
-    return () => unsub();
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get all contractors
-
-export async function getAllContractors() {
-  let result: Contractor[] = [];
-  let loading = true;
-  let error = null;
-
-  try {
-    
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get all contractors under one project
-
-export async function getContractorsByProject(project_id: string) {
-  let result: Contractor[] = [];
-  let loading = true;
-  let error = null;
-
-  try {
-    // Display only projects by a specific team
-   
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get one contractor
-
-export async function getOneContractor(id: string) {
-  let result = {};
-  let loading = true;
-  let error = null;
-
-  try {
-    const oneContractorRef = doc(db, "contractors", id);
-
-    const unsub = onSnapshot(oneContractorRef, (doc) => {
-      result = doc?.data() as Contractor;
-    });
-    return () => unsub();
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get all contracts under one contractor
-
-export async function getContractsByContractor(contractor_id: string) {
-  let result: Contract[] = [];
-  let loading = true;
-  let error = "";
-
-  try {
-   
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get all non-contracts under one contractor
-
-export async function getNonContractsByContractor(non_contractor_id: string) {
-  let result: NonContract[] = [];
-  let loading = true;
-  let error = "";
-
-  try {
-    
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get one contract
-
-export async function getOneContract(id: string) {
-  let result = {};
-  let loading = true;
-  let error = null;
-
-  try {
-    const oneContractRef = doc(db, "contract", id);
-
-    const unsub = onSnapshot(oneContractRef, (doc) => {
-      result = doc?.data() as Contract;
-    });
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
-
-// Get one non-contract
-
-export async function getOneNonContract(id: string) {
-  let result = {};
-  let loading = true;
-  let error = null;
-
-  try {
-    const oneNonContractRef = doc(db, "noncontract", id);
-
-    const unsub = onSnapshot(oneNonContractRef, (doc) => {
-      result = doc?.data() as NonContract;
-    });
-  } catch (err: any) {
-    error = err.message;
-  } finally {
-    loading = false;
-  }
-
-  return { result, loading, error };
-}
 
 // Get all payments under one contract
 
