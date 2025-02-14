@@ -10,7 +10,6 @@ import { Chart } from "@/types/types";
 import { getAllItems } from "@/firebase/actions";
 import { HiCheckCircle } from "react-icons/hi2";
 
-
 function LineChartDisplay() {
   const [chartData, setChartData] = useState<Chart[] | undefined>();
   const [projectName, setProjectName] = useState("");
@@ -42,9 +41,11 @@ function LineChartDisplay() {
 
   return (
     <div className="h-full">
-      <div className="flex justify-end">
-        <TextButton href="/charts" text="See more" iconDirection="right" />
-      </div>
+      {chartData?.length ? (
+        <div className="flex justify-end">
+          <TextButton href="/charts" text="See more" iconDirection="right" />
+        </div>
+      ) : null}
       <div className="flex gap-3 justify-between items-start">
         <div className="flex-1">
           <Header3 text="At a Glance" />
@@ -95,10 +96,12 @@ function LineChartDisplay() {
                   dateRange: range,
                 })
               }
-              disabled={!chartData?.length || !projectName.length || !range.length}
+              disabled={
+                !chartData?.length || !projectName.length || !range.length
+              }
               className=""
             >
-              <HiCheckCircle className="text-darkText w-7 h-7"/>
+              <HiCheckCircle className="text-darkText w-7 h-7" />
             </button>
           </div>
         </div>

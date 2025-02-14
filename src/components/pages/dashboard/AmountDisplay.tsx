@@ -14,6 +14,7 @@ import NotAvailable from "@/components/ui/NotAvailable";
 import { collection, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { totalSum } from "@/utils/currencies";
+import Loading from "@/components/ui/Loading";
 
 function AmountDisplay() {
   const [projectName, setProjectName] = useState("");
@@ -21,7 +22,7 @@ function AmountDisplay() {
   const [currencyTitle, setCurrencyTitle] = useState("");
   const [currencySymbol, setCurrencySymbol] = useState("");
 
-  const [loading, setLoading ] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [allProjects, setAllProjects] = useState<Project[]>();
   const [allContractors, setAllContractors] = useState<Contractor[]>();
@@ -31,11 +32,11 @@ function AmountDisplay() {
     currency: "",
   });
 
-  const [ allTotals, setAllTotals ] = useState({
+  const [allTotals, setAllTotals] = useState({
     noncontractPayments: 0,
     contractPayments: 0,
     contracts: 0,
-  })
+  });
 
   async function totalAmount() {
     projectName.length &&
@@ -50,7 +51,7 @@ function AmountDisplay() {
     const symbol = currency_list.find((item) => item.name === submit.currency);
     symbol && setCurrencySymbol(symbol?.symbol);
 
-    setLoading(true)
+    setLoading(true);
 
     const paymentq = query(
       collection(db, "payments"),
@@ -80,27 +81,27 @@ function AmountDisplay() {
     });
 
     contractQuery?.forEach((item) => {
-      const index = item?.currency?.findIndex((i: string | null) => i && i === submit.currency)
-      contract.push(item?.amount[index])
+      const index = item?.currency?.findIndex(
+        (i: string | null) => i && i === submit.currency
+      );
+      contract.push(item?.amount[index]);
     });
 
     let contractTotals;
     let contractPaymentsTotals;
     let noncontractPaymentsTotals;
 
-    contractTotals = totalSum(contract)
-    contractPaymentsTotals = totalSum(contractPayments)
-    noncontractPaymentsTotals = totalSum(noncontractPayments)
+    contractTotals = totalSum(contract);
+    contractPaymentsTotals = totalSum(contractPayments);
+    noncontractPaymentsTotals = totalSum(noncontractPayments);
 
     setAllTotals({
       contractPayments: contractPaymentsTotals,
       contracts: contractTotals,
-      noncontractPayments: noncontractPaymentsTotals
-    })
+      noncontractPayments: noncontractPaymentsTotals,
+    });
 
-    setLoading(false)
-
-
+    setLoading(false);
   }
 
   async function allData() {
@@ -115,6 +116,65 @@ function AmountDisplay() {
     allData();
   }, []);
 
+  // The condition to either show the amount display or the "No payments available"
+  const amountView =
+    allTotals?.contracts &&
+    allTotals?.contractPayments &&
+    allTotals?.noncontractPayments ? (
+      <div className="mt-6 flex justify-between items-end">
+        <div>
+          <div className="flex items-start gap-3">
+            <Header1
+              text={(
+                allTotals.contractPayments + allTotals.noncontractPayments
+              ).toString()}
+              className="font-semibold"
+            />
+            {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
+          </div>
+          <Header5 text="Total Payment Made" />
+        </div>
+        <div className="flex gap-16">
+          <div>
+            <div className="flex items-start gap-3">
+              <Header2
+                text={allTotals.contracts.toString()}
+                className="font-medium"
+              />
+              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
+            </div>
+            <Header5 text="Total Revised Contracts" />
+          </div>
+          <div>
+            <div className="flex items-start gap-3">
+              <Header2
+                text={allTotals.contractPayments.toString()}
+                className="font-medium"
+              />
+              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
+            </div>
+            <Header5 text="Total Within Contract" />
+          </div>
+          <div>
+            <div className="flex items-start gap-3">
+              <Header2
+                text={allTotals.noncontractPayments.toString()}
+                className="font-medium"
+              />
+              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
+            </div>
+            <Header5 text="Total Outside Contract" />
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="py-6 flex justify-center items-center">
+        <NotAvailable text="No payments available" />
+        <p></p>
+      </div>
+    );
+
+    
   return (
     <div className="">
       <div className="flex gap-4">
@@ -183,50 +243,13 @@ function AmountDisplay() {
           <HiCheckCircle className="text-darkText w-7 h-7" />
         </button>
       </div>
-      {allProjects?.length && allContractors?.length ? (
-        <div className="mt-6 flex justify-between items-end">
-          <div>
-            <div className="flex items-start gap-3">
-              <Header1 text={(allTotals.contractPayments + allTotals.noncontractPayments).toString()} className="font-semibold" />
-              {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
-            </div>
-            <Header5 text="Total Payment Made" />
-          </div>
-          <div className="flex gap-16">
-            <div>
-              <div className="flex items-start gap-3">
-                <Header2 text={allTotals.contracts.toString()} className="font-medium" />
-                {currencySymbol.length ? (
-                  <Header4 text={currencySymbol} />
-                ) : null}
-              </div>
-              <Header5 text="Total Revised Contracts" />
-            </div>
-            <div>
-              <div className="flex items-start gap-3">
-                <Header2 text={allTotals.contractPayments.toString()} className="font-medium" />
-                {currencySymbol.length ? (
-                  <Header4 text={currencySymbol} />
-                ) : null}
-              </div>
-              <Header5 text="Total Within Contract" />
-            </div>
-            <div>
-              <div className="flex items-start gap-3">
-                <Header2 text={allTotals.noncontractPayments.toString()} className="font-medium" />
-                {currencySymbol.length ? (
-                  <Header4 text={currencySymbol} />
-                ) : null}
-              </div>
-              <Header5 text="Total Outside Contract" />
-            </div>
-          </div>
+      {/* IF NOT LOADING, THEN DISPLAY "amountView" above*/}
+      {loading ? (
+        <div className="mt-6 flex justify-center">
+          <Loading />
         </div>
       ) : (
-        <div className="py-6 flex justify-center items-center">
-          <NotAvailable text="No payments available" />
-          <p></p>
-        </div>
+        amountView
       )}
     </div>
   );

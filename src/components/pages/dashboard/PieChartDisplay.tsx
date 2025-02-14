@@ -14,6 +14,7 @@ type Chart = {
   contractors: number | undefined;
   fill: string;
 };
+
 async function PieChartDisplay() {
   const chartData: Chart[] = [];
 
@@ -22,8 +23,6 @@ async function PieChartDisplay() {
       label: "Contractors",
     },
   } satisfies ChartConfig;
-
-  // [... { projectId: 45, }]
 
   const allProjects = await getAllItems("projects");
 
@@ -55,7 +54,7 @@ async function PieChartDisplay() {
       color: `amber-${50 * (i + 1)}`,
     };
 
-    // Adds an object to chartConfig
+    // Adds an object to chartConfig object
     // Ex: { ... chrome: { label: "Chrome", color: "hsl(var(--chart-1))"}}
     Object.defineProperty(chartConfig, projectDoc?.name?.toLowerCase(), {
       value: info,
@@ -67,9 +66,11 @@ async function PieChartDisplay() {
 
   return (
     <div className="h-full">
-      <div className="flex justify-end">
-        <TextButton href="/charts" text="See more" iconDirection="right" />
-      </div>
+      {chartData?.length ? (
+        <div className="flex justify-end">
+          <TextButton href="/charts" text="See more" iconDirection="right" />
+        </div>
+      ) : null}
       {chartData.length ? (
         <div className="mt-1">
           <PieChart
@@ -80,7 +81,11 @@ async function PieChartDisplay() {
           />
         </div>
       ) : (
-        <div className="h-[90%] flex items-center justify-center">
+        <div
+          className={`${
+            chartData?.length ? "h-[90%]" : "h-full"
+          } flex items-center justify-center`}
+        >
           <NotAvailable text="No projects available" />
         </div>
       )}
