@@ -14,6 +14,7 @@ export type User = {
   is_admin: boolean;
   team_id?: string;
   created_at: number;
+  updated_at: number | null;
 };
 
 // When a new user logs in for the first time, they are put into a brand new team
@@ -25,6 +26,16 @@ export type Team = {
   team_name: string;
 };
 
+export type Currencies = {
+  id: string;
+  symbol: string;
+  code: string;
+  name: string;
+  team_id: string;
+  created_at: number;
+  updated_at: number | null;
+};
+
 export type Project = {
   id: string;
   name: string;
@@ -32,10 +43,11 @@ export type Project = {
   city: string;
   state?: string;
   country: string;
+  currencies: ContractAmount[];
   start_year: number;
   is_ongoing: boolean;
   created_at: number;
-  updated_at: number;
+  updated_at: number | null;
 };
 
 export type Contractor = {
@@ -44,13 +56,13 @@ export type Contractor = {
   project_id: string;
   team_id: string;
   location?: string | null;
-  currencies: string[];
+  currencies: ContractAmount[];
   banks: string[];
   importance_level: number;
   text?: string | null;
-  status: "active" | "discontinued";
+  status: "active" | "unavailable";
   created_at: number;
-  updated_at: number;
+  updated_at: number | null;
 };
 
 type ContractAmount = {
@@ -71,12 +83,10 @@ export type Contract = {
   status: "paid" | "pending";
   description: string;
   comment?: string | null;
-  currency: string | null[];
-  amount: number | null[];
-  currencies: string[];
+  currencies: ContractAmount[];
   is_contract: boolean;
   created_at: number;
-  updated_at: number;
+  updated_at: number | null;
 };
 
 // Since NonContract is also a Payment, schema has to match with Payment
@@ -98,7 +108,7 @@ export type NonContract = {
   contract_code?: null;
   status: "paid" | "pending";
   created_at: number;
-  updated_at: number;
+  updated_at: number | null;
 };
 
 export type Payment = {
@@ -119,7 +129,7 @@ export type Payment = {
   contract_code: string | null;
   status: "paid" | "pending";
   created_at: number;
-  updated_at: number;
+  updated_at: number | null;
 };
 
 export type Stage = {
@@ -128,7 +138,7 @@ export type Stage = {
   team_id: string;
   description: string;
   created_at: number;
-  updated_at: number;
+  updated_at: number | null;
 };
 
 export type Chart = {

@@ -17,6 +17,7 @@ import { collection, limit, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import NotAvailable from "@/components/ui/NotAvailable";
 import { optionalS } from "@/utils/optionalS";
+import TextButton from "@/components/ui/buttons/TextButton";
 
 async function PaymentDisplay() {
   const invoices = [
@@ -67,15 +68,20 @@ async function PaymentDisplay() {
 
   return (
     <Card className="w-full">
-      <div className="flex items-start gap-5">
-        <Header3 text="Latest Payments" />
-        {payments ? (
-          <p>
-            {payments?.length === 5
-              ? "Max. 5"
-              : `${payments?.length} result${optionalS(payments?.length)}`}
-          </p>
-        ) : null}
+      <div className="flex justify-between items-start">
+        <div className="flex items-start gap-5">
+          <Header3 text="Latest Payments" />
+          {payments ? (
+            <p>
+              {payments?.length === 5
+                ? "Max. 5"
+                : `${payments?.length} result${optionalS(payments?.length)}`}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          {payments?.length ? <TextButton href="/payments" text="View all" iconDirection="right"/> : null}
+        </div>
       </div>
       <div className="mt-6">
         {payments?.length ? (

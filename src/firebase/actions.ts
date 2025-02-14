@@ -11,95 +11,87 @@ import {
   CollectionReference,
   doc,
   DocumentReference,
+  getDoc,
 } from "firebase/firestore";
 
-export async function getAllItems(
-  collectionName: string
-) {
-  const queryRef = collection(db, collectionName)
+export async function getUserData(id: string) {
+  const userRef = doc(db, "users", id);
+  const userSnap = await getDoc(userRef);
+
+  let user = userSnap?.data()
+  
+  return user
+}
+
+export async function getAllItems(collectionName: string) {
+  const queryRef = collection(db, collectionName);
 
   try {
     // Display only projects by a specific team
-    const allItems: DocumentData[] = []
+    const allItems: DocumentData[] = [];
     const unsub = onSnapshot(queryRef, (snap) => {
-      snap.forEach(item => {
-        allItems.push(item.data())
-      })
+      snap.forEach((item) => {
+        allItems.push(item.data());
+      });
+    });
 
-    })
+    unsub();
 
-    unsub()
-
-    return allItems
-
-    
+    return allItems;
   } catch (err: any) {
-    console.error(err.message)
-  } 
+    console.error(err.message);
+  }
 }
 
-export async function getQueriedItems(
-  ref: Query<DocumentData, DocumentData>
-) {
+export async function getQueriedItems(ref: Query<DocumentData, DocumentData>) {
   try {
     // Display only projects by a specific team
-    const allItems: DocumentData[] = []
+    const allItems: DocumentData[] = [];
     const unsub = onSnapshot(ref, (snap) => {
-      snap.forEach(item => {
-        allItems.push(item.data())
-      })
-    })
-    
-    unsub()
-    
-    return allItems
-    
+      snap.forEach((item) => {
+        allItems.push(item.data());
+      });
+    });
+
+    unsub();
+
+    return allItems;
   } catch (err: any) {
-    throw new err.message
-  } 
+    throw new err.message();
+  }
 }
 
-export async function getCount(
-  collectionName: string
-) {
-  const queryRef = collection(db, collectionName)
+export async function getCount(collectionName: string) {
+  const queryRef = collection(db, collectionName);
 
   try {
     // Display only projects by a specific team
-    const snapshot = await getCountFromServer(queryRef)
-    return snapshot?.data()?.count
-    
+    const snapshot = await getCountFromServer(queryRef);
+    return snapshot?.data()?.count;
   } catch (err: any) {
-    console.error(err.message)
-  } 
+    console.error(err.message);
+  }
 }
 
-export async function getQueriedCount(
-  ref: Query<DocumentData, DocumentData>
-) {
+export async function getQueriedCount(ref: Query<DocumentData, DocumentData>) {
   try {
     // Display only projects by a specific team
-    const snapshot = await getCountFromServer(ref)
-    return snapshot?.data()?.count
-    
+    const snapshot = await getCountFromServer(ref);
+    return snapshot?.data()?.count;
   } catch (err: any) {
     console.log(err.message);
-  } 
+  }
 }
 
-export async function addItem(
-  collectionName: string,
-  items: object
-) {
+export async function addItem(collectionName: string, items: object) {
   try {
     // Display only projects by a specific team
-    const ref = collection(db, collectionName)
+    const ref = collection(db, collectionName);
 
-    await addDoc(ref, items)
-    
+    await addDoc(ref, items);
   } catch (err: any) {
-    return err
-  } 
+    return err;
+  }
 }
 
 export async function addQueriedItem(
@@ -107,12 +99,10 @@ export async function addQueriedItem(
   items: object
 ) {
   try {
-    
-    await addDoc(ref, items)
-    
+    await addDoc(ref, items);
   } catch (err: any) {
-    return err
-  } 
+    return err;
+  }
 }
 
 export async function updateItem(
@@ -122,28 +112,23 @@ export async function updateItem(
 ) {
   try {
     // Display only projects by a specific team
-    const ref = doc(db, collectionName, id)
+    const ref = doc(db, collectionName, id);
 
-    await updateDoc(ref, items)
-    
+    await updateDoc(ref, items);
   } catch (err: any) {
-    return err
-  } 
+    return err;
+  }
 }
 
-export async function deleteItem(
-  collectionName: string,
-  id: string
-) {
+export async function deleteItem(collectionName: string, id: string) {
   try {
     // Display only projects by a specific team
-    const ref = doc(db, collectionName, id)
+    const ref = doc(db, collectionName, id);
 
-    await deleteDoc(ref)
-    
+    await deleteDoc(ref);
   } catch (err: any) {
-    return err
-  } 
+    return err;
+  }
 }
 
 export async function updateQueriedItem(
@@ -151,12 +136,10 @@ export async function updateQueriedItem(
   items: object
 ) {
   try {
-
-    await updateDoc(ref, items)
-    
+    await updateDoc(ref, items);
   } catch (err: any) {
-    return err
-  } 
+    return err;
+  }
 }
 
 // Get one project
