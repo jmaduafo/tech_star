@@ -9,9 +9,13 @@ import {
   BsBarChartFill,
 } from "react-icons/bs";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function BottomBar() {
-  const [nav, setNav] = useState("Dashboard");
+  const pathname = usePathname()
+  const path = pathname.split('/')[1]
+  
+  const [nav, setNav] = useState(path);
 
   const navLinks = [
     {

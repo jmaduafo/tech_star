@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import { User } from "@/types/types";
 
 import SelectBar from "@/components/ui/input/SelectBar";

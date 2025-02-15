@@ -5,14 +5,13 @@ import React from "react";
 function IconTextButton({
   icon,
   text,
-  pathname,
   textNav,
   setText,
 }: {
   readonly icon: React.ReactNode;
   readonly text: string;
-  readonly pathname?: string;
   readonly setText?: React.Dispatch<React.SetStateAction<string>>;
+  // textNav is the pathname
   readonly textNav?: string;
 }) {
   return (
