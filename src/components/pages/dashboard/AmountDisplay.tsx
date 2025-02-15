@@ -9,21 +9,20 @@ import Header2 from "@/components/fontsize/Header2";
 import Header4 from "@/components/fontsize/Header4";
 import { getQueriedItems, getUserData } from "@/firebase/actions";
 import { HiCheckCircle } from "react-icons/hi2";
-import { Contractor, Currencies, Project } from "@/types/types";
+import { Contractor, Currencies, Project, User } from "@/types/types";
 import NotAvailable from "@/components/ui/NotAvailable";
 import { collection, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { totalSum } from "@/utils/currencies";
 import Loading from "@/components/ui/Loading";
-import { useAuth } from "@/hooks/useAuth";
 
-function AmountDisplay() {
+function AmountDisplay({ user }: { readonly user: User | undefined}) {
   const [projectName, setProjectName] = useState("");
   const [contractorName, setContractorName] = useState("");
   const [currencyTitle, setCurrencyTitle] = useState("");
   const [currencySymbol, setCurrencySymbol] = useState("");
 
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [allProjects, setAllProjects] = useState<Project[]>();
   const [allContractors, setAllContractors] = useState<Contractor[]>();
@@ -33,7 +32,6 @@ function AmountDisplay() {
     contractor: "",
     currency: "",
   });
-  const { user, loading} = useAuth()
 
   const [allTotals, setAllTotals] = useState({
     noncontractPayments: 0,

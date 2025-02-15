@@ -2,51 +2,34 @@
 import React, { useState, useEffect } from "react";
 import Header6 from "@/components/fontsize/Header6";
 import TextButton from "@/components/ui/buttons/TextButton";
-import { getQueriedCount, getUserData } from "@/firebase/actions";
+import { getQueriedCount } from "@/firebase/actions";
 import Loading from "@/components/ui/Loading";
 import { optionalS } from "@/utils/optionalS";
-import { db, auth } from "@/firebase/config";
-import { query, collection, where, doc, getDoc } from "firebase/firestore";
-import { useAuth } from "@/hooks/useAuth";
-import { onAuthStateChanged } from "firebase/auth";
+import { db } from "@/firebase/config";
+import { query, collection, where } from "firebase/firestore";
+import { User } from "@/types/types";
 
-function ProjectCount() {
-  const { user, loading } = useAuth();
+function ProjectCount({ user }: { readonly user: User | undefined }) {
   const [count, setCount] = useState<number | undefined>();
 
   async function getUser() {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userRef = doc(db, "users", user?.uid);
+    if (!user) {
+      return;
+    }
 
-        async function getUser() {
-          const userSnap = await getDoc(userRef);
+    const q = query(
+      collection(db, "projects"),
+      where("team_id", "==", user?.team_id)
+    );
 
-          const q = query(
-            collection(db, "projects"),
-            where("team_id", "==", userSnap?.data()?.team_id)
-          );
+    const projectCount = await getQueriedCount(q);
 
-          const projectCount = await getQueriedCount(q);
-
-          setCount(projectCount as number);
-          console.log(projectCount);
-        }
-
-        getUser();
-      }
-    });
-
-    return () => unsub();
+    setCount(projectCount as number);
   }
 
   useEffect(() => {
     getUser();
-  }, []);
-
-  useEffect(() => {
-    getUser();
-  }, []);
+  }, [user?.id ?? "guest"]);
 
   return (
     <>

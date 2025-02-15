@@ -6,11 +6,11 @@ import TextButton from "@/components/ui/buttons/TextButton";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 import LineData from "./LineData";
-import { Chart } from "@/types/types";
+import { Chart, User } from "@/types/types";
 import { getAllItems } from "@/firebase/actions";
 import { HiCheckCircle } from "react-icons/hi2";
 
-function LineChartDisplay() {
+function LineChartDisplay({ user }: { readonly user: User | undefined}) {
   const [chartData, setChartData] = useState<Chart[] | undefined>();
   const [projectName, setProjectName] = useState("");
   const [range, setRange] = useState("");
