@@ -1,8 +1,9 @@
 import React from 'react'
+import MainPage from '@/components/pages/projects/MainPage'
 
 function Projects() {
   return (
-    <div>Projects</div>
+    <MainPage/>
   )
 }
 

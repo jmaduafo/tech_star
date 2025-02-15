@@ -92,7 +92,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
 
     setLoading(true);
 
-    // Get queried contracts
+    // Get queried contracts based on project_id and contractor_id
     const contractq = query(
       collection(db, "contracts"),
       where("project_id", "==", submit.project),
@@ -101,21 +101,23 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
     
     const allContracts = await getQueriedItems(contractq)
     
-    const contractWithCurrencies: ContractAmount[]= []
+    let contractWithCurrencies: ContractAmount[] = [];
 
     allContracts?.length && allContracts?.forEach(async (item) => {
-      // Getting all contract amounts where the project_id, contractor_id, and currency_id in subcollection 
-      // matches the selected options
+      // Getting all contract amounts where the currency_id in subcollection 
+      // matches the selected option
       const amountq = query(
         collection(db, "contracts", item?.id, "contractAmount"),
-        where("project_id", "==", submit.project),
-        where("contractor_id", "==", submit.contractor),
         where("currency_id", "==", submit.currency),
       );
 
       const amount = await getQueriedItems(amountq)
 
-      contractWithCurrencies.push(amount as unknown as ContractAmount)
+      if (!amount?.length) {
+        return;
+      }
+
+      contractWithCurrencies = amount as ContractAmount[]
     })
 
     
