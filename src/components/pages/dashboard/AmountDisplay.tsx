@@ -7,19 +7,19 @@ import Header1 from "@/components/fontsize/Header1";
 import Header5 from "@/components/fontsize/Header5";
 import Header2 from "@/components/fontsize/Header2";
 import Header4 from "@/components/fontsize/Header4";
-import { getQueriedItems, getUserData } from "@/firebase/actions";
+import { getQueriedItems } from "@/firebase/actions";
 import { HiCheckCircle } from "react-icons/hi2";
-import { Contractor, Currencies, Project, User } from "@/types/types";
+import { ContractAmount, Contractor, Currencies, Project, User } from "@/types/types";
 import NotAvailable from "@/components/ui/NotAvailable";
 import { collection, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { totalSum } from "@/utils/currencies";
 import Loading from "@/components/ui/Loading";
 
-function AmountDisplay({ user }: { readonly user: User | undefined}) {
-  const [projectName, setProjectName] = useState("");
-  const [contractorName, setContractorName] = useState("");
-  const [currencyTitle, setCurrencyTitle] = useState("");
+function AmountDisplay({ user }: { readonly user: User | undefined }) {
+  const [projectId, setProjectId] = useState("");
+  const [contractorId, setContractorId] = useState("");
+  const [currencyId, setCurrencyId] = useState("");
   const [currencySymbol, setCurrencySymbol] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -41,112 +41,139 @@ function AmountDisplay({ user }: { readonly user: User | undefined}) {
 
   // GETS ALL PROJECT AND CONTRACTOR NAMES BASED ON THE USER'S TEAM ID
   async function allData() {
+    if (!user) {
+      return;
+    }
 
-    // if (user) {
-    //   const userSnap = await getUserData(user?.uid)
-      
-    //   const projectq = query(
-    //     collection(db, "projects"),
-    //     where("team_id", "==", userSnap?.team_id)
-    //   );
+    const projectq = query(
+      collection(db, "projects"),
+      where("team_id", "==", user?.team_id)
+    );
 
-    //   const projects = await getQueriedItems(projectq);
+    const contractorq = query(
+      collection(db, "contractors"),
+      where("team_id", "==", user?.team_id)
+    );
 
-    //   const currencyq = query(
-    //     collection(db, "currencies"),
-    //     where("team_id", "==", userSnap?.team_id)
-    //   );
+    const currencyq = query(
+      collection(db, "currencies"),
+      where("team_id", "==", user?.team_id)
+    );
 
-    //   const currencies = await getQueriedItems(currencyq);
+    const projects = await getQueriedItems(projectq);
+    const contractors = await getQueriedItems(contractorq);
+    const currencies = await getQueriedItems(currencyq);
 
-    //   const contractorq = query(
-    //     collection(db, "contractors"),
-    //     where("team_id", "==", userSnap?.team_id)
-    //   );
+    projects?.length && setAllProjects(projects as Project[]);
 
-    //   const contractors = await getQueriedItems(contractorq);
+    contractors?.length && setAllContractors(contractors as Contractor[]);
 
-    //   projects?.length &&
-    //     setAllProjects(projects as Project[]) &&
-    //     setAllProjects(projects[0]?.name);
-    //   contractors?.length &&
-    //     setAllContractors(contractors as Contractor[]) &&
-    //     setAllContractors(contractors[0]?.name);
-    //   currencies?.length &&
-    //     setAllCurrencies(currencies as Currencies[]) &&
-    //     setAllCurrencies(currencies[0]?.name);
-    // }
+    currencies?.length && setAllCurrencies(currencies as Currencies[]);
   }
 
   useEffect(() => {
     allData();
-  }, []);
+  }, [user?.id ?? "guest"]);
 
   async function totalAmount() {
-    // // Set submitted values
-    // projectName.length &&
-    //   contractorName.length &&
-    //   currencyTitle.length &&
-    //   setSubmit({
-    //     project: projectName,
-    //     contractor: contractorName,
-    //     currency: currencyTitle,
-    //   });
+    // Set submitted values
+    projectId.length &&
+      contractorId.length &&
+      currencyId.length &&
+      setSubmit({
+        project: projectId,
+        contractor: contractorId,
+        currency: currencyId,
+      });
 
-    // // Find the symbol for the selected/submitted currency
-    // const symbol = currency_list.find((item) => item.name === submit.currency);
-    // symbol && setCurrencySymbol(symbol?.symbol);
+    // Find the symbol for the selected/submitted currency
+    const symbol = currency_list.find((item) => item.name === submit.currency);
+    symbol && setCurrencySymbol(symbol?.symbol);
 
-    // setLoading(true);
+    setLoading(true);
 
-    // const paymentq = query(
-    //   collection(db, "payments"),
-    //   where("project_name", "==", submit.project),
-    //   where("contract_name", "==", submit.contractor),
-    //   where("currency", "==", submit.currency)
-    // );
+    // Get queried contracts
+    const contractq = query(
+      collection(db, "contracts"),
+      where("project_id", "==", submit.project),
+      where("contractor_id", "==", submit.contractor),
+    );
+    
+    const allContracts = await getQueriedItems(contractq)
+    
+    const contractWithCurrencies: ContractAmount[]= []
 
-    // const contractq = query(
-    //   collection(db, "contracts"),
-    //   where("project_name", "==", submit.project),
-    //   where("contract_name", "==", submit.contractor)
-    // );
+    allContracts?.length && allContracts?.forEach(async (item) => {
+      // Getting all contract amounts where the project_id, contractor_id, and currency_id in subcollection 
+      // matches the selected options
+      const amountq = query(
+        collection(db, "contracts", item?.id, "contractAmount"),
+        where("project_id", "==", submit.project),
+        where("contractor_id", "==", submit.contractor),
+        where("currency_id", "==", submit.currency),
+      );
 
-    // const paymentQuery = await getQueriedItems(paymentq);
-    // const contractQuery = await getQueriedItems(contractq);
+      const amount = await getQueriedItems(amountq)
 
-    // const contract: number[] = [];
-    // const contractPayments: number[] = [];
-    // const noncontractPayments: number[] = [];
+      contractWithCurrencies.push(amount as unknown as ContractAmount)
+    })
 
-    // paymentQuery?.forEach((item) => {
-    //   item?.contract_id
-    //     ? contractPayments.push(item?.amount)
-    //     : noncontractPayments.push(item?.amount);
-    // });
+    
+    // Get queried payments within contracts
+    const contractpaymentq = query(
+      collection(db, "payments"),
+      where("project_id", "==", submit.project),
+      where("contractor_id", "==", submit.contractor),
+      where("currency_id", "==", submit.currency),
+      where("contract_id", "!=", null)
+    );
 
-    // contractQuery?.forEach((item) => {
-    //   const index = item?.currency?.findIndex(
-    //     (i: string | null) => i && i === submit.currency
-    //   );
-    //   contract.push(item?.amount[index]);
-    // });
+    // Get queried payments outside of contracts
+    const noncontractpaymentq = query(
+      collection(db, "payments"),
+      where("project_id", "==", submit.project),
+      where("contractor_id", "==", submit.contractor),
+      where("currency_id", "==", submit.currency),
+      where("contract_id", "==", null)
+    );
 
-    // let contractTotals;
-    // let contractPaymentsTotals;
-    // let noncontractPaymentsTotals;
 
-    // contractTotals = totalSum(contract);
-    // contractPaymentsTotals = totalSum(contractPayments);
-    // noncontractPaymentsTotals = totalSum(noncontractPayments);
+    const contractpaymentQuery = await getQueriedItems(contractpaymentq);
+    const noncontractpaymentQuery = await getQueriedItems(noncontractpaymentq);
 
-    // setAllTotals({
-    //   contractPayments: contractPaymentsTotals,
-    //   contracts: contractTotals,
-    //   noncontractPayments: noncontractPaymentsTotals,
-    // });
 
-    // setLoading(false);
+    const contractPayments: number[] = [];
+    const noncontractPayments: number[] = [];
+    const contracts: number[] = [];
+
+    // Only push the amount to the array
+    contractpaymentQuery?.forEach((item) => {
+      contractPayments.push(item?.amount)
+    });
+
+    noncontractpaymentQuery?.forEach((item) => {
+      contractPayments.push(item?.amount)
+    });
+
+    contractWithCurrencies?.forEach((item) => {
+      contracts.push(item?.amount)
+    })
+    
+    let contractTotals;
+    let contractPaymentsTotals;
+    let noncontractPaymentsTotals;
+
+    contractTotals = totalSum(contracts);
+    contractPaymentsTotals = totalSum(contractPayments);
+    noncontractPaymentsTotals = totalSum(noncontractPayments);
+
+    setAllTotals({
+      contractPayments: contractPaymentsTotals,
+      contracts: contractTotals,
+      noncontractPayments: noncontractPaymentsTotals,
+    });
+
+    setLoading(false);
   }
 
   // The condition to either show the amount display or the "No payments available"
@@ -211,14 +238,14 @@ function AmountDisplay({ user }: { readonly user: User | undefined}) {
     <div className="">
       <div className="flex gap-4">
         <SelectBar
-          valueChange={setProjectName}
+          valueChange={setProjectId}
           value="Select a project"
           label="Projects"
         >
           {allProjects?.length
             ? allProjects.map((item) => {
                 return (
-                  <SelectItem key={item?.id} value={item?.name}>
+                  <SelectItem key={item?.id} value={item?.id}>
                     {item?.name}
                   </SelectItem>
                 );
@@ -226,14 +253,14 @@ function AmountDisplay({ user }: { readonly user: User | undefined}) {
             : null}
         </SelectBar>
         <SelectBar
-          valueChange={setContractorName}
+          valueChange={setContractorId}
           value="Select a contractor"
           label="Contractors"
         >
           {allContractors?.length
             ? allContractors.map((item) => {
                 return (
-                  <SelectItem key={item?.id} value={item?.name}>
+                  <SelectItem key={item?.id} value={item?.id}>
                     {item?.name}
                   </SelectItem>
                 );
@@ -241,7 +268,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined}) {
             : null}
         </SelectBar>
         <SelectBar
-          valueChange={setCurrencyTitle}
+          valueChange={setCurrencyId}
           value="Select a currency"
           label="Currencies"
         >
@@ -249,8 +276,8 @@ function AmountDisplay({ user }: { readonly user: User | undefined}) {
             return (
               <SelectItem
                 className="cursor-pointer"
-                key={item.code}
-                value={item.code}
+                key={item?.id}
+                value={item?.id}
               >
                 {item.name}
               </SelectItem>
@@ -260,16 +287,16 @@ function AmountDisplay({ user }: { readonly user: User | undefined}) {
         <button
           onClick={totalAmount}
           className={`${
-            !contractorName.length ||
-            !projectName.length ||
-            !currencyTitle.length
+            !contractorId.length ||
+            !projectId.length ||
+            !currencyId.length
               ? "opacity-70 cursor-not-allowed"
               : "opacity-100 cursor-pointer"
           }`}
           disabled={
-            !contractorName.length ||
-            !projectName.length ||
-            !currencyTitle.length
+            !contractorId.length ||
+            !projectId.length ||
+            !currencyId.length
           }
         >
           <HiCheckCircle className="text-darkText w-7 h-7" />
