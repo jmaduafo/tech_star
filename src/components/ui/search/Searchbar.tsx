@@ -5,18 +5,40 @@ function Searchbar({
   setValue,
   value,
   open,
+  setOpen,
   children,
-  handleSearch
+  handleSearch,
 }: {
   readonly setValue: React.Dispatch<React.SetStateAction<string>>;
   readonly handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
   readonly value: string;
   readonly open: boolean;
+  readonly setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   readonly children: React.ReactNode;
 }) {
+  const searchRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className={`bg-light50 backdrop-blur-lg px-2 py-1.5 ${open ? 'rounded-tr-xl rounded-tl-xl' : 'rounded-xl'}`}>
-      <div className="flex items-center gap-1 relative">
+    <div
+      className={`bg-light50 backdrop-blur-lg px-2 py-1.5 ${
+        open ? "rounded-tr-xl rounded-tl-xl" : "rounded-xl"
+      }`}
+    >
+      <div ref={searchRef} className="flex items-center gap-1 relative">
         <Search className="w-5 text-darkText" />
         <input
           value={value}
@@ -27,7 +49,9 @@ function Searchbar({
         />
       </div>
       {open ? (
-        <div className="absolute px-2 py-1.5 bg-light70 text-dark75 text-[14px] border-t border-t-light85 left-0 top-full w-full rounded-br-xl rounded-bl-xl">{children}</div>
+        <div className="absolute px-2 py-1.5 bg-light70 text-dark75 text-[14px] border-t border-t-light85 left-0 top-full w-full rounded-br-xl rounded-bl-xl">
+          {children}
+        </div>
       ) : null}
     </div>
   );
