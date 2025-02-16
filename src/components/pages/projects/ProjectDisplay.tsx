@@ -1,23 +1,23 @@
-"use client";
 import React, { Fragment } from "react";
 import { User } from "@/types/types";
 import Card from "@/components/ui/MyCard";
 import { Plus } from "lucide-react";
 import Header5 from "@/components/fontsize/Header5";
-import Header3 from "@/components/fontsize/Header3";
-import Header6 from "@/components/fontsize/Header6";
 import Banner from "@/components/ui/Banner";
 import Header4 from "@/components/fontsize/Header4";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function ProjectDisplay({
   user,
   sort,
+  loading,
+  searchValue
 }: {
   readonly user: User | undefined;
   readonly sort: string;
+  readonly searchValue: string;
+  readonly loading: boolean;
 }) {
   const projects = [
     {
@@ -46,9 +46,8 @@ function ProjectDisplay({
     },
   ];
 
-  const { userData, loading } = useAuth();
 
-  const checkAdmin = userData?.is_admin ? (
+  const checkAdmin = user?.is_admin ? (
     <Link href="/projects/create">
       <Card className="h-[200px] cursor-pointer flex justify-center items-center hover:opacity-80 duration-300 hover:shadow-md">
         <div className="">

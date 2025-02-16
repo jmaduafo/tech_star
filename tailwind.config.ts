@@ -14,6 +14,7 @@ export default {
   			lightText: '#ececec',
 			accent1: "#E1B860",
 			accent2: "",
+  			dark90: 'rgba(20, 20, 20, .9)',
   			dark75: 'rgba(20, 20, 20, .75)',
   			dark50: 'rgba(20, 20, 20, .5)',
   			dark35: 'rgba(20, 20, 20, .35)',

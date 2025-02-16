@@ -20,7 +20,7 @@ function MainPage() {
           value={searchValue}
         />
         <div className="mt-10">
-          <ProjectDisplay user={userData} sort={sort} />
+          <ProjectDisplay user={userData} loading={loading} sort={sort} searchValue={searchValue}/>
         </div>
       </div>
     </AuthContainer>
