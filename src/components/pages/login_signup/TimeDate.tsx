@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { fullDate, fullTime } from "@/utils/dateAndTime";
-import { WiHorizonAlt, WiDayCloudy, WiNightAltCloudy } from "react-icons/wi";
+import { Sunrise, Sunset, CloudSun, CloudMoon } from "lucide-react";
 
 function TimeDate({
   timeFontSize,
@@ -28,13 +28,25 @@ function TimeDate({
   }, []);
 
   function timeIcon(hour: string) {
-    if (+hour >= 0 && +hour < 12) {
-      return <WiHorizonAlt className={timeFontSize === "dashboard" ? 'w-14 h-14' : ''}/>
-    } else if (+hour >= 12 && +hour < 17) {
-      return <WiDayCloudy className={timeFontSize === "dashboard" ? 'w-14 h-14' : ''}/>
-    } else if (+hour >=17 && +hour <= 23) {
-      return <WiNightAltCloudy className={timeFontSize === "dashboard" ? 'w-14 h-14' : ''}/>
-    }
+    if (+hour >= 20 || (+hour >= 0 && +hour < 7)) {
+      return (
+        <CloudMoon
+          strokeWidth={1.5} className={timeFontSize === "dashboard" ? "w-14 h-14" : "w-[5vw]"}
+        />
+      );
+    } else if (+hour >= 7 && +hour < 10) {
+      return (
+        <Sunrise strokeWidth={1.5} className={timeFontSize === "dashboard" ? "w-14 h-14" : "w-[5vw]"} />
+      );
+    } else if (+hour >= 10 && +hour < 18) {
+      return (
+        <CloudSun strokeWidth={1.5} className={timeFontSize === "dashboard" ? "w-14 h-14" : "w-[5vw]"} />
+      );
+    } else {
+      return (
+        <Sunset strokeWidth={1.5} className={timeFontSize === "dashboard" ? "w-14 h-14" : "w-[5vw]"} />
+      );
+    } 
   }
 
   return (
@@ -45,24 +57,32 @@ function TimeDate({
         {/* TIME DISPLAY */}
         <div className="flex justify-center">
           <p
-            className={`text-center leading-[1] font-semibold ${timeFontSize === "dashboard" ? 'text-[4vw]' : 'text-[9vh]'}`}
+            className={`text-center leading-[1] font-semibold ${
+              timeFontSize === "dashboard" ? "text-[4vw]" : "text-[9vh]"
+            }`}
           >
             {time.hour}
           </p>
           <p
-            className={`text-center leading-[1] font-semibold animate-pulse ${timeFontSize === "dashboard" ? 'text-[4vw]' : 'text-[9vh]'}`}
+            className={`text-center leading-[1] font-semibold animate-pulse ${
+              timeFontSize === "dashboard" ? "text-[4vw]" : "text-[9vh]"
+            }`}
           >
             :
           </p>
           <p
-            className={`text-center leading-[1] font-semibold ${timeFontSize === "dashboard" ? 'text-[4vw]' : 'text-[9vh]'}`}
+            className={`text-center leading-[1] font-semibold ${
+              timeFontSize === "dashboard" ? "text-[4vw]" : "text-[9vh]"
+            }`}
           >
             {time.minutes}
           </p>
         </div>
       </div>
       <p
-        className={`text-center font-medium tracking-tight ${dateFontSize === "dashboard" ? 'text-[18px]' : 'text-[26px]'}`}
+        className={`text-center font-medium tracking-tight ${
+          dateFontSize === "dashboard" ? "text-[18px]" : "text-[26px]"
+        }`}
       >
         {date}
       </p>
