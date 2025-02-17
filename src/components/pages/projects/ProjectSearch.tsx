@@ -27,7 +27,6 @@ function ProjectSearch({
   // Search by: Project name and country / location
   return (
     <section>
-      <div></div>
       <div className="flex items-start gap-3 ">
         <div className="flex-1">
           <Searchbar

@@ -63,14 +63,14 @@ function ProjectDisplay({
   return (
     <div className="grid grid-cols-3 gap-5 w-full">
       {/* BUTTON TO ADD NEW PROJECT; ONLY ADMIN CAN ADD A NEW PROJECT */}
-      {loading ? <Skeleton className="h-[200px]" /> : checkAdmin}
+      {loading ? <Skeleton className="h-[200px] rounded-[40px]" /> : checkAdmin}
 
       {projects.map((item) => {
         return (
           <Fragment key={item.name}>
-            <Card className="h-[200px] cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
+            <Card className="h-[200px] z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
               <div className="flex flex-col h-full">
-                <Header4 text={item.name} />
+                <Header4 text={item.name} className="capitalize"/>
                 <p className="text-[14px] text-light70">
                   Since {item.year} -{" "}
                   <span className="italic">{item.location}</span>
