@@ -24,12 +24,12 @@ export async function getUserData(id: string) {
 }
 
 export async function getAllItems(collectionName: string) {
-  const queryRef = collection(db, collectionName);
+  const dataRef = collection(db, collectionName);
 
   try {
     // Display only projects by a specific team
     const allItems: DocumentData[] = [];
-    const unsub = onSnapshot(queryRef, (snap) => {
+    const unsub = onSnapshot(dataRef, (snap) => {
       snap.forEach((item) => {
         allItems.push(item.data());
       });

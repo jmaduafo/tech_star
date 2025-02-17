@@ -26,6 +26,7 @@ export default {
   			light35: 'rgba(236, 236, 236, 0.35)',
   			light25: 'rgba(236, 236, 236, 0.25)',
   			light20: 'rgba(236, 236, 236, 0.2)',
+  			light10: 'rgba(236, 236, 236, 0.1)',
   			unpaidBg: 'rgba(214, 112, 64, .4)',
   			unpaidBorder: 'rgb(214, 112, 64)',
   			pendingBg: 'rgba(224, 205, 129, .4)',

@@ -45,9 +45,9 @@ export type Project = {
   id: string;
   name: string;
   team_id: string;
-  city: string;
-  state?: string;
+  city?: string | null;
   country: string;
+  start_month: string;
   start_year: number;
   is_ongoing: boolean;
   created_at: number;

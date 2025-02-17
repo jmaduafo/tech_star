@@ -35,3 +35,17 @@ export const LoginUserSchema = z.object({
       message: "Password is too long. Must be 100 characters at most.",
     }),
 });
+
+export const CreateProjectSchema = z.object({
+  name: z.string().min(1, { message: "You must enter a name." }),
+  country: z.string().min(1, { message: "You must select a country." }),
+  month: z.string().min(1, { message: "You must select a month." }),
+  year: z
+    .number()
+    .min(1900, {
+      message: "The year cannot be less than the year 1900",
+    })
+    .max(new Date().getFullYear(), {
+      message: "The year must be equal to or less than the current year.",
+    }),
+});

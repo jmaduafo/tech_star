@@ -25,7 +25,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Provider Component
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
-  // const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<User | undefined>();
   const [loading, setLoading] = useState(true);
 
