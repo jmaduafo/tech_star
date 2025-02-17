@@ -1,3 +1,27 @@
+export const images = [
+  {
+    image: '/images/background1.jpg',
+  },
+  {
+    image: '/images/background2.jpg'
+  },
+  {
+    image: '/images/background3.jpg'
+  },
+  {
+    image: '/images/background4.jpg'
+  },
+  {
+    image: '/images/background5.jpg'
+  },
+  {
+    image: '/images/background6.jpg'
+  },
+  {
+    image: '/images/background8.jpg'
+  },
+]
+
 export const days = [
   "Sunday",
   "Monday",

@@ -136,6 +136,7 @@ function SignUp() {
                 email,
                 team_id: newTeam?.id,
                 is_admin: true,
+                bg_image_index: 0,
                 created_at: serverTimestamp(),
               });
 

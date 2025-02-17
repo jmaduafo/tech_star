@@ -4,15 +4,59 @@ import AuthContainer from "../AuthContainer";
 import { useAuth } from "@/context/AuthContext";
 import ProjectDisplay from "./ProjectDisplay";
 import ProjectSearch from "./ProjectSearch";
+import { db } from "@/firebase/config";
+import { Project } from "@/types/types";
+import { query, collection, where, onSnapshot } from "firebase/firestore";
+import Header2 from "@/components/fontsize/Header2";
+import Header6 from "@/components/fontsize/Header6";
+import { optionalS } from "@/utils/optionalS";
+import Header1 from "@/components/fontsize/Header1";
 
 function MainPage() {
   const { userData, loading } = useAuth();
   const [sort, setSort] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
+  const [allProjects, setAllProjects] = React.useState<Project[] | undefined>();
+
+  function getProjects() {
+    try {
+      if (!userData) {
+        return;
+      }
+
+      const projectq = query(
+        collection(db, "projects"),
+        where("team_id", "==", userData?.team_id)
+      );
+
+      const projects: Project[] = [];
+
+      const unsub = onSnapshot(projectq, (snap) => {
+        snap.forEach((item) => {
+          projects.push({ ...(item.data() as Project), id: item?.id });
+        });
+
+        setAllProjects(projects);
+      });
+
+      return unsub;
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }
+
+  React.useEffect(() => {
+    getProjects();
+  }, [userData?.id ?? "guest"]);
+
   return (
     <AuthContainer>
       <div className="min-h-[80vh] w-[85%] mx-auto">
+        <div className="flex items-start gap-4 mb-8 text-lightText">
+          <Header1 text="All Projects" />
+          {allProjects ? <Header6 text={`${allProjects?.length} result${optionalS(allProjects?.length)}`} /> : null}
+        </div>
         <ProjectSearch
           user={userData}
           setSort={setSort}
@@ -20,7 +64,13 @@ function MainPage() {
           value={searchValue}
         />
         <div className="mt-10">
-          <ProjectDisplay user={userData} loading={loading} sort={sort} searchValue={searchValue}/>
+          <ProjectDisplay
+            user={userData}
+            loading={loading}
+            sort={sort}
+            searchValue={searchValue}
+            allProjects={allProjects}
+          />
         </div>
       </div>
     </AuthContainer>

@@ -24,14 +24,7 @@ import Submit from "@/components/ui/buttons/Submit";
 import { CreateProjectSchema } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
 import { addItem } from "@/firebase/actions";
-import {
-  collection,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  where,
-} from "firebase/firestore";
-import { db } from "@/firebase/config";
+import { serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 
 function ProjectDisplay({
@@ -39,50 +32,19 @@ function ProjectDisplay({
   loading,
   sort,
   searchValue,
+  allProjects,
 }: {
   readonly user: User | undefined;
   readonly sort: string;
   readonly searchValue: string;
   readonly loading: boolean;
+  readonly allProjects: Project[] | undefined;
 }) {
-  const [allProjects, setAllProjects] = React.useState<Project[] | undefined>();
-
   const [projectMonth, setProjectMonth] = React.useState("");
   const [projectCountry, setProjectCountry] = React.useState("");
 
   const [isClicked, setIsClicked] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-
-  function getProjects() {
-    try {
-      if (!user) {
-        return;
-      }
-
-      const projectq = query(
-        collection(db, "projects"),
-        where("team_id", "==", user?.team_id)
-      );
-
-      const projects: Project[] = [];
-
-      const unsub = onSnapshot(projectq, (snap) => {
-        snap.forEach((item) => {
-          projects.push({ ...(item.data() as Project), id: item?.id });
-        });
-
-        setAllProjects(projects);
-      });
-
-      return unsub;
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  React.useEffect(() => {
-    getProjects();
-  }, [user?.id ?? "guest"]);
 
   async function createProject(formData: FormData) {
     const project_name = formData.get("name");
@@ -148,10 +110,10 @@ function ProjectDisplay({
       <DialogTrigger asChild>
         {/* BUTTON TO ADD NEW PROJECT; ONLY ADMIN CAN ADD A NEW PROJECT */}
         <button>
-          <Card className="h-[200px] cursor-pointer flex justify-center items-center hover:opacity-80 duration-300 hover:shadow-md">
+          <Card className="h-[200px] text-lightText cursor-pointer flex justify-center items-center hover:opacity-80 duration-300 hover:shadow-md">
             <div className="">
               <div className="flex justify-center">
-                <Plus strokeWidth={1} className="w-16 h-16 text-lightText" />
+                <Plus strokeWidth={1} className="w-16 h-16" />
               </div>
               <Header5 text="Add new project" className="text-center" />
             </div>
@@ -238,13 +200,15 @@ function ProjectDisplay({
         ? allProjects.map((item) => {
             return (
               <Link href={`/projects/${item?.id}`} key={item.id}>
-                <Card className="h-[200px] z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
+                <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
                   <div className="flex flex-col h-full">
                     <Header4 text={item.name} className="capitalize" />
-                    <p className="text-[14px] text-light70">
+                    <p className="text-[14px] text-light50">
                       Since {item?.start_month?.substring(0, 3)}.{" "}
                       {item.start_year} -{" "}
-                      {item?.city ? <span className="italic">`${item.city}, `</span> : null}
+                      {item?.city ? (
+                        <span className="italic">`${item.city}, `</span>
+                      ) : null}
                       <span className="italic">{item.country}</span>
                     </p>
                     <div className="mt-auto">

@@ -1,9 +1,3 @@
-// export type Currency = {
-//   name: string;
-//   code: string;
-//   symbol: string;
-// }
-
 export type User = {
   id: string;
   first_name: string;
@@ -12,6 +6,7 @@ export type User = {
   password?: string;
   occupation?: string;
   is_admin: boolean;
+  bg_image_index?: number;
   team_id?: string;
   created_at: number;
   updated_at: number | null;
