@@ -70,8 +70,11 @@ function MainPage() {
     }
   }
 
+  console.log(sort)
+
   async function getProjectName() {
     const project_id = pathname.split("/")[2];
+    
     try {
       if (!userData) {
         return;
@@ -90,13 +93,10 @@ function MainPage() {
       console.log(err.message);
     }
   }
-
+  
+  
   React.useEffect(() => {
     getProjectName();
-  }, [pathname]);
-
-
-  React.useEffect(() => {
     getContractors();
   }, [userData?.id ?? "guest"]);
 

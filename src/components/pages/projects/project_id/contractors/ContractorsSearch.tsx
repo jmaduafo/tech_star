@@ -3,7 +3,7 @@ import SelectBar from '@/components/ui/input/SelectBar';
 import Searchbar from '@/components/ui/search/Searchbar';
 
 import { User } from '@/types/types';
-import { SelectItem } from '@radix-ui/react-select';
+import { SelectItem } from '@/components/ui/select';
 
 function ContractorsSearch({
     user,
