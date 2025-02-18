@@ -49,3 +49,15 @@ export const CreateProjectSchema = z.object({
       message: "The year must be equal to or less than the current year.",
     }),
 });
+
+export const CreateContractorSchema = z.object({
+  name: z.string().min(1, { message: "You must enter a name." }),
+  importance_level: z
+    .number()
+    .min(0, {
+      message: "Level of importance should be greater than or equal to 0.",
+    })
+    .max(5, {
+      message: "Level of importance should be less than or equal to 5.",
+    }),
+});

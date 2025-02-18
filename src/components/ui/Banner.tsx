@@ -12,6 +12,9 @@ function Banner({ text }: { readonly text: string}) {
         else if (text.toLowerCase() === "Ongoing".toLowerCase()) {
              return "bg-ongoingBg border-ongoingBorder"
         }
+        else if (text.toLowerCase() === "Discontinued".toLowerCase()) {
+             return "bg-ongoingBg border-ongoingBorder"
+        }
         else if (text.toLowerCase() === "Unpaid".toLowerCase()) {
              return "bg-unpaidBg border-unpaidBorder"
         }

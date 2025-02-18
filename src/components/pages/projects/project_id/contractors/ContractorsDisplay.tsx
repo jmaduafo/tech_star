@@ -1,6 +1,6 @@
 "use client";
 import React, { Fragment } from "react";
-import { Contractor, Project, User } from "@/types/types";
+import { Contractor, User } from "@/types/types";
 import Card from "@/components/ui/MyCard";
 import { Plus } from "lucide-react";
 import Header5 from "@/components/fontsize/Header5";
@@ -18,14 +18,16 @@ import {
 } from "@/components/ui/dialog";
 import Input from "@/components/ui/input/Input";
 import SelectBar from "@/components/ui/input/SelectBar";
-import { country_list, months } from "@/utils/dataTools";
 import { SelectItem } from "@/components/ui/select";
+import { country_list } from "@/utils/dataTools";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreateProjectSchema } from "@/zod/validation";
+import { CreateContractorSchema } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
 import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 function ContractorsDisplay({
   user,
@@ -34,30 +36,33 @@ function ContractorsDisplay({
   searchValue,
   allContractors,
   filterSearch,
+  projectId,
 }: {
   readonly user: User | undefined;
   readonly sort: string;
   readonly searchValue: string;
   readonly loading: boolean;
+  readonly projectId: string;
   readonly allContractors: Contractor[] | undefined;
   readonly filterSearch: Contractor[];
 }) {
-  
+  const [contractorLocation, setContractorLocation] = React.useState("");
+  const [importance, setImportance] = React.useState([2.5]);
+  const [isUnavailable, setIsUnavailable] = React.useState(false);
 
   const [isClicked, setIsClicked] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
   async function createContractor(formData: FormData) {
-    const project_name = formData.get("name");
-    const project_year = formData.get("year");
-    const city_name = formData.get("city");
+    const contractor_name = formData.get("name");
+    const contractor_additional = formData.get("additional");
 
     const values = {
-      name: project_name,
-      year: project_year && +project_year,
+      name: contractor_name,
+      importance_level: importance[0],
     };
 
-    const result = CreateProjectSchema.safeParse(values);
+    const result = CreateContractorSchema.safeParse(values);
 
     if (!result.success) {
       toast({
@@ -69,29 +74,30 @@ function ContractorsDisplay({
       return;
     }
 
-    const { name, country, year, month } = result.data;
+    const { name, importance_level } = result.data;
 
     try {
-      if (!user) {
+      if (!user || !projectId) {
         return;
       }
 
-      await addItem("projects", {
+      await addItem("contractors", {
         name,
         team_id: user?.team_id,
-        country,
-        city: city_name ?? null,
-        start_month: month,
-        start_year: year,
-        is_ongoing: true,
+        project_id: projectId,
+        location: contractorLocation ?? null,
+        importance_level,
+        text: contractor_additional ?? null,
+        is_unavailaible: isUnavailable ?? false,
         created_at: serverTimestamp(),
+        updated_at: null,
       });
 
       setOpen(false);
 
       toast({
         variant: "default",
-        title: "Project created succesfully!",
+        title: "Contractor created succesfully!",
       });
     } catch (err: any) {
       toast({
@@ -128,18 +134,15 @@ function ContractorsDisplay({
         <form action={createContractor}>
           {/* PROJECT NAME */}
           <Input label="Contractor name *" htmlFor="name">
-            <input name="name" className="form" type="text" />
+            <input name="name" id="name" className="form" type="text" />
           </Input>
-          <Input label="Location" htmlFor="location" className="mt-3">
-            <input name="city" className="form" type="text" />
-          </Input>
-          <div className="flex items-center gap-4 mt-5">
+          <div className="mt-5">
             {/* COUNTRY LOCATION */}
-            {/* <SelectBar
-              value="Select country *"
-              valueChange={setProjectCountry}
+            <SelectBar
+              value="Select contractor location "
+              valueChange={setContractorLocation}
               label="Countries"
-              className="flex-1"
+              className="w-full"
             >
               {country_list.map((item) => {
                 return (
@@ -149,24 +152,48 @@ function ContractorsDisplay({
                 );
               })}
             </SelectBar>
-            <SelectBar
-              value="Starting month *"
-              valueChange={setProjectMonth}
-              label="Months"
-              className="flex-1"
-            >
-              {months.map((item) => {
-                return (
-                  <SelectItem key={item} value={item}>
-                    {item}
-                  </SelectItem>
-                );
-              })}
-            </SelectBar> */}
           </div>
-          <Input label="Starting year *" htmlFor="year" className="flex-1 mt-3">
-            <input name="year" className="form" type="number" />
+          <div className="mt-4">
+            <label htmlFor="importance_level" className="">
+              How crucial is contractor to project? (not as crucial to extremely
+              crucial)
+            </label>
+            <p className="text-right text-dark75 text-[13px]">{importance}</p>
+            <Slider
+              name="importance"
+              id="importance_level"
+              defaultValue={[2.5]}
+              value={importance}
+              onValueChange={setImportance}
+              max={5}
+              step={0.5}
+              className="mt-2"
+            />
+          </div>
+          <Input
+            label="Any additional information?"
+            htmlFor="additional_info"
+            className="mt-4 flex flex-col gap-3"
+          >
+            <textarea
+              name="additional"
+              id="additional_info"
+              className="form"
+            ></textarea>
           </Input>
+          <Input
+            label="Is contractor unavailable?"
+            htmlFor="status"
+            className="mt-4 flex items-center justify-end gap-3"
+          >
+            <Switch
+              id="status"
+              name="status"
+              onCheckedChange={setIsUnavailable}
+              checked={isUnavailable}
+            />
+          </Input>
+
           <div className="flex justify-center mt-6 scale-75">
             <Submit setIsClicked={setIsClicked} isClicked={isClicked} />
           </div>
@@ -180,21 +207,21 @@ function ContractorsDisplay({
     filterSearch?.length && searchValue.length
       ? filterSearch.map((item) => {
           return (
-            <Link href={`/projects/${item?.project_id}/contractors/${item?.id}`} key={item.id}>
+            <Link
+              href={`/projects/${item?.project_id}/contractors/${item?.id}`}
+              key={item.id}
+            >
               <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
                 <div className="flex flex-col h-full">
-                  {/* <Header4 text={item.name} className="capitalize" />
-                  <p className="text-[14px] text-light50">
-                    Since {item?.start_month?.substring(0, 3)}.{" "}
-                    {item.start_year} -{" "}
-                    {item?.city ? (
-                      <span className="italic">`${item.city}, `</span>
-                    ) : null}
-                    <span className="italic">{item.country}</span>
+                  <Header4 text={item.name} className="capitalize" />
+                  <p className="text-[14px] text-light50 italic">
+                    {item.location}
                   </p>
                   <div className="mt-auto">
-                    <Banner text={item.is_ongoing ? "ongoing" : "completed"} />
-                  </div> */}
+                    {item.is_unavailable ? (
+                      <Banner text={"discontinued"} />
+                    ) : null}
+                  </div>
                 </div>
               </Card>
             </Link>
@@ -216,23 +243,21 @@ function ContractorsDisplay({
       {allContractors?.length && !filterSearch.length && !searchValue.length
         ? allContractors?.map((item) => {
             return (
-              <Link href={`/projects/${item?.project_id}/contractors/${item?.id}`} key={item.id}>
+              <Link
+                href={`/projects/${item?.project_id}/contractors/${item?.id}`}
+                key={item.id}
+              >
                 <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
                   <div className="flex flex-col h-full">
-                    {/* <Header4 text={item.name} className="capitalize" />
-                    <p className="text-[14px] text-light50">
-                      Since {item?.start_month?.substring(0, 3)}.{" "}
-                      {item.start_year} -{" "}
-                      {item?.city ? (
-                        <span className="italic">`${item.city}, `</span>
-                      ) : null}
-                      <span className="italic">{item.country}</span>
+                    <Header4 text={item.name} className="capitalize" />
+                    <p className="text-[14px] text-light50 italic">
+                      {item.location}
                     </p>
                     <div className="mt-auto">
-                      <Banner
-                        text={item.is_ongoing ? "ongoing" : "completed"}
-                      />
-                    </div> */}
+                    {item.is_unavailable ? (
+                      <Banner text={"discontinued"} />
+                    ) : null}
+                    </div>
                   </div>
                 </Card>
               </Link>
@@ -242,4 +267,4 @@ function ContractorsDisplay({
     </div>
   );
 }
-export default ContractorsDisplay
+export default ContractorsDisplay;

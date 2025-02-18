@@ -12,7 +12,7 @@ import {
   where,
   onSnapshot,
   doc,
-  getDoc,
+  getDoc
 } from "firebase/firestore";
 import Header6 from "@/components/fontsize/Header6";
 import { optionalS } from "@/utils/optionalS";
@@ -30,7 +30,6 @@ import {
 import { usePathname } from "next/navigation";
 
 function MainPage() {
-  const { userData, loading } = useAuth();
   const [sort, setSort] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
@@ -42,7 +41,11 @@ function MainPage() {
   const [projectName, setProjectName] = React.useState("");
 
   const pathname = usePathname();
+  const project_id = pathname.split("/")[2];
 
+  const { userData, loading } = useAuth();
+
+  // GET ALL CONTRACTORS BY USER'S TEAM
   function getContractors() {
     try {
       if (!userData) {
@@ -70,18 +73,14 @@ function MainPage() {
     }
   }
 
-  console.log(sort)
-
+  // GET SELECTED PROJECT NAME TO DISPLAY IN BREADCRUMB DISPLAY
   async function getProjectName() {
-    const project_id = pathname.split("/")[2];
-    
     try {
       if (!userData) {
         return;
       }
 
       const projectNameq = doc(db, "projects", project_id);
-
       const projectDoc = await getDoc(projectNameq);
 
       if (!projectDoc?.exists()) {
@@ -93,13 +92,13 @@ function MainPage() {
       console.log(err.message);
     }
   }
-  
-  
+
   React.useEffect(() => {
     getProjectName();
     getContractors();
   }, [userData?.id ?? "guest"]);
 
+  // FILTER CONTRACTOR NAME BY SEARCHED VALUE
   function filterContractors() {
     allContractors?.length &&
       searchValue.length &&
@@ -137,6 +136,7 @@ function MainPage() {
             />
           ) : null}
         </div>
+        {/* BREADCRUMB DISPLAY */}
         <div className="mb-8">
           <Breadcrumb>
             <BreadcrumbList>
@@ -147,7 +147,7 @@ function MainPage() {
               {projectName ? (
                 <>
                   <BreadcrumbItem>
-                    <BreadcrumbLink>Kilimanjaro</BreadcrumbLink>
+                    <BreadcrumbLink>{projectName}</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                 </>
@@ -158,16 +158,19 @@ function MainPage() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
+        {/* CONTRACTOR SEARCH BAR */}
         <ContractorsSearch
           user={userData}
           setSort={setSort}
           setValue={setSearchValue}
           value={searchValue}
         />
+        {/* DISPLAY OF CONTRACTORS AND ALLOWS ONLY ADMIN TO ADD CONTRACTOR */}
         <div className="mt-10">
           <ContractorsDisplay
             user={userData}
             loading={loading}
+            projectId={project_id}
             sort={sort}
             searchValue={searchValue}
             allContractors={allContractors}

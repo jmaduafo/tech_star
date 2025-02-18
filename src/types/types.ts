@@ -57,7 +57,7 @@ export type Contractor = {
   location?: string | null;
   importance_level: number;
   text?: string | null;
-  status: "active" | "unavailable";
+  is_unavailable: boolean;
   created_at: number;
   updated_at: number | null;
 };

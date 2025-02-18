@@ -84,7 +84,7 @@ function SettingButton() {
               {images.map((item) => (
                 <CarouselItem
                   key={item.image}
-                  className="md:basis-1/2 lg:basis-1/3"
+                  className="basis-1/3"
                 >
                   <button
                   onClick={() => setBgSelect(item.image)}
