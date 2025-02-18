@@ -35,15 +35,6 @@ function ContractorCount({ user }: { readonly user: User | undefined }) {
     <>
       {typeof count === "number" ? (
         <div className="flex flex-col h-full">
-          {count > 0 ? (
-            <div className="flex justify-end">
-              <TextButton
-                href="/projects"
-                text="View all"
-                iconDirection="right"
-              />
-            </div>
-          ) : null}
           <div className="mt-auto mb-3">
             <p className="text-center font-semibold text-[4vw] leading-[1]">
               {count}
