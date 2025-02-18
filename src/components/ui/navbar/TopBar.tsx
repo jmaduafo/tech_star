@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import { HiUser, HiMiniCog8Tooth } from "react-icons/hi2";
 import {
@@ -55,6 +56,8 @@ function UserButton() {
 }
 
 function SettingButton() {
+  const [ bgSelect, setBgSelect ] = React.useState(images[0].image)
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -84,8 +87,8 @@ function SettingButton() {
                   className="md:basis-1/2 lg:basis-1/3"
                 >
                   <button
-                    className="rounded-md hover:opacity-80 duration-300 w-full h-[60px] bg-cover bg-center bg-no-repeat"
-                    key={item.image}
+                  onClick={() => setBgSelect(item.image)}
+                    className={`${item.image === bgSelect ? 'border-2 border-lightText' : 'border-none'} rounded-md hover:opacity-80 duration-300 w-full h-[60px] bg-cover bg-center bg-no-repeat`}
                     style={{ backgroundImage: `url(${item.image})` }}
                   ></button>
                 </CarouselItem>

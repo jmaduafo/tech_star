@@ -26,6 +26,7 @@ import { toast } from "@/hooks/use-toast";
 import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import NotAvailable from "@/components/ui/NotAvailable";
 
 function ProjectDisplay({
   user,
@@ -33,12 +34,14 @@ function ProjectDisplay({
   sort,
   searchValue,
   allProjects,
+  filterSearch,
 }: {
   readonly user: User | undefined;
   readonly sort: string;
   readonly searchValue: string;
   readonly loading: boolean;
   readonly allProjects: Project[] | undefined;
+  readonly filterSearch: Project[];
 }) {
   const [projectMonth, setProjectMonth] = React.useState("");
   const [projectCountry, setProjectCountry] = React.useState("");
@@ -168,13 +171,7 @@ function ProjectDisplay({
             </SelectBar>
           </div>
           <Input label="Starting year *" htmlFor="year" className="flex-1 mt-3">
-            <input
-              name="year"
-              className="form"
-              type="number"
-              // min={1900}
-              // max={new Date().getFullYear()}
-            />
+            <input name="year" className="form" type="number" />
           </Input>
           <div className="flex justify-center mt-6 scale-75">
             <Submit setIsClicked={setIsClicked} isClicked={isClicked} />
@@ -184,6 +181,33 @@ function ProjectDisplay({
       </DialogContent>
     </Dialog>
   ) : null;
+
+  //   <div className="h-[200px] flex justify-center items-center border border-lightText rounded-[40px]"><NotAvailable text="No matches found"/></div>
+  const filtered =
+    filterSearch?.length && searchValue.length
+      ? filterSearch.map((item) => {
+          return (
+            <Link href={`/projects/${item?.id}`} key={item.id}>
+              <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
+                <div className="flex flex-col h-full">
+                  <Header4 text={item.name} className="capitalize" />
+                  <p className="text-[14px] text-light50">
+                    Since {item?.start_month?.substring(0, 3)}.{" "}
+                    {item.start_year} -{" "}
+                    {item?.city ? (
+                      <span className="italic">`${item.city}, `</span>
+                    ) : null}
+                    <span className="italic">{item.country}</span>
+                  </p>
+                  <div className="mt-auto">
+                    <Banner text={item.is_ongoing ? "ongoing" : "completed"} />
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          );
+        })
+      : null;
 
   return (
     <div className="grid grid-cols-3 gap-5 w-full">
@@ -196,8 +220,8 @@ function ProjectDisplay({
             );
           })
         : checkAdmin}
-      {allProjects
-        ? allProjects.map((item) => {
+      {allProjects?.length && !filterSearch.length && !searchValue.length
+        ? allProjects?.map((item) => {
             return (
               <Link href={`/projects/${item?.id}`} key={item.id}>
                 <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
@@ -221,7 +245,7 @@ function ProjectDisplay({
               </Link>
             );
           })
-        : null}
+        : filtered}
     </div>
   );
 }

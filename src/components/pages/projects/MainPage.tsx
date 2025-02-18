@@ -18,6 +18,7 @@ function MainPage() {
   const [searchValue, setSearchValue] = useState("");
 
   const [allProjects, setAllProjects] = React.useState<Project[] | undefined>();
+  const [filterSearch, setFilterSearch] = React.useState<Project[]>([]);
 
   function getProjects() {
     try {
@@ -50,12 +51,41 @@ function MainPage() {
     getProjects();
   }, [userData?.id ?? "guest"]);
 
+  function filterProjects() {
+    allProjects?.length &&
+      searchValue.length &&
+      setFilterSearch(
+        allProjects.filter(
+          (item) =>
+            item.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+            item.country?.toLowerCase().includes(searchValue.toLowerCase()) ||
+            item.city?.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      );
+
+    //   !searchValue.length && allProjects && setFilterSearch(allProjects)
+  }
+
+  React.useEffect(() => {
+    filterProjects();
+  }, [searchValue]);
+
   return (
     <AuthContainer>
       <div className="min-h-[80vh] w-[85%] mx-auto">
         <div className="flex items-start gap-4 mb-8 text-lightText">
           <Header1 text="All Projects" />
-          {allProjects ? <Header6 text={`${allProjects?.length} result${optionalS(allProjects?.length)}`} /> : null}
+          {allProjects ? (
+            <Header6
+              text={`${
+                allProjects?.length && !filterSearch.length && !searchValue.length
+                  ? allProjects?.length : filterSearch.length
+              } result${optionalS(
+                allProjects?.length && !filterSearch.length && !searchValue.length
+                ? allProjects?.length : filterSearch.length
+              )}`}
+            />
+          ) : null}
         </div>
         <ProjectSearch
           user={userData}
@@ -70,6 +100,7 @@ function MainPage() {
             sort={sort}
             searchValue={searchValue}
             allProjects={allProjects}
+            filterSearch={filterSearch}
           />
         </div>
       </div>
