@@ -7,7 +7,6 @@ import ProjectSearch from "./ProjectSearch";
 import { db } from "@/firebase/config";
 import { Project } from "@/types/types";
 import { query, collection, where, onSnapshot } from "firebase/firestore";
-import Header2 from "@/components/fontsize/Header2";
 import Header6 from "@/components/fontsize/Header6";
 import { optionalS } from "@/utils/optionalS";
 import Header1 from "@/components/fontsize/Header1";
@@ -73,7 +72,7 @@ function MainPage() {
   return (
     <AuthContainer>
       <div className="min-h-[80vh] w-[85%] mx-auto">
-        <div className="flex items-start gap-4 mb-8 text-lightText">
+        <div className="flex items-start gap-5 mb-8 text-lightText">
           <Header1 text="All Projects" />
           {allProjects ? (
             <Header6

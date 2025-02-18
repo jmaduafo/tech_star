@@ -1,6 +1,6 @@
 "use client";
 import React, { Fragment } from "react";
-import { Project, User } from "@/types/types";
+import { Contractor, Project, User } from "@/types/types";
 import Card from "@/components/ui/MyCard";
 import { Plus } from "lucide-react";
 import Header5 from "@/components/fontsize/Header5";
@@ -27,28 +27,27 @@ import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 
-function ProjectDisplay({
+function ContractorsDisplay({
   user,
   loading,
   sort,
   searchValue,
-  allProjects,
+  allContractors,
   filterSearch,
 }: {
   readonly user: User | undefined;
   readonly sort: string;
   readonly searchValue: string;
   readonly loading: boolean;
-  readonly allProjects: Project[] | undefined;
-  readonly filterSearch: Project[];
+  readonly allContractors: Contractor[] | undefined;
+  readonly filterSearch: Contractor[];
 }) {
-  const [projectMonth, setProjectMonth] = React.useState("");
-  const [projectCountry, setProjectCountry] = React.useState("");
+  
 
   const [isClicked, setIsClicked] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
-  async function createProject(formData: FormData) {
+  async function createContractor(formData: FormData) {
     const project_name = formData.get("name");
     const project_year = formData.get("year");
     const city_name = formData.get("city");
@@ -56,8 +55,6 @@ function ProjectDisplay({
     const values = {
       name: project_name,
       year: project_year && +project_year,
-      month: projectMonth,
-      country: projectCountry,
     };
 
     const result = CreateProjectSchema.safeParse(values);
@@ -90,8 +87,6 @@ function ProjectDisplay({
         created_at: serverTimestamp(),
       });
 
-      setProjectMonth("");
-      setProjectCountry("");
       setOpen(false);
 
       toast({
@@ -117,7 +112,7 @@ function ProjectDisplay({
               <div className="flex justify-center">
                 <Plus strokeWidth={1} className="w-16 h-16" />
               </div>
-              <Header5 text="Add new project" className="text-center" />
+              <Header5 text="Add new contractor" className="text-center" />
             </div>
           </Card>
         </button>
@@ -125,22 +120,22 @@ function ProjectDisplay({
       {/* CREATE PROJECT DIALOG POPUP */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create a project</DialogTitle>
+          <DialogTitle>Add a contractor</DialogTitle>
           <DialogDescription>
-            Start a project and manage finances
+            Access payments by adding a contractor
           </DialogDescription>
         </DialogHeader>
-        <form action={createProject}>
+        <form action={createContractor}>
           {/* PROJECT NAME */}
-          <Input label="Project name *" htmlFor="name">
+          <Input label="Contractor name *" htmlFor="name">
             <input name="name" className="form" type="text" />
           </Input>
-          <Input label="City" htmlFor="city" className="mt-3">
+          <Input label="Location" htmlFor="location" className="mt-3">
             <input name="city" className="form" type="text" />
           </Input>
           <div className="flex items-center gap-4 mt-5">
             {/* COUNTRY LOCATION */}
-            <SelectBar
+            {/* <SelectBar
               value="Select country *"
               valueChange={setProjectCountry}
               label="Countries"
@@ -167,7 +162,7 @@ function ProjectDisplay({
                   </SelectItem>
                 );
               })}
-            </SelectBar>
+            </SelectBar> */}
           </div>
           <Input label="Starting year *" htmlFor="year" className="flex-1 mt-3">
             <input name="year" className="form" type="number" />
@@ -185,10 +180,10 @@ function ProjectDisplay({
     filterSearch?.length && searchValue.length
       ? filterSearch.map((item) => {
           return (
-            <Link href={`/projects/${item?.id}/contractors`} key={item.id}>
+            <Link href={`/projects/${item?.project_id}/contractors/${item?.id}`} key={item.id}>
               <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
                 <div className="flex flex-col h-full">
-                  <Header4 text={item.name} className="capitalize" />
+                  {/* <Header4 text={item.name} className="capitalize" />
                   <p className="text-[14px] text-light50">
                     Since {item?.start_month?.substring(0, 3)}.{" "}
                     {item.start_year} -{" "}
@@ -199,7 +194,7 @@ function ProjectDisplay({
                   </p>
                   <div className="mt-auto">
                     <Banner text={item.is_ongoing ? "ongoing" : "completed"} />
-                  </div>
+                  </div> */}
                 </div>
               </Card>
             </Link>
@@ -218,13 +213,13 @@ function ProjectDisplay({
             );
           })
         : checkAdmin}
-      {allProjects?.length && !filterSearch.length && !searchValue.length
-        ? allProjects?.map((item) => {
+      {allContractors?.length && !filterSearch.length && !searchValue.length
+        ? allContractors?.map((item) => {
             return (
-              <Link href={`/projects/${item?.id}/contractors`} key={item.id}>
+              <Link href={`/projects/${item?.project_id}/contractors/${item?.id}`} key={item.id}>
                 <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
                   <div className="flex flex-col h-full">
-                    <Header4 text={item.name} className="capitalize" />
+                    {/* <Header4 text={item.name} className="capitalize" />
                     <p className="text-[14px] text-light50">
                       Since {item?.start_month?.substring(0, 3)}.{" "}
                       {item.start_year} -{" "}
@@ -237,7 +232,7 @@ function ProjectDisplay({
                       <Banner
                         text={item.is_ongoing ? "ongoing" : "completed"}
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </Card>
               </Link>
@@ -247,5 +242,4 @@ function ProjectDisplay({
     </div>
   );
 }
-
-export default ProjectDisplay;
+export default ContractorsDisplay
