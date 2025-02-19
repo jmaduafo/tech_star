@@ -87,5 +87,11 @@ label {
 @layer base {
   :root {
     --radius: 0.5rem; 
+    --amber1: rgb(255 251 235);
+    --amber2: rgb(254 243 199);
+    --amber3: rgb(253 230 138);
+    --amber4: rgb(252 211 77);
+    --amber5: rgb(251 191 36);
+    --amber6: rgb(245 158 11);
   }
 }

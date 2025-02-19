@@ -12,6 +12,7 @@ import {
   doc,
   DocumentReference,
   getDoc,
+  getDocs,
 } from "firebase/firestore";
 
 export async function getUserData(id: string) {
@@ -43,21 +44,16 @@ export async function getAllItems(collectionName: string) {
   }
 }
 
-export async function getQueriedItems(ref: Query<DocumentData, DocumentData>) {
+export async function getQueriedItems<T = DocumentData>(ref: Query<DocumentData, DocumentData>): Promise<T[]> {
   try {
-    // Display only projects by a specific team
-    const allItems: DocumentData[] = [];
-    const unsub = onSnapshot(ref, (snap) => {
-      snap.forEach((item) => {
-        allItems.push(item.data());
-      });
-    });
-    
-    unsub();
-    return allItems;
-
+    const snap = await getDocs(ref);
+    return snap.docs.map((item) => ({
+      id: item.id,
+      ...item.data() as T,
+    }));
   } catch (err: any) {
-    throw new err.message();
+    console.log(err.message);
+    return [];
   }
 }
 

@@ -2,11 +2,13 @@
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import React from "react";
-import { PieChart as PieContainer, Pie, Legend } from "recharts";
+import { PieChart as PieContainer, Pie } from "recharts";
 
 type Chart = {
   project_id: string;
@@ -27,22 +29,6 @@ function PieChart({
   readonly dataKey: string;
 }) {
   return (
-    // <ResponsiveContainer width="100%" height="100%">
-    //     <PieContainer width={400} height={400}>
-    //       <Pie
-    //         dataKey="value"
-    //         isAnimationActive={false}
-    //         data={data}
-    //         cx="50%"
-    //         cy="50%"
-    //         outerRadius={80}
-    //         fill="#8884d8"
-    //         label
-    //       />
-    //       <Legend layout="vertical" align="right" verticalAlign="middle" />
-    //       <Tooltip />
-    //     </PieContainer>
-    //   </ResponsiveContainer>
     <ChartContainer
       config={chartConfig}
       className="mx-auto aspect-square max-h-[250px]"
@@ -53,6 +39,12 @@ function PieChart({
           content={<ChartTooltipContent hideLabel />}
         />
         <Pie data={data} dataKey={dataKey} nameKey={nameKey} stroke="0" />
+        {data.length > 0 && (
+          <ChartLegend
+            content={<ChartLegendContent nameKey={nameKey} />}
+            className="-translate-y-2 w-full flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+          />
+        )}
       </PieContainer>
     </ChartContainer>
   );
