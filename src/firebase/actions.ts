@@ -52,10 +52,28 @@ export async function getQueriedItems(ref: Query<DocumentData, DocumentData>) {
         allItems.push(item.data());
       });
     });
-
+    
     unsub();
-
     return allItems;
+
+  } catch (err: any) {
+    throw new err.message();
+  }
+}
+
+export async function getDocumentItem(collectionName: string, id: string) {
+  try {
+    // Display only projects by a specific team
+    const docRef = doc(db, collectionName, id)
+    
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap?.exists()) {
+      return;
+    }
+
+    return docSnap?.data()
+
   } catch (err: any) {
     throw new err.message();
   }
@@ -88,17 +106,6 @@ export async function addItem(collectionName: string, items: object) {
     // Display only projects by a specific team
     const ref = collection(db, collectionName);
 
-    await addDoc(ref, items);
-  } catch (err: any) {
-    return err;
-  }
-}
-
-export async function addQueriedItem(
-  ref: CollectionReference<object, DocumentData>,
-  items: object
-) {
-  try {
     await addDoc(ref, items);
   } catch (err: any) {
     return err;

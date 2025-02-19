@@ -73,7 +73,7 @@ function SettingButton() {
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         <div className="w-full text-dark75">
-          <Header6 text="Background"/>
+          <Header6 text="Set a background"/>
           <Carousel
             className="w-[80%] mx-auto mt-4"
             opts={{

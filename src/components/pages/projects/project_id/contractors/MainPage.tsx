@@ -10,9 +10,7 @@ import {
   query,
   collection,
   where,
-  onSnapshot,
-  doc,
-  getDoc
+  onSnapshot
 } from "firebase/firestore";
 import Header6 from "@/components/fontsize/Header6";
 import { optionalS } from "@/utils/optionalS";
@@ -28,6 +26,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { usePathname } from "next/navigation";
+import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
 
 function MainPage() {
   const [sort, setSort] = useState("");
@@ -46,15 +45,16 @@ function MainPage() {
   const { userData, loading } = useAuth();
 
   // GET ALL CONTRACTORS BY USER'S TEAM
-  function getContractors() {
+  async function getContractors() {
     try {
-      if (!userData) {
+      if (!userData || !project_id) {
         return;
       }
 
       const contractorq = query(
         collection(db, "contractors"),
-        where("team_id", "==", userData?.team_id)
+        where("team_id", "==", userData?.team_id),
+        where("project_id", "==", project_id)
       );
 
       const contractors: Contractor[] = [];
@@ -80,14 +80,9 @@ function MainPage() {
         return;
       }
 
-      const projectNameq = doc(db, "projects", project_id);
-      const projectDoc = await getDoc(projectNameq);
+      const project = await getDocumentItem("projects", project_id)
 
-      if (!projectDoc?.exists()) {
-        return;
-      }
-
-      setProjectName(projectDoc?.data()?.name);
+      setProjectName(project?.name);
     } catch (err: any) {
       console.log(err.message);
     }
@@ -144,7 +139,7 @@ function MainPage() {
                 <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              {projectName ? (
+              {projectName.length ? (
                 <>
                   <BreadcrumbItem>
                     <BreadcrumbLink>{projectName}</BreadcrumbLink>

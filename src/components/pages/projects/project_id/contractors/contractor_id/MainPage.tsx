@@ -1,17 +1,55 @@
+"use client";
 import AuthContainer from "@/components/pages/AuthContainer";
 import React from "react";
 import Contracts from "./Contracts";
 import NonContracts from "./NonContracts";
 import Header1 from "@/components/fontsize/Header1";
 import Header6 from "@/components/fontsize/Header6";
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { usePathname } from "next/navigation";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import { db } from "@/firebase/config";
+import { doc } from "firebase/firestore";
+import { getDocumentItem } from "@/firebase/actions";
+import { useAuth } from "@/context/AuthContext";
+import Separator from "@/components/ui/Separator";
 
 function MainPage() {
+  const [projectName, setProjectName] = React.useState("");
+  const [contractorName, setContractorName] = React.useState("");
+  const pathname = usePathname();
+  const project_id = pathname.split("/")[2];
+  const contractor_id = pathname.split("/").pop();
+
+  const { userData, loading } = useAuth();
+
+  async function getProjectAndContractorNames() {
+    if (!project_id || !contractor_id) {
+      return;
+    }
+
+    const proj = await getDocumentItem("projects", project_id);
+    const contr = await getDocumentItem("contractors", contractor_id);
+
+    setProjectName(proj?.name);
+    setContractorName(contr?.name);
+  }
+
+  React.useEffect(() => {
+    getProjectAndContractorNames();
+  }, [projectName, contractorName]);
+
   return (
     <AuthContainer>
       <div className="min-h-[80vh] w-[85%] mx-auto">
-      <div className="flex items-start gap-5 mb-2 text-lightText">
-          <Header1 text="Cappa" />
+        <div className="flex items-start gap-5 mb-2 text-lightText">
+          {contractorName.length ? <Header1 text={contractorName} /> : null}
           {/* {allContractors ? (
           <Header6
             text={`${
@@ -29,9 +67,7 @@ function MainPage() {
             )}`}
           />
           ) : null} */}
-          <Header6
-            text={`3 results`}
-          />
+          <Header6 text={`3 results`} />
         </div>
         {/* BREADCRUMB DISPLAY */}
         <div className="mb-8">
@@ -41,22 +77,37 @@ function MainPage() {
                 <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
+              {projectName.length ? (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink>{projectName}</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                </>
+              ) : null}
               <BreadcrumbItem>
-                <BreadcrumbLink>Kilimanjaro</BreadcrumbLink>
+                <BreadcrumbLink href={`/projects/${project_id}/contractors`}>
+                  Contractors
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-              <BreadcrumbLink href="/projects">Contractors</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Cappa</BreadcrumbPage>
-              </BreadcrumbItem>
+              {contractorName.length ? (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{contractorName}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              ) : null}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <Contracts />
-        <NonContracts />
+        <div className="mb-8">
+          <Contracts />
+        </div>
+        <Separator />
+        <div className="mt-8">
+          <NonContracts />
+        </div>
       </div>
     </AuthContainer>
   );

@@ -208,7 +208,7 @@ function ProjectDisplay({
       : null;
 
   return (
-    <div className="grid grid-cols-3 gap-5 w-full">
+    <section className="grid grid-cols-3 gap-5 w-full">
       {loading
         ? [0, 1, 2, 3, 4, 5].map((each, i) => {
             return (
@@ -244,7 +244,7 @@ function ProjectDisplay({
             );
           })
         : filtered}
-    </div>
+    </section>
   );
 }
 
