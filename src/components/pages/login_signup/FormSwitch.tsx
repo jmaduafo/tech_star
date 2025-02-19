@@ -16,22 +16,22 @@ function FormSwitch({
         } duration-300 absolute h-full w-1/2 bg-darkText rounded-full`}
       ></div>
       <div className="flex h-full">
-        <div
+        <button
           onClick={() => setIsLogin(true)}
           className={`${
             isLogin ? "text-lightText" : "text-darkText"
           } duration-300 flex-1 flex justify-center items-center z-[1] cursor-pointer`}
         >
           <Header5 text="Login"/>
-        </div>
-        <div
+        </button>
+        <button
           onClick={() => setIsLogin(false)}
           className={`${
             !isLogin ? "text-lightText" : "text-darkText"
           } duration-300 flex-1 flex justify-center items-center z-[1] cursor-pointer`}
         >
           <Header5 text="Sign Up"/>
-        </div>
+        </button>
       </div>
     </div>
   );

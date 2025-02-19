@@ -6,7 +6,6 @@ import { db } from "@/firebase/config";
 import { optionalS } from "@/utils/optionalS";
 import { query, collection, where } from "firebase/firestore";
 import { getQueriedCount } from "@/firebase/actions";
-import TextButton from "@/components/ui/buttons/TextButton";
 import { User } from "@/types/types";
 
 function ContractorCount({ user }: { readonly user: User | undefined }) {
