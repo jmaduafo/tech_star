@@ -10,9 +10,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import NotAvailable from "@/components/ui/NotAvailable";
-import { Plus } from "lucide-react";
+import AddButton from "@/components/ui/buttons/AddButton";
+import { Contract, User } from "@/types/types";
 
-function Contracts() {
+function Contracts({
+  user,
+  data,
+}: {
+  readonly user: User | undefined;
+  readonly data: Contract[] | undefined;
+}) {
   const invoices = [
     {
       invoice: "INV001",
@@ -66,10 +73,9 @@ function Contracts() {
           <p className="text-[13.5px]">7 results</p>
         </div>
         <div>
-          <button className="flex items-center gap-1 py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300">
-            <Plus className="w-4 h-4"/>
-            Add
-          </button>
+          <AddButton title="contract" desc="Create a contract and add payments">
+            <div></div>
+          </AddButton>
         </div>
       </div>
       <div className="mt-5">

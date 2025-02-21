@@ -186,7 +186,7 @@ function ProjectDisplay({
       ? filterSearch.map((item) => {
           return (
             <Link href={`/projects/${item?.id}/contractors`} key={item.id}>
-              <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
+              <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-90 duration-300 hover:shadow-md">
                 <div className="flex flex-col h-full">
                   <Header4 text={item.name} className="capitalize" />
                   <p className="text-[14px] text-light50">
@@ -222,7 +222,7 @@ function ProjectDisplay({
         ? allProjects?.map((item) => {
             return (
               <Link href={`/projects/${item?.id}/contractors`} key={item.id}>
-                <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-80 duration-300 hover:shadow-md">
+                <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-90 duration-300 hover:shadow-md">
                   <div className="flex flex-col h-full">
                     <Header4 text={item.name} className="capitalize" />
                     <p className="text-[14px] text-light50">

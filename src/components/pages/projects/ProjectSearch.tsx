@@ -4,6 +4,8 @@ import { User } from "@/types/types";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 import Searchbar from "@/components/ui/search/Searchbar";
+import AddButton from "@/components/ui/buttons/AddButton";
+import Input from "@/components/ui/input/Input";
 
 function ProjectSearch({
   user,
@@ -27,7 +29,7 @@ function ProjectSearch({
   // Search by: Project name and country / location
   return (
     <section>
-      <div className="flex items-start gap-3 ">
+      <div className="flex items-start gap-3 z-50">
         <div className="flex-1">
           <Searchbar
             setOpen={setOpen}
@@ -57,6 +59,22 @@ function ProjectSearch({
               );
             })}
           </SelectBar>
+        </div>
+        <div>
+          <AddButton
+            buttonTitle="stages"
+            title="stage"
+            desc="Add key stages of your project to track progress effectively"
+          >
+            <form>
+              <Input htmlFor="name" label="Stage name">
+                <input name="name" id="name" className="form" type="text" />
+              </Input>
+              <Input htmlFor="desc" label="Description" className="mt-3">
+                <textarea name="desc" id="desc" className="form"></textarea>
+              </Input>
+            </form>
+          </AddButton>
         </div>
       </div>
     </section>

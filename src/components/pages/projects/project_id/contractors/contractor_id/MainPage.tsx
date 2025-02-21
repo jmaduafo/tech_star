@@ -14,15 +14,19 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { db } from "@/firebase/config";
-import { doc } from "firebase/firestore";
 import { getDocumentItem } from "@/firebase/actions";
 import { useAuth } from "@/context/AuthContext";
 import Separator from "@/components/ui/Separator";
+import { db } from "@/firebase/config";
+import { query, collection, where, onSnapshot } from "firebase/firestore";
+import { Contract, Payment } from "@/types/types";
 
 function MainPage() {
   const [projectName, setProjectName] = React.useState("");
   const [contractorName, setContractorName] = React.useState("");
+  const [contractorData, setContractorData] = React.useState<Contract[] | undefined>();
+  const [nonContractorData, setNonContractorData] = React.useState<Payment[] | undefined>();
+
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
   const contractor_id = pathname.split("/").pop();
@@ -44,6 +48,50 @@ function MainPage() {
   React.useEffect(() => {
     getProjectAndContractorNames();
   }, [projectName, contractorName]);
+
+  async function getContracts() {
+    if (!userData || !contractor_id) {
+      return;
+    }
+
+    const contractq = query(collection(db, "contracts"), where("contractor_id", "==", contractor_id))
+    
+
+    const contracts: Contract[] = []
+
+    const unsub = onSnapshot(contractq, (snap) => {
+      snap.forEach(item => {
+        contracts.push({... item.data() as Contract, id: item.id})
+      })
+      setContractorData(contracts)
+    })
+
+    return unsub()
+
+  }
+  async function getNonContracts() {
+    if (!userData || !contractor_id) {
+      return;
+    }
+
+    const noncontractq = query(collection(db, "payments"), where("contract_id", "==", null), where("contractor_id", "==", contractor_id))
+
+    const noncontracts: Payment[] = []
+
+    const unsub = onSnapshot(noncontractq, (snap) => {
+      snap.forEach(item => {
+        noncontracts.push({... item.data() as Payment, id: item.id})
+      })
+      setNonContractorData(noncontracts)
+    })
+
+    return unsub()
+  }
+
+  React.useEffect(() => {
+    getContracts()
+    getNonContracts()
+  }, [ userData?.id ?? "guest"])
 
   return (
     <AuthContainer>
@@ -102,11 +150,11 @@ function MainPage() {
           </Breadcrumb>
         </div>
         <div className="mb-8">
-          <Contracts />
+          <Contracts user={userData} data={contractorData}/>
         </div>
         <Separator />
         <div className="mt-8">
-          <NonContracts />
+          <NonContracts user={userData} data={nonContractorData}/>
         </div>
       </div>
     </AuthContainer>

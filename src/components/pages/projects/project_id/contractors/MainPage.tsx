@@ -6,12 +6,7 @@ import ContractorsDisplay from "./ContractorsDisplay";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/firebase/config";
 import { Contractor } from "@/types/types";
-import {
-  query,
-  collection,
-  where,
-  onSnapshot
-} from "firebase/firestore";
+import { query, collection, where, onSnapshot } from "firebase/firestore";
 import Header6 from "@/components/fontsize/Header6";
 import { optionalS } from "@/utils/optionalS";
 import Header1 from "@/components/fontsize/Header1";
@@ -80,7 +75,7 @@ function MainPage() {
         return;
       }
 
-      const project = await getDocumentItem("projects", project_id)
+      const project = await getDocumentItem("projects", project_id);
 
       setProjectName(project?.name);
     } catch (err: any) {
@@ -110,8 +105,8 @@ function MainPage() {
 
   return (
     <AuthContainer>
-      <div className="min-h-[80vh] w-[85%] mx-auto">
-        <div className="flex items-start gap-5 mb-2 text-lightText">
+      <div className="min-h-[80vh] w-[85%] mx-auto relative">
+        <div className="flex items-start gap-5 mb-2">
           <Header1 text="All Contractors" />
           {allContractors ? (
             <Header6

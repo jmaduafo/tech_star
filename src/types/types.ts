@@ -147,6 +147,7 @@ export type Stage = {
   id: string;
   name: string;
   team_id: string;
+  project_id: string;
   description: string;
   created_at: number;
   updated_at: number | null;

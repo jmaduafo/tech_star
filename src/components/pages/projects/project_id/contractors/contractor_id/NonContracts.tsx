@@ -10,9 +10,16 @@ import {
   TableFooter,
   Table,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import AddButton from "@/components/ui/buttons/AddButton";
+import { Payment, User } from "@/types/types";
 
-function NonContracts() {
+function NonContracts({
+  user,
+  data,
+}: {
+  readonly user: User | undefined;
+  readonly data: Payment[] | undefined;
+}) {
   const invoices = [
     {
       invoice: "INV001",
@@ -66,10 +73,12 @@ function NonContracts() {
           <p className="text-[13.5px]">7 results</p>
         </div>
         <div>
-          <button className="flex items-center gap-1 py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300">
-            <Plus className="w-4 h-4" />
-            Add
-          </button>
+          <AddButton
+            title="non-contract"
+            desc="Create a payment with no contract"
+          >
+            <div></div>
+          </AddButton>
         </div>
       </div>
       <div className="mt-5">

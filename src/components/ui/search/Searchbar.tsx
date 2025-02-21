@@ -35,7 +35,7 @@ function Searchbar({
 
   return (
     <div
-      className={`z-[90] relative bg-light50 backdrop-blur-lg px-2 py-1.5 ${
+      className={`z-50 relative bg-light50 backdrop-blur-lg px-2 py-1.5 ${
         open ? "rounded-tr-xl rounded-tl-xl" : "rounded-xl"
       }`}
     >
@@ -50,7 +50,7 @@ function Searchbar({
         />
       </div>
       {open ? (
-        <div className="absolute px-2 py-1.5 bg-light70 text-dark75 text-[14px] border-t border-t-light90 left-0 top-full w-full rounded-br-xl rounded-bl-xl">
+        <div className="absolute px-2 py-1.5 bg-light70 backdrop-blur-lg text-dark75 text-[14px] border-t border-t-light90 left-0 top-full w-full rounded-br-xl rounded-bl-xl">
           {children}
         </div>
       ) : null}

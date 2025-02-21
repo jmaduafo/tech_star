@@ -41,7 +41,7 @@ function BottomBar() {
   ];
 
   return (
-    <nav className="flex justify-center item-center gap-8">
+    <nav className="flex justify-center item-center gap-3">
       {navLinks.map((item) => {
         return (
           <Link key={item.text} href={`/${item.text.toLowerCase()}`}>
