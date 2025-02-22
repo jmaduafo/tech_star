@@ -1,11 +1,12 @@
-import React from "react";
-import { User } from "@/types/types";
-
+import AddButton from "@/components/ui/buttons/AddButton";
 import SelectBar from "@/components/ui/input/SelectBar";
-import { SelectItem } from "@/components/ui/select";
 import Searchbar from "@/components/ui/search/Searchbar";
+import { User } from "@/types/types";
+import { SelectItem } from "@/components/ui/select";
+import Input from "@/components/ui/input/Input";
+import React from "react";
 
-function ProjectSearch({
+function StagesSearch({
   user,
   setSort,
   value,
@@ -16,6 +17,7 @@ function ProjectSearch({
   readonly setValue: React.Dispatch<React.SetStateAction<string>>;
   readonly value: string;
 }) {
+
   const [open, setOpen] = React.useState(false);
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
@@ -24,7 +26,6 @@ function ProjectSearch({
     !e.target.value.length ? setOpen(false) : setOpen(true);
   }
 
-  // Search by: Project name and country / location
   return (
     <section>
       <div className="flex items-start gap-3 z-50">
@@ -47,7 +48,7 @@ function ProjectSearch({
             </div>
           </Searchbar>
         </div>
-        <div className="">
+        {/* <div className="">
           <SelectBar value="Sort by" label="Sort" valueChange={setSort}>
             {["Sort by activity", "Sort by name"].map((item) => {
               return (
@@ -57,10 +58,26 @@ function ProjectSearch({
               );
             })}
           </SelectBar>
+        </div> */}
+        <div>
+          <AddButton
+            buttonTitle="stages"
+            title="stage"
+            desc="Add key stages of your project to track progress effectively"
+          >
+            <form>
+              <Input htmlFor="name" label="Stage name">
+                <input name="name" id="name" className="form" type="text" />
+              </Input>
+              <Input htmlFor="desc" label="Description" className="mt-3">
+                <textarea name="desc" id="desc" className="form"></textarea>
+              </Input>
+            </form>
+          </AddButton>
         </div>
       </div>
     </section>
   );
 }
 
-export default ProjectSearch;
+export default StagesSearch;

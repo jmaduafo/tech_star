@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { usePathname } from "next/navigation";
-import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
+import { getDocumentItem } from "@/firebase/actions";
 
 function MainPage() {
   const [sort, setSort] = useState("");
@@ -137,7 +137,7 @@ function MainPage() {
               {projectName.length ? (
                 <>
                   <BreadcrumbItem>
-                    <BreadcrumbLink>{projectName}</BreadcrumbLink>
+                    <BreadcrumbLink href={`/projects/${project_id}`}>{projectName}</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                 </>
