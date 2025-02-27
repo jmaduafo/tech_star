@@ -35,13 +35,12 @@ function ContractorsSearch({
               setValue={setValue}
               value={value}
               open={open}
-            >
-              <p>{value}</p>
+            />
+              {/* <p>{value}</p>
               <div className="py-1.5">
                 <p className="">Name</p>
                 <div></div>
-              </div>
-            </Searchbar>
+              </div> */}
           </div>
           <div className="">
             <SelectBar value="Sort by" label="Sort" valueChange={setSort}>

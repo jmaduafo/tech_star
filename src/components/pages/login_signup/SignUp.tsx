@@ -253,7 +253,7 @@ function SignUp() {
           />
         </div>
         <div className="mt-[6em] flex justify-center">
-          <Submit isClicked={loading} setIsClicked={setLoading} />
+          <Submit loading={loading} />
         </div>
       </form>
     </div>

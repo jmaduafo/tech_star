@@ -3,25 +3,23 @@ import { HiChevronRight } from "react-icons/hi2";
 import Loading from "../Loading";
 
 function Submit({
-  setIsClicked,
-  isClicked,
+  loading,
 }: {
-  readonly setIsClicked: React.Dispatch<React.SetStateAction<boolean>>;
-  readonly isClicked: boolean;
+  readonly loading: boolean;
 }) {
 
   return (
     <button
       type="submit"
       className="rounded-full w-[160px] h-[60px] bg-dark35 group"
-      disabled={isClicked ?? false}
+      disabled={loading ?? false}
     >
       <span
         className={`${
-          isClicked ? "w-full" : "w-[60px]"
+          loading ? "w-full" : "w-[60px]"
         } duration-300 rounded-full flex justify-end items-center h-full bg-darkText px-1 group-hover:bg-dark75`}
       >
-        {isClicked ? (
+        {loading ? (
           <Loading className="mr-2" />
         ) : (
           <HiChevronRight className="w-10 h-10" />

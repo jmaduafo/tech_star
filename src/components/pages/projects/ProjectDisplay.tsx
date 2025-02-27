@@ -173,7 +173,7 @@ function ProjectDisplay({
             <input name="year" className="form" type="number" />
           </Input>
           <div className="flex justify-center mt-6 scale-75">
-            <Submit setIsClicked={setIsClicked} isClicked={isClicked} />
+            <Submit loading={isClicked} />
           </div>
         </form>
         <DialogFooter className=""></DialogFooter>

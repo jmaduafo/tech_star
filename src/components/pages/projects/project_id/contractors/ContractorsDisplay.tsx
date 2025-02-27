@@ -50,7 +50,7 @@ function ContractorsDisplay({
   const [importance, setImportance] = React.useState([2.5]);
   const [isUnavailable, setIsUnavailable] = React.useState(false);
 
-  const [isClicked, setIsClicked] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
   async function createContractor(formData: FormData) {
@@ -76,10 +76,13 @@ function ContractorsDisplay({
 
     const { name, importance_level } = result.data;
 
+    setIsLoading(true)
+
     try {
       if (!user || !projectId) {
         return;
       }
+
 
       await addItem("contractors", {
         name,
@@ -105,6 +108,8 @@ function ContractorsDisplay({
         title: "Uh oh! Something went wrong",
         description: err?.message,
       });
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -195,7 +200,7 @@ function ContractorsDisplay({
           </Input>
 
           <div className="flex justify-center mt-6 scale-75">
-            <Submit setIsClicked={setIsClicked} isClicked={isClicked} />
+            <Submit loading={isLoading} />
           </div>
         </form>
         <DialogFooter className=""></DialogFooter>

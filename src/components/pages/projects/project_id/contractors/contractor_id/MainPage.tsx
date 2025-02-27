@@ -128,7 +128,7 @@ function MainPage() {
               {projectName.length ? (
                 <>
                   <BreadcrumbItem>
-                    <BreadcrumbLink>{projectName}</BreadcrumbLink>
+                    <BreadcrumbLink href={`/projects/${project_id}`}>{projectName}</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                 </>

@@ -6,7 +6,7 @@ function Searchbar({
   value,
   open,
   setOpen,
-  children,
+  // children,
   handleSearch,
 }: {
   readonly setValue: React.Dispatch<React.SetStateAction<string>>;
@@ -14,7 +14,7 @@ function Searchbar({
   readonly value: string;
   readonly open: boolean;
   readonly setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  readonly children: React.ReactNode;
+  // readonly children: React.ReactNode;
 }) {
   const searchRef = React.useRef<HTMLDivElement>(null);
 
@@ -35,8 +35,7 @@ function Searchbar({
 
   return (
     <div
-      className={`z-50 relative bg-light50 backdrop-blur-lg px-2 py-1.5 ${
-        open ? "rounded-tr-xl rounded-tl-xl" : "rounded-xl"
+      className={`z-50 relative bg-light50 backdrop-blur-lg px-2 py-1.5 rounded-xl
       }`}
     >
       <div ref={searchRef} className="flex items-center gap-1 relative">
@@ -49,11 +48,11 @@ function Searchbar({
           className="placeholder-dark50 text-[15px] py-0"
         />
       </div>
-      {open ? (
+      {/* {open ? (
         <div className="absolute px-2 py-1.5 bg-light70 backdrop-blur-lg text-dark75 text-[14px] border-t border-t-light90 left-0 top-full w-full rounded-br-xl rounded-bl-xl">
           {children}
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

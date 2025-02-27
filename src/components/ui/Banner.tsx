@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Banner({ text }: { readonly text: string}) {
+function Banner({ text }: { readonly text: "pending" | "paid" | "ongoing" | "discontinued" | "unpaid" | "completed"}) {
 
     function colorPalette(text: string) {
         if (text.toLowerCase() === "Pending".toLowerCase()) {
