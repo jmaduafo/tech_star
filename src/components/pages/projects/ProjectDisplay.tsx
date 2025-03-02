@@ -88,6 +88,7 @@ function ProjectDisplay({
         start_year: year,
         is_ongoing: true,
         created_at: serverTimestamp(),
+        updated_at: null
       });
 
       setProjectMonth("");

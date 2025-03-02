@@ -1,29 +1,113 @@
+"use client";
 import AddButton from "@/components/ui/buttons/AddButton";
-import SelectBar from "@/components/ui/input/SelectBar";
 import Searchbar from "@/components/ui/search/Searchbar";
 import { User } from "@/types/types";
-import { SelectItem } from "@/components/ui/select";
 import Input from "@/components/ui/input/Input";
 import React from "react";
+import Submit from "@/components/ui/buttons/Submit";
+import { CreateStagesSchema } from "@/zod/validation";
+import { useToast } from "@/hooks/use-toast";
+import { addItem } from "@/firebase/actions";
+import { serverTimestamp } from "firebase/firestore";
 
 function StagesSearch({
   user,
   setSort,
   value,
   setValue,
+  projectId
 }: {
   readonly user: User | undefined;
   readonly setSort: React.Dispatch<React.SetStateAction<string>>;
   readonly setValue: React.Dispatch<React.SetStateAction<string>>;
   readonly value: string;
+  readonly projectId: string;
 }) {
-
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  const [values, setValues] = React.useState({
+    name: "",
+    desc: ""
+  });
+
+  const { toast } = useToast();
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);
 
     !e.target.value.length ? setOpen(false) : setOpen(true);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement> ) {
+      const { name, value } = e.target
+
+      setValues({
+        ... values,
+        [name]: value
+      })
+  }
+
+  async function addStage(formData: FormData) {
+    const stageName = formData.get("name");
+    const stageDesc = formData.get("desc");
+
+    const values = {
+      name: stageName,
+      description: stageDesc,
+    };
+
+    const result = CreateStagesSchema.safeParse(values);
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: result?.error?.issues[0]?.message,
+      });
+
+      return;
+    }
+
+    const { name, description } = result.data
+
+    setLoading(true)
+
+    try {
+      if (!user) {
+        return;
+      }
+
+      await addItem("stages", {
+        name,
+        description,
+        team_id: user?.team_id,
+        project_id: projectId,
+        created_at: serverTimestamp(),
+        updated_at: null
+      })
+
+      toast({
+        variant: "default",
+        title: "Project created succesfully!",
+      });
+
+      setValues({
+        name: "",
+        desc: ""
+      })
+
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err?.message,
+      });
+    } finally {
+      setLoading(false)
+    }
+
+
   }
 
   return (
@@ -37,41 +121,23 @@ function StagesSearch({
             value={value}
             open={open}
           />
-            {/* <p>{value}</p>
-            <div className="py-1.5">
-              <p className="">Name</p>
-              <div></div>
-            </div>
-            <div className="border-t border-t-light85 py-1.5">
-              <p className="">Location</p>
-              <div></div>
-            </div> */}
-         
         </div>
-        {/* <div className="">
-          <SelectBar value="Sort by" label="Sort" valueChange={setSort}>
-            {["Sort by activity", "Sort by name"].map((item) => {
-              return (
-                <SelectItem key={item} value={item}>
-                  {item}
-                </SelectItem>
-              );
-            })}
-          </SelectBar>
-        </div> */}
         <div>
           <AddButton
             buttonTitle="stages"
             title="stage"
             desc="Add key stages of your project to track progress effectively"
           >
-            <form>
+            <form action={addStage}>
               <Input htmlFor="name" label="Stage name">
-                <input name="name" id="name" className="form" type="text" />
+                <input name="name" id="name" className="form" type="text" onChange={handleChange} value={values.name}/>
               </Input>
               <Input htmlFor="desc" label="Description" className="mt-3">
-                <textarea name="desc" id="desc" className="form"></textarea>
+                <textarea name="desc" id="desc" className="form" onChange={handleChange} value={values.desc}></textarea>
               </Input>
+              <div className="flex justify-center mt-6 scale-75">
+                <Submit loading={loading} />
+              </div>
             </form>
           </AddButton>
         </div>

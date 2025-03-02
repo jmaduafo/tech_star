@@ -18,6 +18,7 @@ export default {
         dark75: "rgba(20, 20, 20, .75)",
         dark50: "rgba(20, 20, 20, .5)",
         dark35: "rgba(20, 20, 20, .35)",
+        dark20: "rgba(20, 20, 20, .20)",
         light90: "rgba(236, 236, 236, 0.9)",
         light85: "rgba(236, 236, 236, 0.85)",
         light70: "rgba(236, 236, 236, 0.7)",
@@ -41,7 +42,7 @@ export default {
         destructiveBorder: "#A80F0F",
       },
       screens: {
-        xs: "max: 480px",
+        xs: "480px",
         sm: "768px",
         md: "992px",
         lg: "1200px",

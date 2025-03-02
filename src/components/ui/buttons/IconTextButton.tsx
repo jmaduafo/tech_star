@@ -16,14 +16,15 @@ function IconTextButton({
   return (
     <button
       onClick={() => setText && setText(text.toLowerCase())}
+      title={text}
       className={`${
         textNav?.toLowerCase() === text.toLowerCase()
           ? "bg-light85"
           : "bg-transparent"
-      } text-darkText flex items-center gap-2 px-6 py-2 rounded-full group duration-300 hover:bg-light85`}
+      } text-darkText flex items-center text-base xs:text-sm sm:text-base gap-2 px-3 sm:px-6 py-2 rounded-full group duration-300 hover:bg-light85`}
     >
       <span>{icon}</span>
-      <span className="">{text}</span>
+      <span className="hidden md:block">{text}</span>
     </button>
   );
 }

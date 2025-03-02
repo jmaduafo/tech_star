@@ -53,9 +53,9 @@ function MainPage() {
 
   return (
     <AuthContainer>
-      <div className="min-h-[80vh] w-[85%] mx-auto">
-        <div className="flex justify-between items-center">
-          <div className="flex items-start gap-5 mb-8 text-lightText">
+      <div className="min-h-[80vh] w-[95%] sm:w-[85%] mx-auto">
+        <div className="flex justify-between sm:items-center flex-col sm:flex-row">
+          <div className="flex items-start gap-5 mb-2 sm:mb-8 text-lightText">
             <Header1 text="All Stages" />
             <Header6 text={`3 results`} />
           </div>
@@ -70,7 +70,7 @@ function MainPage() {
           </Link>
         </div>
         {/* BREADCRUMB DISPLAY */}
-        <div className="mb-8">
+        <div className="mt-3 sm:mt-0 mb-8">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -91,6 +91,7 @@ function MainPage() {
           setSort={setSort}
           setValue={setSearchValue}
           value={searchValue}
+          projectId={project_id}
         />
         {/* DISPLAY OF CONTRACTORS AND ALLOWS ONLY ADMIN TO ADD CONTRACTOR */}
         <div className="mt-10">
