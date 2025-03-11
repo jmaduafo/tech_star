@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AuthContainer from "../../AuthContainer";
 import Header1 from "@/components/fontsize/Header1";
 import Header6 from "@/components/fontsize/Header6";
-import { optionalS } from "@/utils/optionalS";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -20,12 +19,24 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import StagesSearch from "./StagesSearch";
 import StagesDisplay from "./StagesDisplay";
+import { db } from "@/firebase/config";
+import { Stage } from "@/types/types";
+import {
+  query,
+  collection,
+  where,
+  onSnapshot,
+  orderBy,
+} from "firebase/firestore";
+import { optionalS } from "@/utils/optionalS";
 
 function MainPage() {
-  const [projectName, setProjectName] = React.useState("");
+  const [projectName, setProjectName] = useState("");
+  const [sort, setSort] = useState("");
+  const [searchValue, setSearchValue] = useState("");
 
-  const [sort, setSort] = React.useState("");
-  const [searchValue, setSearchValue] = React.useState("");
+  const [allStages, setAllStages] = useState<Stage[] | undefined>();
+  const [stageLoading, setStageLoading] = useState(false);
 
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
@@ -47,7 +58,41 @@ function MainPage() {
     }
   }
 
-  React.useEffect(() => {
+  // GET ALL THE STAGES DATA FROM BACKEND
+  async function getAllStages() {
+    setStageLoading(true);
+
+    try {
+      if (!userData) {
+        return;
+      }
+
+      const stageq = query(
+        collection(db, "stages"),
+        where("team_id", "==", userData?.team_id),
+        orderBy("created_at")
+      );
+
+      const stages: Stage[] = [];
+
+      const unsub = onSnapshot(stageq, (snap) => {
+        snap.forEach((item) => {
+          stages.push({ ...(item.data() as Stage), id: item?.id });
+        });
+
+        setAllStages(stages);
+      });
+
+      return unsub;
+    } catch (err: any) {
+      console.log(err.message);
+    } finally {
+      setStageLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getAllStages();
     getProjectName();
   }, [userData?.id ?? "guest"]);
 
@@ -57,7 +102,13 @@ function MainPage() {
         <div className="flex justify-between sm:items-center flex-col sm:flex-row">
           <div className="flex items-start gap-5 mb-2 sm:mb-8 text-lightText">
             <Header1 text="All Stages" />
-            <Header6 text={`3 results`} />
+            {allStages ? (
+              <Header6
+                text={`${allStages?.length} result${optionalS(
+                  allStages?.length
+                )}`}
+              />
+            ) : null}
           </div>
           <Link href={`/projects/${project_id}/contractors`}>
             <div className="flex items-center gap-3 group">
@@ -101,6 +152,8 @@ function MainPage() {
             projectId={project_id}
             sort={sort}
             searchValue={searchValue}
+            data={allStages}
+            stageLoading={stageLoading}
           />
         </div>
       </div>

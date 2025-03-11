@@ -149,6 +149,7 @@ export type Stage = {
   team_id: string;
   project_id: string;
   description: string;
+  is_completed: boolean;
   created_at: number;
   updated_at: number | null;
 };

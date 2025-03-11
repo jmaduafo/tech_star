@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Urbanist } from "next/font/google";
+import { Urbanist } from "next/font/google";
 import CheckAuth from "@/components/CheckAuth";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-});
-
 const urbanist = Urbanist({
   variable: "--font-urbanist",
   subsets: ["latin"],
+  fallback: []
 });
 
 export const metadata: Metadata = {

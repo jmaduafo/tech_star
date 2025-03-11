@@ -15,7 +15,7 @@ function StagesSearch({
   setSort,
   value,
   setValue,
-  projectId
+  projectId,
 }: {
   readonly user: User | undefined;
   readonly setSort: React.Dispatch<React.SetStateAction<string>>;
@@ -28,7 +28,7 @@ function StagesSearch({
 
   const [values, setValues] = React.useState({
     name: "",
-    desc: ""
+    desc: "",
   });
 
   const { toast } = useToast();
@@ -39,13 +39,17 @@ function StagesSearch({
     !e.target.value.length ? setOpen(false) : setOpen(true);
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement> ) {
-      const { name, value } = e.target
+  function handleChange(
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
 
-      setValues({
-        ... values,
-        [name]: value
-      })
+    setValues({
+      ...values,
+      [name]: value,
+    });
   }
 
   async function addStage(formData: FormData) {
@@ -69,9 +73,9 @@ function StagesSearch({
       return;
     }
 
-    const { name, description } = result.data
+    const { name, description } = result.data;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       if (!user) {
@@ -83,9 +87,10 @@ function StagesSearch({
         description,
         team_id: user?.team_id,
         project_id: projectId,
+        is_completed: false,
         created_at: serverTimestamp(),
-        updated_at: null
-      })
+        updated_at: null,
+      });
 
       toast({
         variant: "default",
@@ -94,9 +99,8 @@ function StagesSearch({
 
       setValues({
         name: "",
-        desc: ""
-      })
-
+        desc: "",
+      });
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -104,10 +108,8 @@ function StagesSearch({
         description: err?.message,
       });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-
-
   }
 
   return (
@@ -122,25 +124,41 @@ function StagesSearch({
             open={open}
           />
         </div>
-        <div>
-          <AddButton
-            buttonTitle="stages"
-            title="stage"
-            desc="Add key stages of your project to track progress effectively"
-          >
-            <form action={addStage}>
-              <Input htmlFor="name" label="Stage name">
-                <input name="name" id="name" className="form" type="text" onChange={handleChange} value={values.name}/>
-              </Input>
-              <Input htmlFor="desc" label="Description" className="mt-3">
-                <textarea name="desc" id="desc" className="form" onChange={handleChange} value={values.desc}></textarea>
-              </Input>
-              <div className="flex justify-center mt-6 scale-75">
-                <Submit loading={loading} />
-              </div>
-            </form>
-          </AddButton>
-        </div>
+        {/* ONLY ADMIN CAN CREATE A STAGE */}
+        {user?.is_admin ? (
+          <div>
+            <AddButton
+              buttonTitle="stages"
+              title="stage"
+              desc="Add key stages of your project to track progress effectively"
+            >
+              <form action={addStage}>
+                <Input htmlFor="name" label="Stage name">
+                  <input
+                    name="name"
+                    id="name"
+                    className="form"
+                    type="text"
+                    onChange={handleChange}
+                    value={values.name}
+                  />
+                </Input>
+                <Input htmlFor="desc" label="Description" className="mt-3">
+                  <textarea
+                    name="desc"
+                    id="desc"
+                    className="form"
+                    onChange={handleChange}
+                    value={values.desc}
+                  ></textarea>
+                </Input>
+                <div className="flex justify-center mt-6 scale-75">
+                  <Submit loading={loading} />
+                </div>
+              </form>
+            </AddButton>
+          </div>
+        ) : null}
       </div>
     </section>
   );

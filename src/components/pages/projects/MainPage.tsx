@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthContainer from "../AuthContainer";
 import { useAuth } from "@/context/AuthContext";
 import ProjectDisplay from "./ProjectDisplay";
@@ -16,8 +16,8 @@ function MainPage() {
   const [sort, setSort] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
-  const [allProjects, setAllProjects] = React.useState<Project[] | undefined>();
-  const [filterSearch, setFilterSearch] = React.useState<Project[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[] | undefined>();
+  const [filterSearch, setFilterSearch] = useState<Project[]>([]);
 
   function getProjects() {
     try {
@@ -46,7 +46,7 @@ function MainPage() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     getProjects();
   }, [userData?.id ?? "guest"]);
 
@@ -65,7 +65,7 @@ function MainPage() {
     //   !searchValue.length && allProjects && setFilterSearch(allProjects)
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     filterProjects();
   }, [searchValue]);
 
