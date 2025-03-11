@@ -59,6 +59,16 @@ export const CreateStagesSchema = z.object({
     })
 });
 
+export const EditStageSchema = z.object({
+  name: z.string().min(1, { message: "You must enter a name for this stage." }),
+  description: z
+    .string()
+    .min(1, {
+      message: "You must enter a description for this stage.",
+    }),
+  is_completed: z.boolean()
+});
+
 export const CreateContractorSchema = z.object({
   name: z.string().min(1, { message: "You must enter a name." }),
   importance_level: z

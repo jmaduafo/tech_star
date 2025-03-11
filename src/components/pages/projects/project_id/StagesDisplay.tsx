@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState } from "react";
 import Header4 from "@/components/fontsize/Header4";
 import Paragraph from "@/components/fontsize/Paragraph";
 import Banner from "@/components/ui/Banner";
@@ -23,7 +23,11 @@ import Submit from "@/components/ui/buttons/Submit";
 import Input from "@/components/ui/input/Input";
 import { Skeleton } from "@/components/ui/skeleton";
 import NotAvailable from "@/components/ui/NotAvailable";
-import { getAllItems } from "@/firebase/actions";
+import { useToast } from "@/hooks/use-toast";
+import { EditStageSchema } from "@/zod/validation";
+import { updateItem } from "@/firebase/actions";
+import { serverTimestamp } from "firebase/firestore";
+import { Switch } from "@/components/ui/switch";
 
 function StagesDisplay({
   user,
@@ -82,11 +86,15 @@ function StageCard({
   readonly item: Stage;
   readonly user: User | undefined;
 }) {
+  const { toast } = useToast();
+
   const [values, setValues] = useState({
     name: item.name,
     desc: item.description,
-    is_completed: item.is_completed,
   });
+
+  const [isComplete, setIsComplete] = useState<boolean>(item.is_completed);
+  const [open, setOpen] = React.useState(false);
 
   function handleChange(
     e:
@@ -102,8 +110,54 @@ function StageCard({
   }
 
   async function handleEditStage(formData: FormData) {
-    const name = formData.get("name")
-    const desc = formData.get("desc")
+    const editName = formData.get("name");
+    const editDesc = formData.get("desc");
+
+    const vals = {
+      name: editName,
+      description: editDesc,
+      is_completed: isComplete,
+    };
+
+    const result = EditStageSchema.safeParse(vals);
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: result.error.issues[0].message,
+      });
+
+      return;
+    }
+
+    const { name, description, is_completed } = result.data;
+
+    try {
+      if (!user) {
+        return;
+      }
+
+      // updateItem(collectionName: string, id: string, items: object)
+      await updateItem("stages", item?.id, {
+        name,
+        description,
+        is_completed,
+        updated_at: serverTimestamp(),
+      });
+
+      toast({
+        title: "Stage updated successfully!",
+      });
+
+      setOpen(false)
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message,
+      });
+    }
   }
 
   return (
@@ -121,7 +175,7 @@ function StageCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-44">
                 <DropdownMenuGroup>
-                  <Dialog>
+                  <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                       <p className="text-sm px-2 py-1 border-r-[1.5px] hover:border-r-darkText">
                         Edit
@@ -159,6 +213,15 @@ function StageCard({
                             value={values.desc}
                           ></textarea>
                         </Input>
+                        <div className="flex items-center justify-end gap-2 mt-3">
+                          <Switch
+                            id="is_completed"
+                            name="is_completed"
+                            checked={isComplete}
+                            onCheckedChange={setIsComplete}
+                          />
+                          <label htmlFor="is_completed">Completed?</label>
+                        </div>
                         <div className="flex justify-center mt-6 scale-75">
                           <Submit loading={loading} />
                         </div>

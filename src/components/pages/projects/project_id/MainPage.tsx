@@ -59,7 +59,7 @@ function MainPage() {
   }
 
   // GET ALL THE STAGES DATA FROM BACKEND
-  async function getAllStages() {
+  function getAllStages() {
     setStageLoading(true);
 
     try {
@@ -73,12 +73,11 @@ function MainPage() {
         orderBy("created_at")
       );
 
-      const stages: Stage[] = [];
-
       const unsub = onSnapshot(stageq, (snap) => {
-        snap.forEach((item) => {
-          stages.push({ ...(item.data() as Stage), id: item?.id });
-        });
+        const stages: Stage[] = snap.docs.map((doc) => ({
+          ...(doc.data() as Stage),
+          id: doc.id,
+        }));
 
         setAllStages(stages);
       });
@@ -92,8 +91,12 @@ function MainPage() {
   }
 
   useEffect(() => {
-    getAllStages();
+    const unsub = getAllStages();
     getProjectName();
+
+    return () => {
+      unsub && unsub(); // Cleanup the Firestore listener when component unmounts
+    };
   }, [userData?.id ?? "guest"]);
 
   return (
