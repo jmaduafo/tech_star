@@ -29,6 +29,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { optionalS } from "@/utils/optionalS";
+import ContentContainer from "../../ContentContainer";
 
 function MainPage() {
   const [projectName, setProjectName] = useState("");
@@ -101,7 +102,7 @@ function MainPage() {
 
   return (
     <AuthContainer>
-      <div className="min-h-[80vh] w-[95%] sm:w-[85%] mx-auto">
+      <ContentContainer>
         <div className="flex justify-between sm:items-center flex-col sm:flex-row">
           <div className="flex items-start gap-5 mb-2 sm:mb-8 text-lightText">
             <Header1 text="All Stages" />
@@ -159,7 +160,7 @@ function MainPage() {
             stageLoading={stageLoading}
           />
         </div>
-      </div>
+      </ContentContainer>
     </AuthContainer>
   );
 }

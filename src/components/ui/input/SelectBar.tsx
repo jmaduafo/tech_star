@@ -23,7 +23,7 @@ function SelectBar({
 }) {
   return (
     <Select onValueChange={valueChange}>
-      <SelectTrigger className={`w-[180px] ${className}`}>
+      <SelectTrigger className={`w-[120px] sm:w-[180px] ${className}`}>
         <SelectValue placeholder={`${value}`} />
       </SelectTrigger>
       <SelectContent>

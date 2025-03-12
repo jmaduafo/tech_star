@@ -10,6 +10,7 @@ import { query, collection, where, onSnapshot } from "firebase/firestore";
 import Header6 from "@/components/fontsize/Header6";
 import { optionalS } from "@/utils/optionalS";
 import Header1 from "@/components/fontsize/Header1";
+import ContentContainer from "../ContentContainer";
 
 function MainPage() {
   const { userData, loading } = useAuth();
@@ -71,7 +72,7 @@ function MainPage() {
 
   return (
     <AuthContainer>
-      <div className="min-h-[80vh] w-[85%] mx-auto">
+      <ContentContainer>
         <div className="flex items-start gap-5 mb-8 text-lightText">
           <Header1 text="All Projects" />
           {allProjects ? (
@@ -102,7 +103,7 @@ function MainPage() {
             filterSearch={filterSearch}
           />
         </div>
-      </div>
+      </ContentContainer>
     </AuthContainer>
   );
 }

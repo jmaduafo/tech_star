@@ -22,6 +22,7 @@ import {
 
 import { usePathname } from "next/navigation";
 import { getDocumentItem } from "@/firebase/actions";
+import ContentContainer from "@/components/pages/ContentContainer";
 
 function MainPage() {
   const [sort, setSort] = useState("");
@@ -105,7 +106,7 @@ function MainPage() {
 
   return (
     <AuthContainer>
-      <div className="min-h-[80vh] w-[85%] mx-auto relative">
+      <ContentContainer>
         <div className="flex items-start gap-5 mb-2">
           <Header1 text="All Contractors" />
           {allContractors ? (
@@ -167,7 +168,7 @@ function MainPage() {
             filterSearch={filterSearch}
           />
         </div>
-      </div>
+      </ContentContainer>
     </AuthContainer>
   );
 }

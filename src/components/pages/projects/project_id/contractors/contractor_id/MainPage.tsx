@@ -20,6 +20,7 @@ import Separator from "@/components/ui/Separator";
 import { db } from "@/firebase/config";
 import { query, collection, where, onSnapshot } from "firebase/firestore";
 import { Contract, Payment } from "@/types/types";
+import ContentContainer from "@/components/pages/ContentContainer";
 
 function MainPage() {
   const [projectName, setProjectName] = React.useState("");
@@ -95,7 +96,7 @@ function MainPage() {
 
   return (
     <AuthContainer>
-      <div className="min-h-[80vh] w-[85%] mx-auto">
+      <ContentContainer>
         <div className="flex items-start gap-5 mb-2 text-lightText">
           {contractorName.length ? <Header1 text={contractorName} /> : null}
           {/* {allContractors ? (
@@ -156,7 +157,7 @@ function MainPage() {
         <div className="mt-8">
           <NonContracts user={userData} data={nonContractorData}/>
         </div>
-      </div>
+      </ContentContainer>
     </AuthContainer>
   );
 }
