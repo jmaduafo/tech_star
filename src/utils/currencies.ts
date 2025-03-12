@@ -1,18 +1,18 @@
 import { currency_list } from "./dataTools";
-import { Currency } from "@/types/types";
+import { Currencies } from "@/types/types";
 
-// arr = contractor?.currencies: string[]
-export function currencyDisplay(arr: string[]) {
-    const contractorCurrency: Currency[]= []
+// // arr = contractor?.currencies: string[]
+// export function currencyDisplay(arr: string[]) {
+//     const contractorCurrency: Currency[]= []
 
-    arr.forEach(i => {
-        currency_list.forEach(j => {
-            i === j.code && contractorCurrency.push(j)
-        })
-    })
+//     arr.forEach(i => {
+//         currency_list.forEach(j => {
+//             i === j.code && contractorCurrency.push(j)
+//         })
+//     })
 
-    return contractorCurrency
-}
+//     return contractorCurrency
+// }
 
 export function totalSum(arr: number[]) {
     let total = 0
@@ -22,4 +22,10 @@ export function totalSum(arr: number[]) {
     })
 
     return total
+}
+
+export function formatCurrency(num: number, code: string) {
+    if (num.toString().length < 16) {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(num)
+    }
 }

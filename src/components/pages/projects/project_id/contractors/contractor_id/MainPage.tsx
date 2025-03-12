@@ -21,6 +21,8 @@ import { db } from "@/firebase/config";
 import { query, collection, where, onSnapshot } from "firebase/firestore";
 import { Contract, Payment } from "@/types/types";
 import ContentContainer from "@/components/pages/ContentContainer";
+import AddButton from "@/components/ui/buttons/AddButton";
+import Input from "@/components/ui/input/Input";
 
 function MainPage() {
   const [projectName, setProjectName] = React.useState("");
@@ -54,7 +56,8 @@ function MainPage() {
     getProjectAndContractorNames();
   }, [projectName, contractorName]);
 
-  async function getContracts() {
+  // RETRIEVE
+  function getContracts() {
     if (!userData || !contractor_id) {
       return;
     }
@@ -73,9 +76,11 @@ function MainPage() {
       setContractorData(contracts);
     });
 
-    return unsub();
+    return unsub;
   }
-  async function getNonContracts() {
+
+  // RETRIEVE ALL NON-CONTRACTS
+  function getNonContracts() {
     if (!userData || !contractor_id) {
       return;
     }
@@ -86,27 +91,33 @@ function MainPage() {
       where("contractor_id", "==", contractor_id)
     );
 
-    const noncontracts: Payment[] = [];
-
-    const unsub = onSnapshot(noncontractq, (snap) => {
-      snap.forEach((item) => {
-        noncontracts.push({ ...(item.data() as Payment), id: item.id });
-      });
+    const nonUnsub = onSnapshot(noncontractq, (snap) => {
+      const noncontracts: Payment[] = snap.docs.map((doc) => ({
+        ...(doc.data() as Payment),
+        id: doc.id,
+      }));
       setNonContractorData(noncontracts);
     });
 
-    return unsub();
+    return nonUnsub;
   }
 
   React.useEffect(() => {
-    getContracts();
+    const unsub = getContracts();
+    const nonUnsub = getContracts();
+
     getNonContracts();
+
+    return () => {
+      unsub && unsub();
+      nonUnsub && nonUnsub();
+    };
   }, [userData?.id ?? "guest"]);
 
   return (
     <AuthContainer>
       <ContentContainer>
-        <div>
+        <div className="">
           <div className="flex items-start gap-5 mb-2 text-lightText">
             {contractorName.length ? <Header1 text={contractorName} /> : null}
             {/* {allContractors ? (

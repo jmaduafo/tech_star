@@ -16,17 +16,19 @@ function AddButton({
   buttonTitle,
   desc,
   footerButton,
+  className
 }: {
   readonly children: React.ReactNode;
   readonly title: string;
   readonly buttonTitle?: string;
   readonly desc: string;
   readonly footerButton?: React.ReactNode;
+  readonly className?: string;
 }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="font-light flex items-center gap-1 py-2.5 sm:py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300">
+        <button className={`font-light flex items-center gap-1 py-2.5 sm:py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300 ${className}`}>
           <Plus className="w-4 h-4" />
           <span className="hidden sm:block">Add {buttonTitle}</span>
         </button>

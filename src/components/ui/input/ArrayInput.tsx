@@ -8,9 +8,18 @@ type Input = {
   readonly htmlFor: string;
   readonly setInputs: React.Dispatch<React.SetStateAction<string[]>>;
   readonly inputs: string[];
+  readonly disabledLogic?: boolean;
+  readonly children?: React.ReactNode;
 };
 
-function ArrayInput({ label, htmlFor, setInputs, inputs }: Input) {
+function ArrayInput({
+  label,
+  htmlFor,
+  setInputs,
+  inputs,
+  disabledLogic,
+  children
+}: Input) {
   const [value, setValue] = useState("");
 
   function handleAddInput() {
@@ -21,20 +30,21 @@ function ArrayInput({ label, htmlFor, setInputs, inputs }: Input) {
   }
 
   function deleteInput(item: string) {
-    setInputs(inputs.filter(inp => inp !== item))
+    setInputs(inputs.filter((inp) => inp !== item));
   }
 
   return (
-    <div className="mt-4">
+    <div className="my-4">
       <div className="flex items-center gap-2 flex-wrap mb-2">
         {inputs.map((item) => {
           return (
-            <div key={item} className="flex items-center gap-1 py-1 px-4 text-[13.5px] border border-lightText rounded-full">
-              <p className="capitalize">
-                {item}
-              </p>
+            <div
+              key={item}
+              className="flex items-center gap-1 py-1 px-4 text-[13.5px] border border-lightText rounded-full"
+            >
+              <p className="capitalize">{item}</p>
               <button type="button" onClick={() => deleteInput(item)}>
-                <X className="w-4 h-4"/>
+                <X className="w-4 h-4" />
               </button>
             </div>
           );
@@ -49,12 +59,18 @@ function ArrayInput({ label, htmlFor, setInputs, inputs }: Input) {
           id={htmlFor}
         />
       </Input>
+      {
+        children
+      }
       {/* CLICK BUTTON TO ADD INPUT TO ARRAY */}
       <div className="flex justify-end">
         <button
           type="button"
-          className="mt-2 py-1 px-4 rounded-md border-none outline-none bg-darkText hover:opacity-50 duration-300"
+          className={`mt-2 py-1 px-4 rounded-md border-none outline-none bg-darkText ${
+            disabledLogic ? "opacity-50" : "hover:opacity-50"
+          } duration-300`}
           onClick={handleAddInput}
+          disabled={disabledLogic}
         >
           + Add
         </button>
