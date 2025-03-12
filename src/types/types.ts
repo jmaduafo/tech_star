@@ -30,7 +30,6 @@ export type Currencies = {
   project_name: string;
   contractor_id: string;
   contractor_name: string;
-  contract_id: string | null;
   team_id: string;
   created_at: number;
   updated_at: number | null;
@@ -62,17 +61,6 @@ export type Contractor = {
   updated_at: number | null;
 };
 
-export type ContractAmount = {
-  id: string;
-  amount: number;
-  currency_name: string;
-  currency_code: string;
-  currency_symbol: string;
-  project_id: string;
-  contractor_id: string | null;
-  contract_id: string;
-}
-
 export type Contract = {
   id: string;
   date: string;
@@ -84,11 +72,11 @@ export type Contract = {
   contractor_name: string;
   contract_code: string;
   bank_name: string[];
-  status: "paid" | "pending";
+  is_completed: boolean;
   description: string;
   comment?: string | null;
-  currencies: ContractAmount[];
   is_contract: boolean;
+  amount: number;
   created_at: number;
   updated_at: number | null;
 };
@@ -108,6 +96,7 @@ export type NonContract = {
   bank_name: string;
   comment?: string | null;
   amount: number;
+  currency_id: string;
   currency_name: string;
   currency_code: string;
   currency_symbol: string;
@@ -132,7 +121,7 @@ export type Payment = {
   comment: string | null;
   amount: number;
   bank_name: string;
-  currency: string;
+  currency_id: string;
   currency_name: string;
   currency_code: string;
   currency_symbol: string;

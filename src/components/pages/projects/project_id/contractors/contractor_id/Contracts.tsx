@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Header3 from "@/components/fontsize/Header3";
 import {
   Table,
@@ -9,16 +10,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import NotAvailable from "@/components/ui/NotAvailable";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import AddButton from "@/components/ui/buttons/AddButton";
 import { Contract, User } from "@/types/types";
+import Input from "@/components/ui/input/Input";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import ArrayInput from "@/components/ui/input/ArrayInput";
+import { Switch } from "@/components/ui/switch";
 
 function Contracts({
   user,
   data,
+  contractorName,
+  projectName
 }: {
   readonly user: User | undefined;
   readonly data: Contract[] | undefined;
+  readonly contractorName: string;
+  readonly projectName: string;
 }) {
   const invoices = [
     {
@@ -65,6 +82,11 @@ function Contracts({
     },
   ];
 
+  const [date, setDate] = useState<Date>();
+  const [inputs, setInputs] = useState<string[]>([]);
+  const [currencies, setCurrencies] = useState<string[]>([]);
+  const [isComplete, setIsComplete] = useState(false);
+
   return (
     <section>
       <div className="flex items-end justify-between">
@@ -74,7 +96,62 @@ function Contracts({
         </div>
         <div>
           <AddButton title="contract" desc="Create a contract and add payments">
-            <div></div>
+            <form>
+              {/* CONTRACT CODE INPUT */}
+              <Input htmlFor="code" label="Contract code *">
+                <input className="form" type="text" id="code" />
+              </Input>
+              {/* DESCRIPTION INPUT */}
+              <Input htmlFor="desc" label="Description *" className="my-3">
+                <textarea className="form" id="desc"></textarea>
+              </Input>
+              {/* DATE PICKER POPUP */}
+              <Popover>
+                <p className="text-[14.5px] text-darkText mb-[5px]">
+                  Contract date *
+                </p>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={
+                      "text-dark90 w-full justify-start text-left font-normal"
+                    }
+                  >
+                    <CalendarIcon />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[1000]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+                {/* ADD AND DELETE BANK NAMES */}
+                <ArrayInput
+                  label="Bank names *"
+                  htmlFor="banks"
+                  setInputs={setInputs}
+                  inputs={inputs}
+                />
+                {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}
+                <div className="flex items-center gap-2 mt-3">
+                  <Switch
+                    id="is_completed"
+                    name="is_completed"
+                    checked={isComplete}
+                    onCheckedChange={setIsComplete}
+                  />
+                  <label htmlFor="is_completed">Is the contract complete?</label>
+                </div>
+                {/* OPTIONAL COMMENT INPUT */}
+                <Input htmlFor="comment" label="Comment" className="mt-3">
+                  <textarea className="form" id="comment"></textarea>
+                </Input>
+              </Popover>
+            </form>
           </AddButton>
         </div>
       </div>

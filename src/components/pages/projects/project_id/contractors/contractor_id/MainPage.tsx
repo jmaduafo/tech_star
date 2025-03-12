@@ -25,8 +25,12 @@ import ContentContainer from "@/components/pages/ContentContainer";
 function MainPage() {
   const [projectName, setProjectName] = React.useState("");
   const [contractorName, setContractorName] = React.useState("");
-  const [contractorData, setContractorData] = React.useState<Contract[] | undefined>();
-  const [nonContractorData, setNonContractorData] = React.useState<Payment[] | undefined>();
+  const [contractorData, setContractorData] = React.useState<
+    Contract[] | undefined
+  >();
+  const [nonContractorData, setNonContractorData] = React.useState<
+    Payment[] | undefined
+  >();
 
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
@@ -55,68 +59,75 @@ function MainPage() {
       return;
     }
 
-    const contractq = query(collection(db, "contracts"), where("contractor_id", "==", contractor_id))
-    
+    const contractq = query(
+      collection(db, "contracts"),
+      where("contractor_id", "==", contractor_id)
+    );
 
-    const contracts: Contract[] = []
+    const contracts: Contract[] = [];
 
     const unsub = onSnapshot(contractq, (snap) => {
-      snap.forEach(item => {
-        contracts.push({... item.data() as Contract, id: item.id})
-      })
-      setContractorData(contracts)
-    })
+      snap.forEach((item) => {
+        contracts.push({ ...(item.data() as Contract), id: item.id });
+      });
+      setContractorData(contracts);
+    });
 
-    return unsub()
-
+    return unsub();
   }
   async function getNonContracts() {
     if (!userData || !contractor_id) {
       return;
     }
 
-    const noncontractq = query(collection(db, "payments"), where("contract_id", "==", null), where("contractor_id", "==", contractor_id))
+    const noncontractq = query(
+      collection(db, "payments"),
+      where("contract_id", "==", null),
+      where("contractor_id", "==", contractor_id)
+    );
 
-    const noncontracts: Payment[] = []
+    const noncontracts: Payment[] = [];
 
     const unsub = onSnapshot(noncontractq, (snap) => {
-      snap.forEach(item => {
-        noncontracts.push({... item.data() as Payment, id: item.id})
-      })
-      setNonContractorData(noncontracts)
-    })
+      snap.forEach((item) => {
+        noncontracts.push({ ...(item.data() as Payment), id: item.id });
+      });
+      setNonContractorData(noncontracts);
+    });
 
-    return unsub()
+    return unsub();
   }
 
   React.useEffect(() => {
-    getContracts()
-    getNonContracts()
-  }, [ userData?.id ?? "guest"])
+    getContracts();
+    getNonContracts();
+  }, [userData?.id ?? "guest"]);
 
   return (
     <AuthContainer>
       <ContentContainer>
-        <div className="flex items-start gap-5 mb-2 text-lightText">
-          {contractorName.length ? <Header1 text={contractorName} /> : null}
-          {/* {allContractors ? (
+        <div>
+          <div className="flex items-start gap-5 mb-2 text-lightText">
+            {contractorName.length ? <Header1 text={contractorName} /> : null}
+            {/* {allContractors ? (
           <Header6
-            text={`${
+          text={`${
+            allContractors?.length &&
+            !filterSearch.length &&
+            !searchValue.length
+            ? allContractors?.length
+            : filterSearch.length
+            } result${optionalS(
               allContractors?.length &&
               !filterSearch.length &&
               !searchValue.length
-                ? allContractors?.length
-                : filterSearch.length
-            } result${optionalS(
-              allContractors?.length &&
-                !filterSearch.length &&
-                !searchValue.length
-                ? allContractors?.length
-                : filterSearch.length
-            )}`}
-          />
-          ) : null} */}
-          <Header6 text={`3 results`} />
+              ? allContractors?.length
+              : filterSearch.length
+              )}`}
+              />
+              ) : null} */}
+            <Header6 text={`3 results`} />
+          </div>
         </div>
         {/* BREADCRUMB DISPLAY */}
         <div className="mb-8">
@@ -129,7 +140,9 @@ function MainPage() {
               {projectName.length ? (
                 <>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href={`/projects/${project_id}`}>{projectName}</BreadcrumbLink>
+                    <BreadcrumbLink href={`/projects/${project_id}`}>
+                      {projectName}
+                    </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                 </>
@@ -151,11 +164,21 @@ function MainPage() {
           </Breadcrumb>
         </div>
         <div className="mb-8">
-          <Contracts user={userData} data={contractorData}/>
+          <Contracts
+            user={userData}
+            data={contractorData}
+            contractorName={contractorName}
+            projectName={projectName}
+          />
         </div>
         <Separator />
         <div className="mt-8">
-          <NonContracts user={userData} data={nonContractorData}/>
+          <NonContracts
+            user={userData}
+            data={nonContractorData}
+            contractorName={contractorName}
+            projectName={projectName}
+          />
         </div>
       </ContentContainer>
     </AuthContainer>

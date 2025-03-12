@@ -16,9 +16,13 @@ import { Payment, User } from "@/types/types";
 function NonContracts({
   user,
   data,
+  contractorName,
+  projectName,
 }: {
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
+  readonly contractorName: string;
+  readonly projectName: string;
 }) {
   const invoices = [
     {
