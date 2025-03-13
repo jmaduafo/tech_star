@@ -1,3 +1,4 @@
+import { TimeStamp } from "@/types/types";
 import { months, days } from "./dataTools";
 
 export function fullTime() {
@@ -35,4 +36,12 @@ export function fullDate() {
     now.getFullYear();
 
   return date;
+}
+
+export function formatDate(timestamp: TimeStamp) {
+  const date = new Date(timestamp.seconds*1000)
+
+  const format = date.getDate() + " " + months[date.getMonth()].substring(0, 3) + " " + date.getFullYear().toString().slice(2)
+
+  return format
 }

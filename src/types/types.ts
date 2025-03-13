@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type User = {
   id: string;
   first_name: string;
@@ -20,6 +22,11 @@ export type Team = {
   organization_name?: string;
   team_name: string;
 };
+
+export type TimeStamp = {
+  nanoseconds: number;
+  seconds: number;
+}
 
 export type Currencies = {
   id: string;
@@ -70,7 +77,7 @@ export type Amount = {
 
 export type Contract = {
   id: string;
-  date: Date;
+  date: Timestamp;
   project_id: string;
   contractor_id: string;
   team_id: string;
@@ -87,6 +94,23 @@ export type Contract = {
   created_at: number;
   updated_at: number | null;
 };
+
+export type ContractTable = {
+  id: string;
+  date: Timestamp;
+  contract_code: string;
+  status: "completed" | "ongoing";
+  description: string;
+  amount: number | "Unlimited";
+}
+
+export type PaymentTable = {
+  id: string;
+  date: Timestamp;
+  status: "paid" | "unpaid" | "pending";
+  description: string;
+  amount: number;
+}
 
 // Since NonContract is also a Payment, schema has to match with Payment
 export type NonContract = {

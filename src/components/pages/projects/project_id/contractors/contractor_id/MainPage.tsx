@@ -25,7 +25,7 @@ import {
   onSnapshot,
   orderBy,
 } from "firebase/firestore";
-import { Contract, Payment, Stage } from "@/types/types";
+import { Contract, ContractTable, Payment, Stage } from "@/types/types";
 import ContentContainer from "@/components/pages/ContentContainer";
 import { optionalS } from "@/utils/optionalS";
 
@@ -33,7 +33,7 @@ function MainPage() {
   const [projectName, setProjectName] = React.useState("");
   const [contractorName, setContractorName] = React.useState("");
   const [contractorData, setContractorData] = React.useState<
-    Contract[] | undefined
+    ContractTable[] | undefined
   >();
   const [nonContractorData, setNonContractorData] = React.useState<
     Payment[] | undefined
@@ -92,9 +92,13 @@ function MainPage() {
     );
 
     const unsub = onSnapshot(contractq, (snap) => {
-      const contracts: Contract[] = snap.docs.map((doc) => ({
-        ...(doc.data() as Contract),
+      const contracts: ContractTable[] = snap.docs.map((doc) => ({
         id: doc.id,
+        date: doc.data().date,
+        contract_code: doc.data().contract_code,
+        status: doc.data().is_completed ? "completed" : "ongoing",
+        description: doc.data().description,
+        amount: doc.data().currencies[0].amount
       }));
 
       setContractorData(contracts);
