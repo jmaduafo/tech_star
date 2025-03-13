@@ -5,11 +5,30 @@ import { formatCurrency } from "@/utils/currencies";
 import { formatDate } from "@/utils/dateAndTime";
 import { ColumnDef } from "@tanstack/react-table";
 import Banner from "../Banner";
+import { Checkbox } from "../checkbox";
 
 export const contractColumns: ColumnDef<ContractTable>[] = [
   {
-    header: "Select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
     accessorKey: "id",
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     header: () => <div className="whitespace-nowrap">Contract code</div>,
@@ -32,14 +51,18 @@ export const contractColumns: ColumnDef<ContractTable>[] = [
 
       return <div className="">{formatDate(date)}</div>;
     },
-},
-{
+  },
+  {
     header: "Description",
     accessorKey: "description",
     cell: ({ row }) => {
-      const desc : string = row.getValue("description");
-    
-      return <div className="">{desc.length > 40 ? desc.substring(0, 41) + "..." : desc} </div>;
+      const desc: string = row.getValue("description");
+
+      return (
+        <div className="">
+          {desc.length > 40 ? desc.substring(0, 41) + "..." : desc}{" "}
+        </div>
+      );
     },
   },
   {
