@@ -52,21 +52,17 @@ export const CreateProjectSchema = z.object({
 
 export const CreateStagesSchema = z.object({
   name: z.string().min(1, { message: "You must enter a name for this stage." }),
-  description: z
-    .string()
-    .min(1, {
-      message: "You must enter a description for this stage.",
-    })
+  description: z.string().min(1, {
+    message: "You must enter a description for this stage.",
+  }),
 });
 
 export const EditStageSchema = z.object({
   name: z.string().min(1, { message: "You must enter a name for this stage." }),
-  description: z
-    .string()
-    .min(1, {
-      message: "You must enter a description for this stage.",
-    }),
-  is_completed: z.boolean()
+  description: z.string().min(1, {
+    message: "You must enter a description for this stage.",
+  }),
+  is_completed: z.boolean(),
 });
 
 export const CreateContractorSchema = z.object({
@@ -79,4 +75,47 @@ export const CreateContractorSchema = z.object({
     .max(5, {
       message: "Level of importance should be less than or equal to 5.",
     }),
+});
+
+export const CreateContractSchema = z.object({
+  code: z.string().min(1, { message: "You must enter a contract code." }),
+  desc: z
+    .string()
+    .min(1, { message: "You must enter a contract description." }),
+  date: z
+    .date({
+      required_error: "Please select a date",
+    })
+    .min(new Date("1960-01-01"), {
+      message: "The date cannot be earlier than 1960",
+    }),
+  bank_names: z.string().array().nonempty({
+    message: "There must be at least one bank entered.",
+  }),
+  stage_id: z.string().nonempty({
+    message: "There must be a stage selected.",
+  }),
+  currency: z
+    .object({
+      code: z.string().nonempty({
+        message: "You must enter a currency code.",
+      }),
+      name: z.string().nonempty({
+        message: "You must enter a currency name.",
+      }),
+      symbol: z.string().nonempty({
+        message: "You must enter a currency symbol.",
+      }),
+      amount: z
+        .number()
+        .min(0.01, {
+          message: "You must enter an amount greater than 0.",
+        })
+        .or(z.string().includes("Unlimited")),
+    })
+    .array()
+    .nonempty({
+      message: "You must enter a currency and amount.",
+    }),
+  comment: z.nullable(z.string())
 });

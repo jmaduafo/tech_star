@@ -16,7 +16,9 @@ function AddButton({
   buttonTitle,
   desc,
   footerButton,
-  className
+  className,
+  setOpen,
+  open
 }: {
   readonly children: React.ReactNode;
   readonly title: string;
@@ -24,9 +26,11 @@ function AddButton({
   readonly desc: string;
   readonly footerButton?: React.ReactNode;
   readonly className?: string;
+  readonly setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly open?: boolean;
 }) {
   return (
-    <Dialog>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         <button className={`font-light flex items-center gap-1 py-2.5 sm:py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300 ${className}`}>
           <Plus className="w-4 h-4" />

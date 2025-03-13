@@ -14,15 +14,20 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { getDocumentItem } from "@/firebase/actions";
+import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
 import { useAuth } from "@/context/AuthContext";
 import Separator from "@/components/ui/Separator";
 import { db } from "@/firebase/config";
-import { query, collection, where, onSnapshot } from "firebase/firestore";
-import { Contract, Payment } from "@/types/types";
+import {
+  query,
+  collection,
+  where,
+  onSnapshot,
+  orderBy,
+} from "firebase/firestore";
+import { Contract, Payment, Stage } from "@/types/types";
 import ContentContainer from "@/components/pages/ContentContainer";
-import AddButton from "@/components/ui/buttons/AddButton";
-import Input from "@/components/ui/input/Input";
+import { optionalS } from "@/utils/optionalS";
 
 function MainPage() {
   const [projectName, setProjectName] = React.useState("");
@@ -33,6 +38,7 @@ function MainPage() {
   const [nonContractorData, setNonContractorData] = React.useState<
     Payment[] | undefined
   >();
+  const [stagesData, setStagesData] = React.useState<Stage[] | undefined>();
 
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
@@ -56,7 +62,25 @@ function MainPage() {
     getProjectAndContractorNames();
   }, [projectName, contractorName]);
 
-  // RETRIEVE
+  // RETRIEVE ALL STAGES
+  async function getStages() {
+    if (!userData || !project_id) {
+      return;
+    }
+
+    const stageq = query(
+      collection(db, "stages"),
+      where("project_id", "==", project_id),
+      where("team_id", "==", userData?.team_id),
+      orderBy("created_at")
+    );
+
+    const stageData = await getQueriedItems(stageq);
+
+    setStagesData(stageData as Stage[]);
+  }
+
+  // RETRIEVE ALL CONTRACTS
   function getContracts() {
     if (!userData || !contractor_id) {
       return;
@@ -67,12 +91,12 @@ function MainPage() {
       where("contractor_id", "==", contractor_id)
     );
 
-    const contracts: Contract[] = [];
-
     const unsub = onSnapshot(contractq, (snap) => {
-      snap.forEach((item) => {
-        contracts.push({ ...(item.data() as Contract), id: item.id });
-      });
+      const contracts: Contract[] = snap.docs.map((doc) => ({
+        ...(doc.data() as Contract),
+        id: doc.id,
+      }));
+
       setContractorData(contracts);
     });
 
@@ -107,6 +131,8 @@ function MainPage() {
     const nonUnsub = getContracts();
 
     getNonContracts();
+    getContracts();
+    getStages();
 
     return () => {
       unsub && unsub();
@@ -137,7 +163,13 @@ function MainPage() {
               )}`}
               />
               ) : null} */}
-            <Header6 text={`3 results`} />
+            {contractorData && nonContractorData ? (
+              <Header6
+                text={`${
+                  contractorData.length + nonContractorData.length
+                } result${optionalS(contractorData.length + nonContractorData.length)}`}
+              />
+            ) : null}
           </div>
         </div>
         {/* BREADCRUMB DISPLAY */}
@@ -178,8 +210,11 @@ function MainPage() {
           <Contracts
             user={userData}
             data={contractorData}
+            stagesData={stagesData}
             contractorName={contractorName}
             projectName={projectName}
+            contractorId={contractor_id}
+            projectId={project_id}
           />
         </div>
         <Separator />
@@ -187,8 +222,11 @@ function MainPage() {
           <NonContracts
             user={userData}
             data={nonContractorData}
+            stagesData={stagesData}
             contractorName={contractorName}
             projectName={projectName}
+            contractorId={contractor_id}
+            projectId={project_id}
           />
         </div>
       </ContentContainer>

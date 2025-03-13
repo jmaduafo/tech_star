@@ -29,7 +29,6 @@ import Link from "next/link";
 
 function ProjectDisplay({
   user,
-  loading,
   sort,
   searchValue,
   allProjects,
@@ -38,14 +37,13 @@ function ProjectDisplay({
   readonly user: User | undefined;
   readonly sort: string;
   readonly searchValue: string;
-  readonly loading: boolean;
   readonly allProjects: Project[] | undefined;
   readonly filterSearch: Project[];
 }) {
   const [projectMonth, setProjectMonth] = React.useState("");
   const [projectCountry, setProjectCountry] = React.useState("");
 
-  const [isClicked, setIsClicked] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
   async function createProject(formData: FormData) {
@@ -73,6 +71,8 @@ function ProjectDisplay({
     }
 
     const { name, country, year, month } = result.data;
+
+    setLoading(true)
 
     try {
       if (!user) {
@@ -105,6 +105,8 @@ function ProjectDisplay({
         title: "Uh oh! Something went wrong",
         description: err?.message,
       });
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -174,7 +176,7 @@ function ProjectDisplay({
             <input name="year" className="form" type="number" />
           </Input>
           <div className="flex justify-center mt-6 scale-75">
-            <Submit loading={isClicked} />
+            <Submit loading={loading} />
           </div>
         </form>
         <DialogFooter className=""></DialogFooter>

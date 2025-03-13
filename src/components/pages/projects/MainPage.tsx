@@ -96,7 +96,6 @@ function MainPage() {
         <div className="mt-10">
           <ProjectDisplay
             user={userData}
-            loading={loading}
             sort={sort}
             searchValue={searchValue}
             allProjects={allProjects}

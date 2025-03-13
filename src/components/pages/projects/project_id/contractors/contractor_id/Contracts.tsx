@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import AddButton from "@/components/ui/buttons/AddButton";
-import { Contract, User, Amount } from "@/types/types";
+import { Contract, User, Amount, Stage } from "@/types/types";
 import Input from "@/components/ui/input/Input";
 import { format } from "date-fns";
 import { CalendarIcon, X } from "lucide-react";
@@ -31,79 +31,57 @@ import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 import Separator from "@/components/ui/Separator";
 import { formatCurrency } from "@/utils/currencies";
+import Submit from "@/components/ui/buttons/Submit";
+import { CreateContractSchema } from "@/zod/validation";
+import { useToast } from "@/hooks/use-toast";
+import { addItem } from "@/firebase/actions";
+import { serverTimestamp } from "firebase/firestore";
+import { optionalS } from "@/utils/optionalS";
 
 function Contracts({
   user,
   data,
   contractorName,
   projectName,
+  contractorId,
+  projectId,
+  stagesData,
 }: {
   readonly user: User | undefined;
   readonly data: Contract[] | undefined;
+  readonly stagesData: Stage[] | undefined;
   readonly contractorName: string;
   readonly projectName: string;
+  readonly projectId: string | undefined;
+  readonly contractorId: string | undefined;
 }) {
-  const invoices = [
-    {
-      invoice: "INV001",
-      paymentStatus: "Paid",
-      totalAmount: "$250.00",
-      paymentMethod: "Credit Card",
-    },
-    {
-      invoice: "INV002",
-      paymentStatus: "Pending",
-      totalAmount: "$150.00",
-      paymentMethod: "PayPal",
-    },
-    {
-      invoice: "INV003",
-      paymentStatus: "Unpaid",
-      totalAmount: "$350.00",
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      invoice: "INV004",
-      paymentStatus: "Paid",
-      totalAmount: "$450.00",
-      paymentMethod: "Credit Card",
-    },
-    {
-      invoice: "INV005",
-      paymentStatus: "Paid",
-      totalAmount: "$550.00",
-      paymentMethod: "PayPal",
-    },
-    {
-      invoice: "INV006",
-      paymentStatus: "Pending",
-      totalAmount: "$200.00",
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      invoice: "INV007",
-      paymentStatus: "Unpaid",
-      totalAmount: "$300.00",
-      paymentMethod: "Credit Card",
-    },
-  ];
-
-  const [date, setDate] = useState<Date>();
+  const [contractDate, setContractDate] = useState<Date>();
   const [bankInputs, setBankInputs] = useState<string[]>([]);
   const [currencyInputs, setCurrencyInputs] = useState<Amount[]>([]);
 
   const [isComplete, setIsComplete] = useState(false);
+  const [isUnlimited, setIsUnlimited] = useState(false);
+  const [open, setOpen] = useState(false);
 
+  const [stageId, setStageId] = useState("");
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
+  const { toast } = useToast();
+
   function handleAddCurrency() {
-    if (currencyCode.length && +currencyAmount > 0) {
+    if (
+      (currencyCode.length && +currencyAmount > 0) ||
+      (isUnlimited && currencyAmount.length < 16)
+    ) {
       const checkDuplicate = currencyInputs.find(
         (item) => item.code === currencyCode
       );
 
-      // IF CHECK DUPLICATE IS NOT UNDEFINED, MEANING THAT THE CODE ALREADY EXISTS, THEN DO NOTHING
+      // IF CHECK DUPLICATE IS NOT UNDEFINED, MEANING THAT THE CURRENCY CODE ALREADY EXISTS,
+      // THEN CLEAR THE INPUT FIELD AND DO NOTHING
       if (checkDuplicate) {
         setCurrencyAmount("");
         return;
@@ -117,9 +95,10 @@ function Contracts({
         code: currencyCode,
         name: currency_list[currencyIndex].name,
         symbol: currency_list[currencyIndex].symbol,
-        amount: +currencyAmount,
+        amount: isUnlimited ? "Unlimited" : +currencyAmount,
       });
 
+      setIsUnlimited(false);
       setCurrencyAmount("");
     }
   }
@@ -128,23 +107,108 @@ function Contracts({
     setCurrencyInputs(currencyInputs.filter((inp) => inp.code !== item));
   }
 
+  async function handleSubmit(formData: FormData) {
+    const contractCode = formData.get("code");
+    const contractDesc = formData.get("desc");
+    const contractComment = formData.get("comment");
+
+    const values = {
+      code: contractCode,
+      desc: contractDesc,
+      date: contractDate,
+      bank_names: bankInputs,
+      stage_id: stageId,
+      currency: currencyInputs,
+      comment: contractComment,
+    };
+
+    const result = CreateContractSchema.safeParse(values);
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: result.error.issues[0].message,
+      });
+
+      return;
+    }
+
+    const { code, desc, date, stage_id, bank_names, currency, comment } =
+      result.data;
+
+    try {
+      if (!user || !projectId || !contractorId) {
+        return;
+      }
+
+      setLoading(true);
+
+      await addItem("contracts", {
+        date,
+        project_id: projectId,
+        contractor_id: contractorId,
+        team_id: user.team_id,
+        stage_id: stage_id,
+        project_name: projectName,
+        contractor_name: contractorName,
+        contract_code: code,
+        bank_name: bank_names,
+        currencies: currency,
+        is_completed: isComplete,
+        description: desc,
+        comment: comment ?? null,
+        is_contract: true,
+        created_at: serverTimestamp(),
+        updated_at: null,
+      });
+
+      toast({
+        title: "Contract added successfully!",
+      });
+
+      setBankInputs([]);
+      setCurrencyInputs([]);
+      setIsComplete(false);
+
+      setOpen(false)
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <section>
       <div className="flex items-end justify-between">
         <div className="flex items-start gap-5">
           <Header3 text="Contracts" />
-          <p className="text-[13.5px]">7 results</p>
+          {data ? (
+            <p className="text-[13.5px]">
+              {data.length} result{optionalS(data.length)}
+            </p>
+          ) : null}
         </div>
         <div>
-          <AddButton title="contract" desc="Create a contract and add payments">
-            <form>
+          <AddButton
+            title="contract"
+            desc="Create a contract and add payments"
+            setOpen={setOpen}
+            open={open}
+          >
+            <form action={handleSubmit}>
               {/* CONTRACT CODE INPUT */}
               <Input htmlFor="code" label="Contract code *">
-                <input className="form" type="text" id="code" />
+                <input className="form" type="text" id="code" name="code" />
               </Input>
               {/* DESCRIPTION INPUT */}
               <Input htmlFor="desc" label="Description *" className="my-3">
-                <textarea className="form" id="desc"></textarea>
+                <textarea className="form" id="desc" name="desc"></textarea>
               </Input>
               {/* DATE PICKER POPUP */}
               <Popover>
@@ -159,14 +223,18 @@ function Contracts({
                     }
                   >
                     <CalendarIcon />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    {contractDate ? (
+                      format(contractDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 z-[1000]" align="start">
                   <Calendar
                     mode="single"
-                    selected={date}
-                    onSelect={setDate}
+                    selected={contractDate}
+                    onSelect={setContractDate}
                     initialFocus
                   />
                 </PopoverContent>
@@ -184,6 +252,22 @@ function Contracts({
                     </p>
                   ) : null}
                 </ArrayInput>
+                <SelectBar
+                  valueChange={setStageId}
+                  value="Select the project stage *"
+                  label="Stages"
+                  className="w-full sm:w-full mb-3"
+                >
+                  {stagesData
+                    ? stagesData.map((item) => {
+                        return (
+                          <SelectItem key={item.name} value={item.id}>
+                            {item.name}
+                          </SelectItem>
+                        );
+                      })
+                    : null}
+                </SelectBar>
                 <Separator />
                 <ObjectArray
                   handleAdd={handleAddCurrency}
@@ -194,13 +278,14 @@ function Contracts({
                       return (
                         <div
                           key={item.name}
-                          className="flex justify-between items-center text-[13.5px] mb-1"
+                          className="flex justify-between items-center text-[14px] mb-1"
                         >
                           <p>{item.code}</p>
                           <div className="flex items-center gap-1">
-                            {/* <p className="capitalize">{item.symbol}</p> */}
                             <p className="capitalize">
-                              {formatCurrency(+item.amount, item.code)}
+                              {item.amount !== "Unlimited"
+                                ? formatCurrency(+item.amount, item.code)
+                                : `${item.symbol} Unlimited`}
                             </p>
                             <button
                               type="button"
@@ -245,6 +330,15 @@ function Contracts({
                       You have reached the max
                     </p>
                   ) : null}
+                  <div className="flex items-center gap-2 mt-3">
+                    <Switch
+                      id="is_unlimited"
+                      name="is_unlimited"
+                      checked={isUnlimited}
+                      onCheckedChange={setIsUnlimited}
+                    />
+                    <label htmlFor="is_unlimited">Unlimited amount?</label>
+                  </div>
                 </ObjectArray>
                 <Separator />
                 {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}
@@ -256,13 +350,24 @@ function Contracts({
                     onCheckedChange={setIsComplete}
                   />
                   <label htmlFor="is_completed">
-                    Is the contract complete?
+                    Is the contract complete? *
                   </label>
                 </div>
                 {/* OPTIONAL COMMENT INPUT */}
-                <Input htmlFor="comment" label="Comment" className="mt-3">
-                  <textarea className="form" id="comment"></textarea>
+                <Input
+                  htmlFor="comment"
+                  label="Optional comment"
+                  className="mt-3"
+                >
+                  <textarea
+                    className="form"
+                    id="comment"
+                    name="comment"
+                  ></textarea>
                 </Input>
+                <div className="flex justify-center mt-6 scale-75">
+                  <Submit loading={loading} />
+                </div>
               </Popover>
             </form>
           </AddButton>
@@ -280,17 +385,43 @@ function Contracts({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice.invoice}>
-                <TableCell className="font-medium">{invoice.invoice}</TableCell>
-                <TableCell>{invoice.paymentStatus}</TableCell>
-                <TableCell>{invoice.paymentMethod}</TableCell>
-                <TableCell>{invoice.paymentMethod}</TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-              </TableRow>
-            ))}
+            {data
+              ? data.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">
+                      {item.contract_code}
+                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="flex gap-1">
+                      {item.bank_name.map((name, i) => {
+                        return (
+                          <p key={name} className="capitalize">
+                            {name}
+                            <span
+                              className={`${
+                                i === item?.bank_name?.length - 1
+                                  ? "hidden"
+                                  : "block"
+                              }`}
+                            >
+                              ,
+                            </span>{" "}
+                          </p>
+                        );
+                      })}
+                    </TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell className="text-right">
+                      {item.currencies[0].amount !== "Unlimited"
+                        ? formatCurrency(
+                            +item.currencies[0].amount,
+                            item.currencies[0].code
+                          )
+                        : `${item.currencies[0].symbol} Unlimited`}
+                    </TableCell>
+                  </TableRow>
+                ))
+              : null}
           </TableBody>
           <TableFooter>
             <TableRow>

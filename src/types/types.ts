@@ -64,13 +64,13 @@ export type Amount = {
   symbol: string;
   code: string;
   name: string;
-  amount: number;
+  amount: number | "Unlimited";
   created_at?: number;
 };
 
 export type Contract = {
   id: string;
-  date: string;
+  date: Date;
   project_id: string;
   contractor_id: string;
   team_id: string;

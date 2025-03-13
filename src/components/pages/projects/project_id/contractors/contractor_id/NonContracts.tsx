@@ -11,18 +11,24 @@ import {
   Table,
 } from "@/components/ui/table";
 import AddButton from "@/components/ui/buttons/AddButton";
-import { Payment, User } from "@/types/types";
+import { Payment, Stage, User } from "@/types/types";
 
 function NonContracts({
   user,
   data,
   contractorName,
   projectName,
+  contractorId,
+  projectId,
+  stagesData
 }: {
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
+  readonly stagesData: Stage[] | undefined;
   readonly contractorName: string;
   readonly projectName: string;
+  readonly projectId: string | undefined;
+  readonly contractorId: string | undefined;
 }) {
   const invoices = [
     {
