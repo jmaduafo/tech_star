@@ -101,7 +101,7 @@ export type ContractTable = {
   contract_code: string;
   status: "completed" | "ongoing";
   description: string;
-  amount: number | "Unlimited";
+  currencies: Amount[];
 }
 
 export type PaymentTable = {

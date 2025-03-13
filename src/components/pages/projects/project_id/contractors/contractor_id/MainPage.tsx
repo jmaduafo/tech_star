@@ -98,7 +98,7 @@ function MainPage() {
         contract_code: doc.data().contract_code,
         status: doc.data().is_completed ? "completed" : "ongoing",
         description: doc.data().description,
-        amount: doc.data().currencies[0].amount
+        currencies: doc.data().currencies
       }));
 
       setContractorData(contracts);
