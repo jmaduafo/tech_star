@@ -37,6 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
 import { optionalS } from "@/utils/optionalS";
+import Banner from "@/components/ui/Banner";
 
 function Contracts({
   user,
@@ -171,7 +172,7 @@ function Contracts({
       setCurrencyInputs([]);
       setIsComplete(false);
 
-      setOpen(false)
+      setOpen(false);
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -377,9 +378,10 @@ function Contracts({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">Contract code</TableHead>
+              <TableHead className="w-[180px]">Contract code</TableHead>
+              <TableHead className="w-[150px]">Status</TableHead>
               <TableHead className="w-[150px]">Date</TableHead>
-              <TableHead className="w-[250px]">Bank name</TableHead>
+              <TableHead className="w-[180px]">Bank names</TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
@@ -391,26 +393,32 @@ function Contracts({
                     <TableCell className="font-medium">
                       {item.contract_code}
                     </TableCell>
+                    <TableCell>
+                      {item.is_completed ? (
+                        <Banner text="completed" />
+                      ) : (
+                        <Banner text="ongoing" />
+                      )}
+                    </TableCell>
                     <TableCell></TableCell>
                     <TableCell className="flex gap-1">
-                      {item.bank_name.map((name, i) => {
-                        return (
-                          <p key={name} className="capitalize">
-                            {name}
-                            <span
-                              className={`${
-                                i === item?.bank_name?.length - 1
-                                  ? "hidden"
-                                  : "block"
-                              }`}
-                            >
-                              ,
-                            </span>{" "}
-                          </p>
-                        );
-                      })}
+                      {item.bank_name.length > 1 ? (
+                        item.bank_name.map((name, i) => {
+                          return (
+                            <p key={name} className="capitalize">
+                              {name}, ...
+                            </p>
+                          );
+                        })
+                      ) : (
+                        <p className="capitalize">{item.bank_name[0]}</p>
+                      )}
                     </TableCell>
-                    <TableCell>{item.description}</TableCell>
+                    <TableCell>
+                      {item.description.length > 40
+                        ? `${item.description.substring(0, 41)}...`
+                        : item.description}
+                    </TableCell>
                     <TableCell className="text-right">
                       {item.currencies[0].amount !== "Unlimited"
                         ? formatCurrency(
@@ -425,7 +433,7 @@ function Contracts({
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={4}>Total</TableCell>
+              <TableCell colSpan={5}>Total</TableCell>
               <TableCell className="text-right">$2,500.00</TableCell>
             </TableRow>
           </TableFooter>
