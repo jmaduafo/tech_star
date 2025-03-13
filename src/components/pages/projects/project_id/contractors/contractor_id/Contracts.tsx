@@ -377,7 +377,7 @@ function Contracts({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">Contract no.</TableHead>
+              <TableHead className="w-[200px]">Contract code</TableHead>
               <TableHead className="w-[150px]">Date</TableHead>
               <TableHead className="w-[250px]">Bank name</TableHead>
               <TableHead>Description</TableHead>
