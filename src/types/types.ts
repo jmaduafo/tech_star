@@ -133,14 +133,14 @@ export type NonContract = {
   currency_symbol: string;
   is_contract: boolean;
   contract_code?: null;
-  status: "paid" | "pending";
+  is_completed: boolean;
   created_at: number;
   updated_at: number | null;
 };
 
 export type Payment = {
   id: string;
-  date: Date;
+  date: Timestamp;
   project_id: string;
   contractor_id: string;
   contract_id: string | null;
@@ -158,7 +158,7 @@ export type Payment = {
   currency_symbol: string;
   is_contract: boolean;
   contract_code: string | null;
-  status: "paid" | "pending";
+  is_completed: boolean;
   created_at: number;
   updated_at: number | null;
 };

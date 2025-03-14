@@ -19,6 +19,7 @@ export default {
         dark50: "rgba(20, 20, 20, .5)",
         dark35: "rgba(20, 20, 20, .35)",
         dark20: "rgba(20, 20, 20, .20)",
+        dark10: "rgba(20, 20, 20, .10)",
         light90: "rgba(236, 236, 236, 0.9)",
         light85: "rgba(236, 236, 236, 0.85)",
         light70: "rgba(236, 236, 236, 0.7)",

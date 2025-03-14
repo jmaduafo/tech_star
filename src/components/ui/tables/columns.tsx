@@ -1,13 +1,21 @@
 "use client";
 
-import { Amount, ContractTable, PaymentTable, TimeStamp } from "@/types/types";
+import {
+  Amount,
+  Contract,
+  Payment,
+  TimeStamp,
+} from "@/types/types";
 import { formatCurrency } from "@/utils/currencies";
 import { formatDate } from "@/utils/dateAndTime";
 import { ColumnDef } from "@tanstack/react-table";
 import Banner from "../Banner";
 import { Checkbox } from "../checkbox";
+import { MoreHorizontal } from "lucide-react";
 
-export const contractColumns: ColumnDef<ContractTable>[] = [
+
+import ActionDialog from "./ActionDialog";
+export const contractColumns: ColumnDef<Contract>[] = [
   {
     header: ({ table }) => (
       <Checkbox
@@ -36,11 +44,11 @@ export const contractColumns: ColumnDef<ContractTable>[] = [
   },
   {
     header: "Status",
-    accessorKey: "status",
+    accessorKey: "is_completed",
     cell: ({ row }) => {
-      const status: "completed" | "ongoing" = row.getValue("status");
+      const status: boolean = row.getValue("is_completed");
 
-      return <Banner text={status} />;
+      return <Banner text={status ? "completed" : "ongoing"} />;
     },
   },
   {
@@ -80,9 +88,19 @@ export const contractColumns: ColumnDef<ContractTable>[] = [
       );
     },
   },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const contract = row.original;
+
+      return (
+        <ActionDialog data={contract}/>
+      );
+    },
+  },
 ];
 
-export const paymentColumns: ColumnDef<PaymentTable>[] = [
+export const paymentColumns: ColumnDef<Payment>[] = [
   {
     header: "Select",
     accessorKey: "id",

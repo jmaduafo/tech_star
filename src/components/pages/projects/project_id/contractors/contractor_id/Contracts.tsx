@@ -53,7 +53,7 @@ function Contracts({
   stagesData,
 }: {
   readonly user: User | undefined;
-  readonly data: ContractTable[] | undefined;
+  readonly data: Contract[] | undefined;
   readonly stagesData: Stage[] | undefined;
   readonly contractorName: string;
   readonly projectName: string;

@@ -1,6 +1,6 @@
 "use client";
 import AuthContainer from "@/components/pages/AuthContainer";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Contracts from "./Contracts";
 import NonContracts from "./NonContracts";
 import Header1 from "@/components/fontsize/Header1";
@@ -30,21 +30,21 @@ import ContentContainer from "@/components/pages/ContentContainer";
 import { optionalS } from "@/utils/optionalS";
 
 function MainPage() {
-  const [projectName, setProjectName] = React.useState("");
-  const [contractorName, setContractorName] = React.useState("");
-  const [contractorData, setContractorData] = React.useState<
-    ContractTable[] | undefined
+  const [projectName, setProjectName] = useState("");
+  const [contractorName, setContractorName] = useState("");
+  const [contractorData, setContractorData] = useState<
+    Contract[] | undefined
   >();
-  const [nonContractorData, setNonContractorData] = React.useState<
+  const [nonContractorData, setNonContractorData] = useState<
     Payment[] | undefined
   >();
-  const [stagesData, setStagesData] = React.useState<Stage[] | undefined>();
+  const [stagesData, setStagesData] = useState<Stage[] | undefined>();
 
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
   const contractor_id = pathname.split("/").pop();
 
-  const { userData, loading } = useAuth();
+  const { userData } = useAuth();
 
   async function getProjectAndContractorNames() {
     if (!project_id || !contractor_id) {
@@ -58,7 +58,7 @@ function MainPage() {
     setContractorName(contr?.name);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     getProjectAndContractorNames();
   }, [projectName, contractorName]);
 
@@ -92,13 +92,9 @@ function MainPage() {
     );
 
     const unsub = onSnapshot(contractq, (snap) => {
-      const contracts: ContractTable[] = snap.docs.map((doc) => ({
+      const contracts: Contract[] = snap.docs.map((doc) => ({
+        ...( doc.data() as Contract),
         id: doc.id,
-        date: doc.data().date,
-        contract_code: doc.data().contract_code,
-        status: doc.data().is_completed ? "completed" : "ongoing",
-        description: doc.data().description,
-        currencies: doc.data().currencies
       }));
 
       setContractorData(contracts);
