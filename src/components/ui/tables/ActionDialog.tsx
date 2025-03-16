@@ -24,6 +24,8 @@ import Paragraph from "@/components/fontsize/Paragraph";
 import { useAuth } from "@/context/AuthContext";
 import { formatDate } from "@/utils/dateAndTime";
 import Banner from "../Banner";
+import { formatCurrency } from "@/utils/currencies";
+import { format } from "timeago.js"
 
 type Dialog = {
   readonly data: Contract | Payment | undefined;
@@ -31,6 +33,11 @@ type Dialog = {
 
 function ActionDialog({ data }: Dialog) {
   const { userData } = useAuth();
+
+  const ongoing =
+    !data?.is_completed && data?.is_contract ? "ongoing" : "pending";
+
+  const paid = data?.is_completed && !data?.is_contract ? "paid" : ongoing;
 
   return (
     <Dialog>
@@ -122,19 +129,40 @@ function ActionDialog({ data }: Dialog) {
               )}
             </div>
             <div className="flex-1">
+              {data?.currencies ? (
+                <Detail title="Amounts" custom>
+                  <div className="flex items-end">
+                    {data?.currencies?.map((item, i) => {
+                      return (
+                        <p key={item.code} className={`${i === data.currencies.length - 1 ? "mb-0" : "mb-1"}`}>
+                          {item.code} {formatCurrency(+item.amount, item.code)}
+                        </p>
+                      );
+                    })}
+                  </div>
+                </Detail>
+              ) : (
+                <Detail title="amounts" item="N/A" />
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between items-start gap-5">
+            <div className="flex-1">
               <Detail title="Status" custom>
                 <Banner
                   text={
-                    data?.is_completed && data?.is_contract
-                      ? "completed"
-                      : data?.is_completed && !data?.is_contract
-                      ? "paid"
-                      : !data?.is_completed && data?.is_contract
-                      ? "ongoing"
-                      : "pending"
+                    data?.is_completed && data?.is_contract ? "completed" : paid
                   }
                 />
               </Detail>
+            </div>
+            <div className="flex-1">
+              {data?.updated_at ? (
+                <Detail
+                  title="Updated"
+                  item={format(data?.updated_at?.seconds)}
+                />
+              ) : null}
             </div>
           </div>
         </div>

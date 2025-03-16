@@ -91,8 +91,8 @@ export type Contract = {
   description: string;
   comment?: string | null;
   is_contract: boolean;
-  created_at: number;
-  updated_at: number | null;
+  created_at: Timestamp;
+  updated_at: Timestamp | null;
 };
 
 export type ContractTable = {
@@ -135,7 +135,7 @@ export type NonContract = {
   contract_code?: null;
   is_completed: boolean;
   created_at: number;
-  updated_at: number | null;
+  updated_at: Timestamp | null;
 };
 
 export type Payment = {
@@ -152,15 +152,12 @@ export type Payment = {
   comment: string | null;
   amount: number;
   bank_name: string;
-  currency_id: string;
-  currency_name: string;
-  currency_code: string;
-  currency_symbol: string;
+  currencies: Amount[];
   is_contract: boolean;
   contract_code: string | null;
   is_completed: boolean;
-  created_at: number;
-  updated_at: number | null;
+  created_at: Timestamp;
+  updated_at: Timestamp | null;
 };
 
 export type Stage = {
