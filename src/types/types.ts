@@ -84,6 +84,7 @@ export type Contract = {
   stage_id: string;
   project_name: string;
   contractor_name: string;
+  stage_name: string;
   contract_code: string;
   bank_name: string[];
   currencies: Amount[];
@@ -94,23 +95,6 @@ export type Contract = {
   created_at: Timestamp;
   updated_at: Timestamp | null;
 };
-
-export type ContractTable = {
-  id: string;
-  date: Timestamp;
-  contract_code: string;
-  status: "completed" | "ongoing";
-  description: string;
-  currencies: Amount[];
-}
-
-export type PaymentTable = {
-  id: string;
-  date: Timestamp;
-  status: "paid" | "unpaid" | "pending";
-  description: string;
-  amount: number;
-}
 
 // Since NonContract is also a Payment, schema has to match with Payment
 export type NonContract = {
@@ -148,6 +132,7 @@ export type Payment = {
   team_id: string;
   project_name: string;
   contractor_name: string;
+  stage_name: string;
   description: string;
   comment: string | null;
   amount: number;

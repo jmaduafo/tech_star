@@ -122,11 +122,12 @@ function ActionDialog({ data }: Dialog) {
           </div>
           <div className="flex justify-between items-start gap-5">
             <div className="flex-1">
-              {data?.comment ? (
-                <Detail title="comments" item={data?.comment} />
-              ) : (
-                <Detail title="comments" item="N/A" />
-              )}
+              {data?.stage_name ? (
+                <Detail
+                  title="Stage"
+                  item={data.stage_name}
+                />
+              ) : null}
             </div>
             <div className="flex-1">
               {data?.currencies ? (
@@ -156,6 +157,15 @@ function ActionDialog({ data }: Dialog) {
                 />
               </Detail>
             </div>
+            <div className="flex-1">
+            {data?.comment ? (
+                <Detail title="comments" item={data?.comment} />
+              ) : (
+                <Detail title="comments" item="N/A" />
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between items-start gap-5">
             <div className="flex-1">
               {data?.updated_at ? (
                 <Detail

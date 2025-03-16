@@ -25,7 +25,7 @@ import {
   onSnapshot,
   orderBy,
 } from "firebase/firestore";
-import { Contract, ContractTable, Payment, Stage } from "@/types/types";
+import { Contract, Payment, Stage } from "@/types/types";
 import ContentContainer from "@/components/pages/ContentContainer";
 import { optionalS } from "@/utils/optionalS";
 

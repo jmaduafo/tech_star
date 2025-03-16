@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import AddButton from "@/components/ui/buttons/AddButton";
-import { Contract, User, Amount, Stage, ContractTable } from "@/types/types";
+import { Contract, User, Amount, Stage } from "@/types/types";
 import Input from "@/components/ui/input/Input";
 import { format } from "date-fns";
 import { CalendarIcon, X } from "lucide-react";
@@ -143,9 +143,11 @@ function Contracts({
       result.data;
 
     try {
-      if (!user || !projectId || !contractorId) {
+      if (!user || !projectId || !contractorId || !stagesData) {
         return;
       }
+
+      const stageIndex = stagesData?.findIndex(item => item.id === stage_id)
 
       setLoading(true);
 
@@ -157,6 +159,7 @@ function Contracts({
         stage_id: stage_id,
         project_name: projectName,
         contractor_name: contractorName,
+        stage_name: stageIndex ? stagesData[stageIndex]?.name : null,
         contract_code: code,
         bank_name: bank_names,
         currencies: currency,
