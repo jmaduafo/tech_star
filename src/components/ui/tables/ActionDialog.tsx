@@ -68,7 +68,7 @@ function ActionDialog({ data }: Dialog) {
         await deleteItem("contracts", id)
 
         toast({
-            
+
         })
     } catch (err: any) {
         
