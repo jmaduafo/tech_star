@@ -2,15 +2,6 @@
 import React, { useState } from "react";
 import Header3 from "@/components/fontsize/Header3";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -37,8 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
 import { optionalS } from "@/utils/optionalS";
-import Banner from "@/components/ui/Banner";
-import { formatDate } from "@/utils/dateAndTime";
 import DataTable from "@/components/ui/tables/DataTable";
 import { contractColumns } from "@/components/ui/tables/columns";
 import Loading from "@/components/ui/Loading";
@@ -191,8 +180,6 @@ function Contracts({
     }
   }
 
-  console.log(data);
-
   return (
     <section>
       <div className="flex items-end justify-between">
@@ -282,7 +269,7 @@ function Contracts({
                   <Separator />
                   <ObjectArray
                     handleAdd={handleAddCurrency}
-                    disabledLogic={currencyInputs.length === 4}
+                    disabledLogic={currencyInputs.length >= 4}
                   >
                     <div className="mb-2">
                       {currencyInputs.map((item) => {
@@ -336,7 +323,7 @@ function Contracts({
                         id="amount"
                       />
                     </Input>
-                    {currencyInputs.length === 4 ? (
+                    {currencyInputs.length >= 4 ? (
                       <p className="text-[14px] text-red-700">
                         You have reached the max
                       </p>
@@ -386,7 +373,7 @@ function Contracts({
         </div>
       </div>
       <div className="mt-4">
-
+      {/* DISPLAY OF DATA TABLE WITH RENDERED DATA FROM BACKEND */}
       {!data ? (
         <div className="py-8 flex justify-center">
           <Loading className="w-10 h-10" />
@@ -395,71 +382,6 @@ function Contracts({
         <DataTable columns={contractColumns} data={data} />
       )}
       </div>
-      {/* <div className="mt-5">
-        <Table className="relative">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[160px]">Contract code</TableHead>
-              <TableHead className="w-[150px] hidden md:flex items-center">Status</TableHead>
-              <TableHead className="w-[150px]">Date</TableHead>
-              <TableHead className="w-[180px] hidden md:flex">Bank names</TableHead>
-              <TableHead className="">Description</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data
-              ? data.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">
-                      {item.contract_code}
-                    </TableCell>
-                    <TableCell className="hidden md:flex items-center">
-                      {item.is_completed ? (
-                        <Banner text="completed" />
-                      ) : (
-                        <Banner text="ongoing" />
-                      )}
-                    </TableCell>
-                    <TableCell>{formatDate(item.date)}</TableCell>
-                    <TableCell className="hidden md:flex items-center">
-                      {item.bank_name.length > 1 ? (
-                        item.bank_name.map((name, i) => {
-                          return (
-                            <p key={name} className="capitalize">
-                              {name}, ...
-                            </p>
-                          );
-                        })
-                      ) : (
-                        <p className="capitalize">{item.bank_name[0]}</p>
-                      )}
-                    </TableCell>
-                    <TableCell className="hidden">
-                      {item.description.length > 40
-                        ? `${item.description.substring(0, 41)}...`
-                        : item.description}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.currencies[0].amount !== "Unlimited"
-                        ? formatCurrency(
-                            +item.currencies[0].amount,
-                            item.currencies[0].code
-                          )
-                        : `${item.currencies[0].symbol} Unlimited`}
-                    </TableCell>
-                  </TableRow>
-                ))
-              : null}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={4}>Total</TableCell>
-              <TableCell className="text-right">$2,500.00</TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </div> */}
     </section>
   );
 }

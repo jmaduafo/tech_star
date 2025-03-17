@@ -53,17 +53,20 @@ function MainPage() {
         where("project_id", "==", project_id)
       );
 
-      const contractors: Contractor[] = [];
-
+      
       const unsub = onSnapshot(contractorq, (snap) => {
+
+        const contractors: Contractor[] = [];
+
         snap.forEach((item) => {
           contractors.push({ ...(item.data() as Contractor), id: item?.id });
         });
 
         setAllContractors(contractors);
+
+        return () => unsub();
       });
 
-      return unsub;
     } catch (err: any) {
       console.log(err.message);
     }

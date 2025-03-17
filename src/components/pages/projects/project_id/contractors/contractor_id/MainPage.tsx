@@ -92,15 +92,16 @@ function MainPage() {
     );
 
     const unsub = onSnapshot(contractq, (snap) => {
-      const contracts: Contract[] = snap.docs.map((doc) => ({
-        ...( doc.data() as Contract),
-        id: doc.id,
-      }));
+      const contracts: Contract[] = [];
+
+      snap.forEach((doc) => {
+        contracts.push({ ...(doc.data() as Contract), id: doc.id });
+      });
 
       setContractorData(contracts);
-    });
 
-    return unsub;
+      return () => unsub();
+    });
   }
 
   // RETRIEVE ALL NON-CONTRACTS
@@ -116,28 +117,23 @@ function MainPage() {
     );
 
     const nonUnsub = onSnapshot(noncontractq, (snap) => {
-      const noncontracts: Payment[] = snap.docs.map((doc) => ({
-        ...(doc.data() as Payment),
-        id: doc.id,
-      }));
+      const noncontracts: Payment[] = [];
+
+      snap.forEach((doc) => {
+        noncontracts.push({ ...(doc.data() as Payment), id: doc.id });
+      });
+
       setNonContractorData(noncontracts);
+
+      return () => nonUnsub();
     });
 
-    return nonUnsub;
   }
 
   React.useEffect(() => {
-    const unsub = getContracts();
-    const nonUnsub = getContracts();
-
     getNonContracts();
     getContracts();
     getStages();
-
-    return () => {
-      unsub && unsub();
-      nonUnsub && nonUnsub();
-    };
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -167,7 +163,9 @@ function MainPage() {
               <Header6
                 text={`${
                   contractorData.length + nonContractorData.length
-                } result${optionalS(contractorData.length + nonContractorData.length)}`}
+                } result${optionalS(
+                  contractorData.length + nonContractorData.length
+                )}`}
               />
             ) : null}
           </div>

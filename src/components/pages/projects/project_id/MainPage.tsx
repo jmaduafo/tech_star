@@ -75,15 +75,18 @@ function MainPage() {
       );
 
       const unsub = onSnapshot(stageq, (snap) => {
-        const stages: Stage[] = snap.docs.map((doc) => ({
-          ...(doc.data() as Stage),
-          id: doc.id,
-        }));
+        const stages: Stage[] = [];
+        
+        snap.forEach(doc => {
+          stages.push({...doc.data() as Stage, id: doc.id})
+        });
 
         setAllStages(stages);
+
+
+        return () => unsub();
       });
 
-      return unsub;
     } catch (err: any) {
       console.log(err.message);
     } finally {
@@ -92,12 +95,9 @@ function MainPage() {
   }
 
   useEffect(() => {
-    const unsub = getAllStages();
+    getAllStages();
     getProjectName();
 
-    return () => {
-      unsub && unsub(); // Cleanup the Firestore listener when component unmounts
-    };
   }, [userData?.id ?? "guest"]);
 
   return (
