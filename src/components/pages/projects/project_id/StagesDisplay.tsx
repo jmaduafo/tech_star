@@ -140,8 +140,8 @@ function StageCard({
 
       // updateItem(collectionName: string, id: string, items: object)
       await updateItem("stages", item?.id, {
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim(),
         is_completed,
         updated_at: serverTimestamp(),
       });

@@ -85,7 +85,7 @@ function ContractorsDisplay({
 
 
       await addItem("contractors", {
-        name,
+        name: name.trim(),
         team_id: user?.team_id,
         project_id: projectId,
         location: contractorLocation ?? null,

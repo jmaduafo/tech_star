@@ -83,8 +83,8 @@ function StagesSearch({
       }
 
       await addItem("stages", {
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim(),
         team_id: user?.team_id,
         project_id: projectId,
         is_completed: false,

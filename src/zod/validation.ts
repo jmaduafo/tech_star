@@ -123,7 +123,7 @@ export const CreateContractSchema = z.object({
 export const CreatePaymentSchema = z.object({
   desc: z
     .string()
-    .min(1, { message: "You must enter a contract description." }),
+    .min(1, { message: "You must enter a payment description." }),
   date: z
     .date({
       required_error: "Please select a date",

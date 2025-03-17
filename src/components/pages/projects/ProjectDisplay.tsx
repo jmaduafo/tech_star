@@ -80,7 +80,7 @@ function ProjectDisplay({
       }
 
       await addItem("projects", {
-        name,
+        name: name.trim(),
         team_id: user?.team_id,
         country,
         city: city_name ?? null,

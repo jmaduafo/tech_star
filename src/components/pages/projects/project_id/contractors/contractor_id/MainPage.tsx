@@ -14,7 +14,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
+import { getDocumentItem } from "@/firebase/actions";
 import { useAuth } from "@/context/AuthContext";
 import Separator from "@/components/ui/Separator";
 import { db } from "@/firebase/config";
@@ -24,6 +24,7 @@ import {
   where,
   onSnapshot,
   orderBy,
+  getDocs,
 } from "firebase/firestore";
 import { Contract, Payment, Stage } from "@/types/types";
 import ContentContainer from "@/components/pages/ContentContainer";
@@ -32,10 +33,8 @@ import { optionalS } from "@/utils/optionalS";
 function MainPage() {
   const [projectName, setProjectName] = useState("");
   const [contractorName, setContractorName] = useState("");
-  const [contractorData, setContractorData] = useState<
-    Contract[] | undefined
-  >();
-  const [nonContractorData, setNonContractorData] = useState<
+  const [contractData, setContractData] = useState<Contract[] | undefined>();
+  const [nonContractData, setNonContractData] = useState<
     Payment[] | undefined
   >();
   const [stagesData, setStagesData] = useState<Stage[] | undefined>();
@@ -64,70 +63,90 @@ function MainPage() {
 
   // RETRIEVE ALL STAGES
   async function getStages() {
-    if (!userData || !project_id) {
-      return;
+    try {
+      if (!userData || !project_id) {
+        return;
+      }
+  
+      const stageq = query(
+        collection(db, "stages"),
+        where("project_id", "==", project_id),
+        where("team_id", "==", userData?.team_id),
+        orderBy("created_at")
+      );
+  
+      const stageRef = await getDocs(stageq)
+  
+      const stages : Stage[] = []
+      stageRef.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        stages.push({ ... doc.data() as Stage, id: doc.id})
+      })
+  
+      setStagesData(stages)
+
+    } catch (err: any) {
+      console.log(err.message)
     }
-
-    const stageq = query(
-      collection(db, "stages"),
-      where("project_id", "==", project_id),
-      where("team_id", "==", userData?.team_id),
-      orderBy("created_at")
-    );
-
-    const stageData = await getQueriedItems(stageq);
-
-    setStagesData(stageData as Stage[]);
   }
 
   // RETRIEVE ALL CONTRACTS
   function getContracts() {
-    if (!userData || !contractor_id) {
-      return;
+    try {
+
+      if (!userData || !contractor_id) {
+        return;
+      }
+      const contractq = query(
+        collection(db, "contracts"),
+        where("contractor_id", "==", contractor_id)
+      );
+  
+      const unsub = onSnapshot(contractq, (snap) => {
+        const contracts: Contract[] = [];
+  
+        snap.forEach((doc) => {
+          contracts.push({ ...(doc.data() as Contract), id: doc.id });
+        });
+  
+        setContractData(contracts);
+  
+        return () => unsub();
+      });
+    } catch (err: any) {
+      console.log(err.message)
     }
 
-    const contractq = query(
-      collection(db, "contracts"),
-      where("contractor_id", "==", contractor_id)
-    );
-
-    const unsub = onSnapshot(contractq, (snap) => {
-      const contracts: Contract[] = [];
-
-      snap.forEach((doc) => {
-        contracts.push({ ...(doc.data() as Contract), id: doc.id });
-      });
-
-      setContractorData(contracts);
-
-      return () => unsub();
-    });
   }
 
   // RETRIEVE ALL NON-CONTRACTS
   function getNonContracts() {
-    if (!userData || !contractor_id) {
-      return;
-    }
-
-    const noncontractq = query(
-      collection(db, "payments"),
-      where("contract_id", "==", null),
-      where("contractor_id", "==", contractor_id)
-    );
-
-    const nonUnsub = onSnapshot(noncontractq, (snap) => {
-      const noncontracts: Payment[] = [];
-
-      snap.forEach((doc) => {
-        noncontracts.push({ ...(doc.data() as Payment), id: doc.id });
+    try {
+      if (!userData || !contractor_id) {
+        return;
+      }
+  
+      const noncontractq = query(
+        collection(db, "payments"),
+        where("is_contract", "==", false),
+        where("contractor_id", "==", contractor_id)
+      );
+  
+      const unsub = onSnapshot(noncontractq, (snap) => {
+        const noncontracts: Payment[] = [];
+  
+        snap.forEach((doc) => {
+          noncontracts.push({ ...(doc.data() as Payment), id: doc.id });
+        });
+  
+        setNonContractData(noncontracts);
+  
+        return () => unsub();
       });
 
-      setNonContractorData(noncontracts);
-
-      return () => nonUnsub();
-    });
-
+    } catch (err: any) {
+      console.log(err.message)
+    }
   }
 
   React.useEffect(() => {
@@ -142,29 +161,12 @@ function MainPage() {
         <div className="">
           <div className="flex items-start gap-5 mb-2 text-lightText">
             {contractorName.length ? <Header1 text={contractorName} /> : null}
-            {/* {allContractors ? (
-          <Header6
-          text={`${
-            allContractors?.length &&
-            !filterSearch.length &&
-            !searchValue.length
-            ? allContractors?.length
-            : filterSearch.length
-            } result${optionalS(
-              allContractors?.length &&
-              !filterSearch.length &&
-              !searchValue.length
-              ? allContractors?.length
-              : filterSearch.length
-              )}`}
-              />
-              ) : null} */}
-            {contractorData && nonContractorData ? (
+            {contractData && nonContractData ? (
               <Header6
                 text={`${
-                  contractorData.length + nonContractorData.length
+                  contractData.length + nonContractData.length
                 } result${optionalS(
-                  contractorData.length + nonContractorData.length
+                  contractData.length + nonContractData.length
                 )}`}
               />
             ) : null}
@@ -207,7 +209,7 @@ function MainPage() {
         <div className="mb-8">
           <Contracts
             user={userData}
-            data={contractorData}
+            data={contractData}
             stagesData={stagesData}
             contractorName={contractorName}
             projectName={projectName}
@@ -219,7 +221,7 @@ function MainPage() {
         <div className="mt-8">
           <NonContracts
             user={userData}
-            data={nonContractorData}
+            data={nonContractData}
             stagesData={stagesData}
             contractorName={contractorName}
             projectName={projectName}

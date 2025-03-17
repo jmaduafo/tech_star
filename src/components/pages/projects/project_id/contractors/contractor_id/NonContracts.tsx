@@ -88,10 +88,6 @@ function NonContracts({
     }
   }
 
-  function deleteCurrency(item: string) {
-    setCurrencyInputs(currencyInputs.filter((inp) => inp.code !== item));
-  }
-
   async function handleSubmit(formData: FormData) {
     const contractDesc = formData.get("desc");
     const contractComment = formData.get("comment");
@@ -121,6 +117,7 @@ function NonContracts({
 
     try {
       if (!user || !projectId || !contractorId || !stagesData) {
+        console.log("Could not find user or project id or contractor id or stages data")
         return;
       }
 
@@ -141,15 +138,15 @@ function NonContracts({
         bank_name: bank_names,
         currencies: currency,
         is_completed: isComplete,
-        description: desc,
-        comment: comment ?? null,
+        description: desc.trim(),
+        comment: comment ? comment.trim() : null,
         is_contract: false,
         created_at: serverTimestamp(),
         updated_at: null,
       });
 
       toast({
-        title: "Contract added successfully!",
+        title: "Payment added successfully!",
       });
 
       setBankInputs([]);
@@ -228,22 +225,22 @@ function NonContracts({
                     inputs={bankInputs}
                     disabledLogic={bankInputs.length >= 1}
                   />
-                  <SelectBar
-                    valueChange={setStageId}
-                    value="Select the project stage *"
-                    label="Stages"
-                    className="w-full sm:w-full mb-3"
-                  >
-                    {stagesData
-                      ? stagesData.map((item) => {
-                          return (
-                            <SelectItem key={item.name} value={item.id}>
-                              {item.name}
-                            </SelectItem>
-                          );
-                        })
-                      : null}
-                  </SelectBar>
+                  {stagesData ? (
+                    <SelectBar
+                      valueChange={setStageId}
+                      value="Select the project stage *"
+                      label="Stages"
+                      className="w-full sm:w-full mb-3"
+                    >
+                      {stagesData.map((item) => {
+                        return (
+                          <SelectItem key={item.name} value={item.id}>
+                            {item.name}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectBar>
+                  ) : null}
                   <Separator />
                   <ObjectArray handleAdd={handleAddCurrency}>
                     <div className="mb-2">

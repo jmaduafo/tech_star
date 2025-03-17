@@ -24,7 +24,7 @@ function ArrayInput({
 
   function handleAddInput() {
     if (value.length) {
-      setInputs([...new Set([...inputs, value.toLowerCase()])]);
+      setInputs([...new Set([...inputs, value.toLowerCase().trim()])]);
       setValue("");
     }
   }
