@@ -34,34 +34,34 @@ export const contractColumns: ColumnDef<Contract>[] = [
   },
   {
     header: ({ column }) => {
-        return (
-          <div className="">
-            <button
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="flex items-center gap-1"
-            >
-              Contract code
-              <ArrowUpDown className="h-4 w-4" />
-            </button>
-          </div>
-        );
-      },
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Contract code
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
     accessorKey: "contract_code",
   },
   {
-    header:  ({ column }) => {
-        return (
-          <div className="">
-            <button
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="flex items-center gap-1"
-            >
-              Status
-              <ArrowUpDown className="h-4 w-4" />
-            </button>
-          </div>
-        );
-      },
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Status
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
     accessorKey: "is_completed",
     cell: ({ row }) => {
       const status: boolean = row.getValue("is_completed");
@@ -176,7 +176,19 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
-    header: "Date",
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Date
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
     accessorKey: "date",
     cell: ({ row }) => {
       const date: TimeStamp = row.getValue("date");
@@ -185,7 +197,19 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     },
   },
   {
-    header: "Status",
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Status
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
     accessorKey: "is_completed",
     cell: ({ row }) => {
       const status: boolean = row.getValue("is_completed");
@@ -194,7 +218,19 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     },
   },
   {
-    header: "Description",
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Description
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
     accessorKey: "description",
     cell: ({ row }) => {
       const desc: string = row.getValue("description");
@@ -207,7 +243,19 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     },
   },
   {
-    header: () => <div className="text-right">Amount</div>,
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-end">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Amount
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
     accessorKey: "currencies",
     cell: ({ row }) => {
       const currencies: Amount[] = row.getValue("currencies");
