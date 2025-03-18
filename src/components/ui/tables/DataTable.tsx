@@ -6,6 +6,7 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
@@ -30,8 +31,8 @@ function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [ sorting, setSorting ] = useState<SortingState>([])
-  const [ columnFilters, setColumnFilters ] = useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
@@ -42,6 +43,8 @@ function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     // Handles sorting functionality
     getSortedRowModel: getSortedRowModel(),
+    // Handles sorting functionality
+    getFilteredRowModel: getFilteredRowModel(),
 
     // Setting states for sorting and filter functionalities
     onSortingChange: setSorting,
@@ -49,12 +52,24 @@ function DataTable<TData, TValue>({
 
     state: {
       sorting,
-      columnFilters
-    }
+      columnFilters,
+    },
   });
 
   return (
     <div>
+      <div className="mb-5">
+        <input
+          placeholder="Filter description..."
+          className="searchTable placeholder:text-light70 max-w-sm backdrop-blur-2xl"
+          value={
+            (table.getColumn("description")?.getFilterValue() as string) || ""
+          }
+          onChange={(e) =>
+            table.getColumn("description")?.setFilterValue(e.target.value)
+          }
+        />
+      </div>
       <Table>
         <TableHeader>
           {/* table.getHeaderGroups => an array that contains the headers from the "columns" definition */}
@@ -106,21 +121,29 @@ function DataTable<TData, TValue>({
       <div className="flex items-center justify-end gap-3 mt-3">
         {/* PREVIOUS */}
         <button
-          className={`${table.getCanPreviousPage() ? "block" : "hidden"} flex items-center gap-1 duration-300`}
+          className={`${
+            table.getCanPreviousPage() ? "block" : "hidden"
+          } flex items-center gap-1 duration-300`}
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          <span><ChevronLeft className="w-4 h-4" /></span>
+          <span>
+            <ChevronLeft className="w-4 h-4" />
+          </span>
           <span>Previous</span>
         </button>
         {/* NEXT */}
         <button
-          className={`${table.getCanNextPage() ? "block" : "hidden"} flex items-center gap-1 duration-300`}
+          className={`${
+            table.getCanNextPage() ? "block" : "hidden"
+          } flex items-center gap-1 duration-300`}
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           <span>Next</span>
-          <span><ChevronRight className="w-4 h-4" /></span>
+          <span>
+            <ChevronRight className="w-4 h-4" />
+          </span>
         </button>
       </div>
     </div>

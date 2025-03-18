@@ -116,16 +116,10 @@ export const contractColumns: ColumnDef<Contract>[] = [
     },
   },
   {
-    header: ({ column }) => {
+    header: () => {
       return (
         <div className="flex justify-end">
-          <button
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1"
-          >
-            Amount
-            <ArrowUpDown className="h-4 w-4" />
-          </button>
+          <div>Amount</div>
         </div>
       );
     },
@@ -243,16 +237,10 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     },
   },
   {
-    header: ({ column }) => {
+    header: () => {
       return (
         <div className="flex justify-end">
-          <button
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1"
-          >
-            Amount
-            <ArrowUpDown className="h-4 w-4" />
-          </button>
+          <div>Amount</div>
         </div>
       );
     },
