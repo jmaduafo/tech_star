@@ -125,13 +125,17 @@ export const contractColumns: ColumnDef<Contract>[] = [
     },
     accessorKey: "currencies",
     cell: ({ row }) => {
-      const currencies: Amount[] = row.getValue("currencies");
+      const currencies = row.original;
 
       return (
         <div className="text-right">
-          {currencies[0]?.amount !== "Unlimited"
-            ? formatCurrency(currencies[0]?.amount, currencies[0]?.code)
-            : `${currencies[0]?.symbol} Unlimited`}
+          {currencies?.currency_amount &&
+          currencies?.currency_amount !== "Unlimited"
+            ? formatCurrency(
+                +currencies?.currency_amount,
+                currencies?.currency_code
+              )
+            : `${currencies?.currency_symbol} Unlimited`}
         </div>
       );
     },
@@ -246,13 +250,17 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     },
     accessorKey: "currencies",
     cell: ({ row }) => {
-      const currencies: Amount[] = row.getValue("currencies");
+      const currencies = row.original;
 
       return (
         <div className="text-right">
-          {currencies[0]?.amount !== "Unlimited"
-            ? formatCurrency(currencies[0]?.amount, currencies[0]?.code)
-            : `${currencies[0]?.symbol} Unlimited`}
+          {currencies?.currency_amount &&
+          currencies?.currency_amount !== "Unlimited"
+            ? formatCurrency(
+                +currencies?.currency_amount,
+                currencies?.currency_code
+              )
+            : `${currencies?.currency_symbol} Unlimited`}
         </div>
       );
     },
@@ -262,7 +270,11 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     cell: ({ row }) => {
       const contract = row.original;
 
-      return <div className="flex justify-around"><ActionDialog data={contract} /></div>
+      return (
+        <div className="flex justify-around">
+          <ActionDialog data={contract} />
+        </div>
+      );
     },
   },
 ];

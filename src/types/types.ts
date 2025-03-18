@@ -86,8 +86,11 @@ export type Contract = {
   contractor_name: string;
   stage_name: string;
   contract_code: string;
-  bank_name: string[];
-  currencies: Amount[];
+  bank_name: string;
+  currency_symbol: string;
+  currency_code: string;
+  currency_name: string;
+  currency_amount: number | "Unlimited";
   is_completed: boolean;
   description: string;
   comment?: string | null;
@@ -135,9 +138,12 @@ export type Payment = {
   stage_name: string;
   description: string;
   comment: string | null;
-  amount: number;
   bank_name: string;
-  currencies: Amount[];
+  // currencies: Amount[];
+  currency_symbol: string;
+  currency_code: string;
+  currency_name: string;
+  currency_amount: number | "Unlimited";
   is_contract: boolean;
   contract_code: string | null;
   is_completed: boolean;

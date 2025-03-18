@@ -156,8 +156,11 @@ function Contracts({
         contractor_name: contractorName,
         stage_name: stageComplete,
         contract_code: code,
-        bank_name: bank_names,
-        currencies: currency,
+        bank_name: bank_names[0],
+        currency_amount: currency[0].amount,
+        currency_symbol: currency[0].symbol,
+        currency_code: currency[0].code,
+        currency_name: currency[0].name,
         is_completed: isComplete,
         description: desc.trim(),
         comment: comment ? comment.trim() : null,
@@ -275,7 +278,7 @@ function Contracts({
                   <Separator />
                   <ObjectArray
                     handleAdd={handleAddCurrency}
-                    disabledLogic={currencyInputs.length >= 4}
+                    disabledLogic={currencyInputs.length >= 1}
                   >
                     <div className="mb-2">
                       {currencyInputs.map((item) => {
@@ -329,11 +332,6 @@ function Contracts({
                         id="amount"
                       />
                     </Input>
-                    {currencyInputs.length >= 4 ? (
-                      <p className="text-[14px] text-red-700">
-                        You have reached the max
-                      </p>
-                    ) : null}
                     <div className="flex items-center gap-2 mt-3">
                       <Switch
                         id="is_unlimited"

@@ -149,30 +149,7 @@ function ActionDialog({ data }: Dialog) {
             {/* BANK NAMES AND CONTRACT DESCRIPTION */}
             <div className="flex justify-between items-start gap-5">
               <div className="flex-1">
-                <Detail title="Banks" custom={true}>
-                  {typeof data?.bank_name === "string" ? (
-                    <p>{data.bank_name}</p>
-                  ) : (
-                    <div className="flex items-end gap-1">
-                      {data?.bank_name?.map((item, i) => {
-                        return (
-                          <p key={item} className="capitalize">
-                            {item}
-                            <span
-                              className={`${
-                                i === data?.bank_name?.length - 1
-                                  ? "hidden"
-                                  : "inline-block"
-                              }`}
-                            >
-                              ,
-                            </span>
-                          </p>
-                        );
-                      })}
-                    </div>
-                  )}
-                </Detail>
+                <Detail title="Banks" item={data?.bank_name} className="capitalize"/>
               </div>
               <div className="flex-1">
                 <Detail title="description" item={data?.description} />
@@ -186,27 +163,14 @@ function ActionDialog({ data }: Dialog) {
                 ) : null}
               </div>
               <div className="flex-1">
-                {data?.currencies ? (
-                  <Detail title="Amounts" custom>
-                    <div className="">
-                      {data?.currencies?.map((item, i) => {
-                        return (
-                          <p
-                            key={item.code}
-                            className={`${
-                              i === data.currencies.length - 1 ? "mb-0" : "mb-1"
-                            }`}
-                          >
-                            {item.code}{" "}
-                            {formatCurrency(+item.amount, item.code)}
-                          </p>
-                        );
-                      })}
-                    </div>
-                  </Detail>
-                ) : (
-                  <Detail title="amounts" item="N/A" />
-                )}
+                {data?.currency_amount && data?.currency_code ? (
+                  <Detail
+                    title="Amount"
+                    item={data?.currency_amount !== "Unlimited" && data?.currency_code
+                        ? data?.currency_code + " " + formatCurrency(+data?.currency_amount, data?.currency_code)
+                        : `${data?.currency_symbol} Unlimited`}
+                  />
+                ) : null}
               </div>
             </div>
             {/* CONTRACT STATUS & OPTIONAL COMMENT */}
@@ -289,18 +253,20 @@ function Detail({
   title,
   item,
   custom,
+  className
 }: {
   readonly children?: React.ReactNode;
   readonly title: string;
   readonly item?: string;
   readonly custom?: boolean;
+  readonly className?: string;
 }) {
   const render = item ? <Paragraph text={item} /> : null;
 
   return (
     <div className="mb-4">
       <Header6 text={title} className="capitalize text-darkText font-medium" />
-      <div className="mt-1 text-dark75 text-[14.5px]">
+      <div className={`mt-1 text-dark75 text-[14.5px] ${className}`}>
         {custom ? children : render}
       </div>
     </div>

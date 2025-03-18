@@ -26,7 +26,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../button";
 
@@ -42,7 +42,8 @@ function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -60,11 +61,13 @@ function DataTable<TData, TValue>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
 
     state: {
       sorting,
       columnFilters,
-      columnVisibility
+      columnVisibility,
+      rowSelection,
     },
   });
 
@@ -85,15 +88,13 @@ function DataTable<TData, TValue>({
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               Columns
-              <ChevronDown className="text-darkText"/>
+              <ChevronDown className="text-darkText" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter(
-                (column) => column.getCanHide()
-              )
+              .filter((column) => column.getCanHide())
               .map((column) => {
                 return (
                   <DropdownMenuCheckboxItem
@@ -106,7 +107,7 @@ function DataTable<TData, TValue>({
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -159,33 +160,40 @@ function DataTable<TData, TValue>({
         </TableBody>
       </Table>
       {/* PAGINATION NEXT AND PREVIOUS DISPLAY */}
-      <div className="flex items-center justify-end gap-3 mt-3">
-        {/* PREVIOUS */}
-        <button
-          className={`${
-            table.getCanPreviousPage() ? "block" : "hidden"
-          } flex items-center gap-1 duration-300`}
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <span>
-            <ChevronLeft className="w-4 h-4" />
-          </span>
-          <span>Previous</span>
-        </button>
-        {/* NEXT */}
-        <button
-          className={`${
-            table.getCanNextPage() ? "block" : "hidden"
-          } flex items-center gap-1 duration-300`}
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          <span>Next</span>
-          <span>
-            <ChevronRight className="w-4 h-4" />
-          </span>
-        </button>
+      <div className="flex justify-between items-end mt-3">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div className="flex items-center gap-3">
+          {/* PREVIOUS */}
+          <button
+            className={`${
+              table.getCanPreviousPage() ? "opacity-100 cursor-pointer" : "opacity-50 cursor-default"
+            } flex items-center gap-1 duration-300`}
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <span>
+              <ChevronLeft className="w-4 h-4" />
+            </span>
+            <span>Previous</span>
+          </button>
+          <p>Page {table.getPageCount()}</p>
+          {/* NEXT */}
+          <button
+            className={`${
+              table.getCanNextPage() ? "block" : "opacity-50"
+            } flex items-center gap-1 duration-300`}
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <span>Next</span>
+            <span>
+              <ChevronRight className="w-4 h-4" />
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
