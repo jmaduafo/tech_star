@@ -137,8 +137,14 @@ function Contracts({
       }
 
       const stageIndex = stagesData?.findIndex(item => item.id === stage_id)
+      const stageComplete = stageIndex ? stagesData[stageIndex]?.name : null
 
       setLoading(true);
+
+      if (!stageComplete) {
+        console.log("Stage returned null")
+        return;
+      }
 
       await addItem("contracts", {
         date,
@@ -148,7 +154,7 @@ function Contracts({
         stage_id: stage_id,
         project_name: projectName,
         contractor_name: contractorName,
-        stage_name: stageIndex ? stagesData[stageIndex]?.name : null,
+        stage_name: stageComplete,
         contract_code: code,
         bank_name: bank_names,
         currencies: currency,

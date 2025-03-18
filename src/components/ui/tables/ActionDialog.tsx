@@ -46,12 +46,11 @@ type Dialog = {
 function ActionDialog({ data }: Dialog) {
   const { userData } = useAuth();
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
 
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
@@ -63,18 +62,14 @@ function ActionDialog({ data }: Dialog) {
 
   async function handleDelete(id: string) {
     try {
-        setLoadingDelete(true)
+      setLoadingDelete(true);
 
-        await deleteItem("contracts", id)
+      await deleteItem("contracts", id);
 
-        toast({
-
-        })
+      toast({});
     } catch (err: any) {
-        
     } finally {
-        setLoadingDelete(false)
-
+      setLoadingDelete(false);
     }
   }
 
@@ -158,24 +153,24 @@ function ActionDialog({ data }: Dialog) {
                   {typeof data?.bank_name === "string" ? (
                     <p>{data.bank_name}</p>
                   ) : (
-                    data?.bank_name?.map((item, i) => {
-                      return (
-                        <div key={item} className="flex items-end gap-1">
-                          <p className="capitalize">
+                    <div className="flex items-end gap-1">
+                      {data?.bank_name?.map((item, i) => {
+                        return (
+                          <p key={item} className="capitalize">
                             {item}
                             <span
                               className={`${
                                 i === data?.bank_name?.length - 1
                                   ? "hidden"
-                                  : "block"
+                                  : "inline-block"
                               }`}
                             >
                               ,
                             </span>
                           </p>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </div>
                   )}
                 </Detail>
               </div>
@@ -193,7 +188,7 @@ function ActionDialog({ data }: Dialog) {
               <div className="flex-1">
                 {data?.currencies ? (
                   <Detail title="Amounts" custom>
-                    <div className="flex items-end">
+                    <div className="">
                       {data?.currencies?.map((item, i) => {
                         return (
                           <p
@@ -272,8 +267,14 @@ function ActionDialog({ data }: Dialog) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-darkText">Cancel</AlertDialogCancel>
-            {data ? <AlertDialogAction onClick={() => handleDelete(data?.id)}>Continue</AlertDialogAction>: null}
+            <AlertDialogCancel className="text-darkText">
+              Cancel
+            </AlertDialogCancel>
+            {data ? (
+              <AlertDialogAction onClick={() => handleDelete(data?.id)}>
+                Continue
+              </AlertDialogAction>
+            ) : null}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -28,6 +30,9 @@ function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [ sorting, setSorting ] = useState<SortingState>([])
+  const [ columnFilters, setColumnFilters ] = useState<ColumnFiltersState>([])
+
   const table = useReactTable({
     data,
     columns,
@@ -36,7 +41,16 @@ function DataTable<TData, TValue>({
     // Handles pagination
     getPaginationRowModel: getPaginationRowModel(),
     // Handles sorting functionality
-    getSortedRowModel: getSortedRowModel()
+    getSortedRowModel: getSortedRowModel(),
+
+    // Setting states for sorting and filter functionalities
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+
+    state: {
+      sorting,
+      columnFilters
+    }
   });
 
   return (
