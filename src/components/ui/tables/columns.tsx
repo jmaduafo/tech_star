@@ -262,7 +262,7 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     cell: ({ row }) => {
       const contract = row.original;
 
-      return <ActionDialog data={contract} />;
+      return <div className="flex justify-around"><ActionDialog data={contract} /></div>
     },
   },
 ];

@@ -11,6 +11,7 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -20,7 +21,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "../button";
 
 interface DataTableProps<TData, TValue> {
   readonly columns: ColumnDef<TData, TValue>[];
@@ -33,6 +41,8 @@ function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
 
   const table = useReactTable({
     data,
@@ -49,19 +59,21 @@ function DataTable<TData, TValue>({
     // Setting states for sorting and filter functionalities
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
 
     state: {
       sorting,
       columnFilters,
+      columnVisibility
     },
   });
 
   return (
     <div>
-      <div className="mb-5">
+      <div className="mb-5 flex items-end gap-4">
         <input
           placeholder="Filter description..."
-          className="searchTable placeholder:text-light70 max-w-sm backdrop-blur-2xl"
+          className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
           value={
             (table.getColumn("description")?.getFilterValue() as string) || ""
           }
@@ -69,6 +81,35 @@ function DataTable<TData, TValue>({
             table.getColumn("description")?.setFilterValue(e.target.value)
           }
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              Columns
+              <ChevronDown className="text-darkText"/>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter(
+                (column) => column.getCanHide()
+              )
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <Table>
         <TableHeader>
