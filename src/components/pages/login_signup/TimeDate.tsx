@@ -53,7 +53,7 @@ function TimeDate({
     <div>
       <div className={`flex justify-center items-end gap-2 tracking-tighter`}>
         {/* TIME ICON */}
-        <div className="text-accent1 duration-200">{timeIcon(time.hour)}</div>
+        <div className="text-lightText duration-200">{timeIcon(time.hour)}</div>
         {/* TIME DISPLAY */}
         <div className="flex justify-center">
           <p

@@ -9,7 +9,7 @@ import Header2 from "@/components/fontsize/Header2";
 import Header4 from "@/components/fontsize/Header4";
 import { getQueriedItems } from "@/firebase/actions";
 import { HiCheckCircle } from "react-icons/hi2";
-import { ContractAmount, Contractor, Currencies, Project, User } from "@/types/types";
+import { Contractor, Currencies, Project, User } from "@/types/types";
 import NotAvailable from "@/components/ui/NotAvailable";
 import { collection, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -75,108 +75,108 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
     allData();
   }, [user?.id ?? "guest"]);
 
-  async function totalAmount() {
-    // Set submitted values
-    projectId.length &&
-      contractorId.length &&
-      currencyId.length &&
-      setSubmit({
-        project: projectId,
-        contractor: contractorId,
-        currency: currencyId,
-      });
+  // async function totalAmount() {
+  //   // Set submitted values
+  //   projectId.length &&
+  //     contractorId.length &&
+  //     currencyId.length &&
+  //     setSubmit({
+  //       project: projectId,
+  //       contractor: contractorId,
+  //       currency: currencyId,
+  //     });
 
-    // Find the symbol for the selected/submitted currency
-    const symbol = currency_list.find((item) => item.name === submit.currency);
-    symbol && setCurrencySymbol(symbol?.symbol);
+  //   // Find the symbol for the selected/submitted currency
+  //   const symbol = currency_list.find((item) => item.name === submit.currency);
+  //   symbol && setCurrencySymbol(symbol?.symbol);
 
-    setLoading(true);
+  //   setLoading(true);
 
-    // Get queried contracts based on project_id and contractor_id
-    const contractq = query(
-      collection(db, "contracts"),
-      where("project_id", "==", submit.project),
-      where("contractor_id", "==", submit.contractor),
-    );
+  //   // Get queried contracts based on project_id and contractor_id
+  //   const contractq = query(
+  //     collection(db, "contracts"),
+  //     where("project_id", "==", submit.project),
+  //     where("contractor_id", "==", submit.contractor),
+  //   );
     
-    const allContracts = await getQueriedItems(contractq)
+  //   const allContracts = await getQueriedItems(contractq)
     
-    let contractWithCurrencies: ContractAmount[] = [];
+  //   let contractWithCurrencies: ContractAmount[] = [];
 
-    allContracts?.length && allContracts?.forEach(async (item) => {
-      // Getting all contract amounts where the currency_id in subcollection 
-      // matches the selected option
-      const amountq = query(
-        collection(db, "contracts", item?.id, "contractAmount"),
-        where("currency_id", "==", submit.currency),
-      );
+  //   allContracts?.length && allContracts?.forEach(async (item) => {
+  //     // Getting all contract amounts where the currency_id in subcollection 
+  //     // matches the selected option
+  //     const amountq = query(
+  //       collection(db, "contracts", item?.id, "contractAmount"),
+  //       where("currency_id", "==", submit.currency),
+  //     );
 
-      const amount = await getQueriedItems(amountq)
+  //     const amount = await getQueriedItems(amountq)
 
-      if (!amount?.length) {
-        return;
-      }
+  //     if (!amount?.length) {
+  //       return;
+  //     }
 
-      contractWithCurrencies = amount as ContractAmount[]
-    })
+  //     contractWithCurrencies = amount as ContractAmount[]
+  //   })
 
     
-    // Get queried payments within contracts
-    const contractpaymentq = query(
-      collection(db, "payments"),
-      where("project_id", "==", submit.project),
-      where("contractor_id", "==", submit.contractor),
-      where("currency_id", "==", submit.currency),
-      where("contract_id", "!=", null)
-    );
+  //   // Get queried payments within contracts
+  //   const contractpaymentq = query(
+  //     collection(db, "payments"),
+  //     where("project_id", "==", submit.project),
+  //     where("contractor_id", "==", submit.contractor),
+  //     where("currency_id", "==", submit.currency),
+  //     where("contract_id", "!=", null)
+  //   );
 
-    // Get queried payments outside of contracts
-    const noncontractpaymentq = query(
-      collection(db, "payments"),
-      where("project_id", "==", submit.project),
-      where("contractor_id", "==", submit.contractor),
-      where("currency_id", "==", submit.currency),
-      where("contract_id", "==", null)
-    );
-
-
-    const contractpaymentQuery = await getQueriedItems(contractpaymentq);
-    const noncontractpaymentQuery = await getQueriedItems(noncontractpaymentq);
+  //   // Get queried payments outside of contracts
+  //   const noncontractpaymentq = query(
+  //     collection(db, "payments"),
+  //     where("project_id", "==", submit.project),
+  //     where("contractor_id", "==", submit.contractor),
+  //     where("currency_id", "==", submit.currency),
+  //     where("contract_id", "==", null)
+  //   );
 
 
-    const contractPayments: number[] = [];
-    const noncontractPayments: number[] = [];
-    const contracts: number[] = [];
+  //   const contractpaymentQuery = await getQueriedItems(contractpaymentq);
+  //   const noncontractpaymentQuery = await getQueriedItems(noncontractpaymentq);
 
-    // Only push the amount to the array
-    contractpaymentQuery?.forEach((item) => {
-      contractPayments.push(item?.amount)
-    });
 
-    noncontractpaymentQuery?.forEach((item) => {
-      contractPayments.push(item?.amount)
-    });
+  //   const contractPayments: number[] = [];
+  //   const noncontractPayments: number[] = [];
+  //   const contracts: number[] = [];
 
-    contractWithCurrencies?.forEach((item) => {
-      contracts.push(item?.amount)
-    })
+  //   // Only push the amount to the array
+  //   contractpaymentQuery?.forEach((item) => {
+  //     contractPayments.push(item?.amount)
+  //   });
+
+  //   noncontractpaymentQuery?.forEach((item) => {
+  //     contractPayments.push(item?.amount)
+  //   });
+
+  //   contractWithCurrencies?.forEach((item) => {
+  //     contracts.push(item?.amount)
+  //   })
     
-    let contractTotals;
-    let contractPaymentsTotals;
-    let noncontractPaymentsTotals;
+  //   let contractTotals;
+  //   let contractPaymentsTotals;
+  //   let noncontractPaymentsTotals;
 
-    contractTotals = totalSum(contracts);
-    contractPaymentsTotals = totalSum(contractPayments);
-    noncontractPaymentsTotals = totalSum(noncontractPayments);
+  //   contractTotals = totalSum(contracts);
+  //   contractPaymentsTotals = totalSum(contractPayments);
+  //   noncontractPaymentsTotals = totalSum(noncontractPayments);
 
-    setAllTotals({
-      contractPayments: contractPaymentsTotals,
-      contracts: contractTotals,
-      noncontractPayments: noncontractPaymentsTotals,
-    });
+  //   setAllTotals({
+  //     contractPayments: contractPaymentsTotals,
+  //     contracts: contractTotals,
+  //     noncontractPayments: noncontractPaymentsTotals,
+  //   });
 
-    setLoading(false);
-  }
+  //   setLoading(false);
+  // }
 
   // The condition to either show the amount display or the "No payments available"
   const amountView =
@@ -287,7 +287,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
           })}
         </SelectBar>
         <button
-          onClick={totalAmount}
+          // onClick={totalAmount}
           className={`${
             !contractorId.length ||
             !projectId.length ||

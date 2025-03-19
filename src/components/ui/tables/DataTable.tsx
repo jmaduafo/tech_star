@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -29,16 +29,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../button";
+import { downloadToExcel } from "@/utils/export";
+import { IContent } from "json-as-xlsx";
 
 interface DataTableProps<TData, TValue> {
   readonly columns: ColumnDef<TData, TValue>[];
   readonly data: TData[];
+  readonly is_payment: boolean;
+  readonly is_export?: boolean;
+  readonly team_name: string;
 }
 
 function DataTable<TData, TValue>({
   columns,
   data,
+  is_payment,
+  team_name,
+  is_export,
 }: DataTableProps<TData, TValue>) {
+  const [exportedData, setExportedData] = useState<TData[] | IContent[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] =
@@ -71,6 +80,20 @@ function DataTable<TData, TValue>({
     },
   });
 
+  function getExportData() {
+    const data: TData[] = [];
+
+    table.getFilteredRowModel().rows.forEach((item) => {
+      data.push(item.original);
+    });
+
+    setExportedData(data);
+  }
+
+  useEffect(() => {
+    getExportData();
+  }, [columnFilters]);
+
   return (
     <div>
       <div className="mb-5 flex items-end gap-4">
@@ -84,6 +107,19 @@ function DataTable<TData, TValue>({
             table.getColumn("description")?.setFilterValue(e.target.value)
           }
         />
+        {is_export ? (
+          <Button
+            onClick={() =>
+              downloadToExcel(
+                is_payment,
+                "Ria's team",
+                exportedData as IContent[]
+              )
+            }
+          >
+            Export as CSV
+          </Button>
+        ) : null}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
@@ -169,7 +205,9 @@ function DataTable<TData, TValue>({
           {/* PREVIOUS */}
           <button
             className={`${
-              table.getCanPreviousPage() ? "opacity-100 cursor-pointer" : "opacity-50 cursor-default"
+              table.getCanPreviousPage()
+                ? "opacity-100 cursor-pointer"
+                : "opacity-50 cursor-default"
             } flex items-center gap-1 duration-300`}
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}

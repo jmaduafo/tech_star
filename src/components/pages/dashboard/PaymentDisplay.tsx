@@ -1,4 +1,5 @@
-import React from "react";
+"use client"
+import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/MyCard";
 import Header3 from "@/components/fontsize/Header3";
 import {
@@ -18,8 +19,12 @@ import { db } from "@/firebase/config";
 import NotAvailable from "@/components/ui/NotAvailable";
 import { optionalS } from "@/utils/optionalS";
 import TextButton from "@/components/ui/buttons/TextButton";
+import { Payment } from "@/types/types";
 
-async function PaymentDisplay() {
+function PaymentDisplay() {
+  const [ latestPayments, setLatestPayments ] = useState<Payment[] | undefined>()
+
+
   const invoices = [
     {
       contractor: "INV001",
@@ -58,75 +63,19 @@ async function PaymentDisplay() {
     },
   ];
 
-  const q = query(
-    collection(db, "payments"),
-    orderBy("date", "desc"),
-    limit(5)
-  );
+  function getLatest() {
+    const q = query(
+      collection(db, "payments"),
+      orderBy("date", "desc"),
+      limit(5)
+    );
 
-  const payments = await getQueriedItems(q);
+   
+  }
+
 
   return (
-    <Card className="w-full">
-      <div className="flex justify-between items-start">
-        <div className="flex items-start gap-5">
-          <Header3 text="Latest Payments" />
-          {payments ? (
-            <p>
-              {payments?.length === 5
-                ? "Max. 5"
-                : `${payments?.length} result${optionalS(payments?.length)}`}
-            </p>
-          ) : null}
-        </div>
-        <div>
-          {payments?.length ? <TextButton href="/payments" text="View all" iconDirection="right"/> : null}
-        </div>
-      </div>
-      <div className="mt-6">
-        {payments?.length ? (
-          <Table>
-            <TableCaption></TableCaption>
-            <TableHeader className="hover:bg-transparent">
-              <TableRow>
-                <TableHead className="w-[150px]">Contractor</TableHead>
-                <TableHead>Project Name</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.contractor}>
-                  <TableCell className="font-medium">
-                    {invoice.contractor}
-                  </TableCell>
-                  <TableCell>{invoice.projectName}</TableCell>
-                  <TableCell>{invoice.date}</TableCell>
-                  <TableCell>
-                    <Banner text={invoice.paymentStatus} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {invoice.totalAmount}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              {/* <TableRow>
-              <TableCell colSpan={4}>Total</TableCell>
-              <TableCell className="text-right">$2,500.00</TableCell>
-            </TableRow> */}
-            </TableFooter>
-          </Table>
-        ) : (
-          <div className="h-[100px] flex justify-center items-center">
-            <NotAvailable text="No payments available " />
-          </div>
-        )}
-      </div>
-    </Card>
+    <div></div>
   );
 }
 

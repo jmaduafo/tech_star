@@ -1,17 +1,17 @@
-import xlsx, { IJsonSheet } from "json-as-xlsx";
+import xlsx, { IContent, IJsonSheet } from "json-as-xlsx";
 import { formatDate } from "./dateAndTime";
 import { TimeStamp } from "@/types/types";
 
-export function downloadToExcel(payment: boolean) {
+export function downloadToExcel(
+  payment: boolean,
+  team_name: string,
+  data: IContent[]
+) {
   let columns: IJsonSheet[] = [
     {
       sheet: payment ? "Payments Table" : "Contracts Table",
       columns: [
         { label: "ID", value: "id" }, // Top level data
-        { label: "PROJECT NAME", value: "project_name" },
-        { label: "CONTRACTOR NAME", value: "contractor_name" },
-        { label: "STAGE", value: "stage_name" },
-        { label: "BANK NAME", value: "bank_name" },
         {
           label: "CONTRACT?",
           value: (row) => (row.is_contract ? "Yes" : "No"),
@@ -19,6 +19,16 @@ export function downloadToExcel(payment: boolean) {
         { label: "CONTRACT CODE", value: (row) => row.contract_code ?? "--" },
         { label: "DATE", value: (row) => formatDate(row.date as TimeStamp) },
         { label: "DESCRIPTION", value: "description" },
+        { label: "PROJECT NAME", value: "project_name" },
+        { label: "CONTRACTOR NAME", value: "contractor_name" },
+        { label: "STAGE", value: "stage_name" },
+        {
+          label: "BANK NAME",
+          value: (row) =>
+            row.bank_name && typeof row.bank_name === "string"
+              ? row.bank_name.charAt(0).toUpperCase() + row.bank_name.slice(1)
+              : "",
+        },
         {
           label: "CURRENCY NAME",
           value: "currency_name",
@@ -33,49 +43,39 @@ export function downloadToExcel(payment: boolean) {
         },
         {
           label: "CURRENCY AMOUNT",
-          value: "currency_amount",
+          value: "currency_amount"
         },
         {
           label: "STATUS",
           value: (row) =>
-            row.is_complete && payment
+            row.is_completed && payment
               ? "Paid"
-              : !row.is_complete && payment
+              : !row.is_completed && payment
               ? "Pending"
-              : row.is_complete && !payment
+              : row.is_completed && !payment
               ? "Completed"
               : "Ongoing",
         },
         {
+          label: "UPDATED AT",
+          value: (row) =>
+            row.updated_at ? formatDate(row.updated_at as TimeStamp) : "",
+        },
+        {
           label: "COMMENT",
-          value: (row) => ( row.comment ?? ""),
+          value: (row) => row.comment ?? "",
         },
       ],
-      content: [
-        { user: "Andrea", age: 20, more: { phone: "11111111" } },
-        { user: "Luis", age: 21, more: { phone: "12345678" } },
-      ],
-    },
-    {
-      sheet: "Children",
-      columns: [
-        { label: "User", value: "user" }, // Top level data
-        { label: "Age", value: "age", format: '# "years"' }, // Column format
-        { label: "Phone", value: "more.phone", format: "(###) ###-####" }, // Deep props and column format
-      ],
-      content: [
-        { user: "Manuel", age: 16, more: { phone: 9999999900 } },
-        { user: "Ana", age: 17, more: { phone: 8765432135 } },
-      ],
+      content: data,
     },
   ];
 
   let settings = {
-    fileName: "MySpreadsheet", // Name of the resulting spreadsheet
+    fileName: team_name + " Spreadsheet", // Name of the resulting spreadsheet
     extraLength: 3, // A bigger number means that columns will be wider
     writeMode: "writeFile", // The available parameters are 'WriteFile' and 'write'. This setting is optional. Useful in such cases https://docs.sheetjs.com/docs/solutions/output#example-remote-file
     writeOptions: {}, // Style options from https://docs.sheetjs.com/docs/api/write-options
-    RTL: true, // Display the columns from right-to-left (the default value is false)
+    RTL: false, // Display the columns from right-to-left (the default value is false)
   };
 
   xlsx(columns, settings);

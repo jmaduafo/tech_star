@@ -1,6 +1,6 @@
 "use client";
 
-import { Amount, Contract, Payment, TimeStamp } from "@/types/types";
+import { Contract, Payment, TimeStamp } from "@/types/types";
 import { formatCurrency } from "@/utils/currencies";
 import { formatDate } from "@/utils/dateAndTime";
 import { ColumnDef } from "@tanstack/react-table";

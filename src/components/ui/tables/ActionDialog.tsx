@@ -25,7 +25,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Contract, Payment } from "@/types/types";
 import { MoreHorizontal } from "lucide-react";
@@ -149,7 +148,11 @@ function ActionDialog({ data }: Dialog) {
             {/* BANK NAMES AND CONTRACT DESCRIPTION */}
             <div className="flex justify-between items-start gap-5">
               <div className="flex-1">
-                <Detail title="Banks" item={data?.bank_name} className="capitalize"/>
+                <Detail
+                  title="Banks"
+                  item={data?.bank_name}
+                  className="capitalize"
+                />
               </div>
               <div className="flex-1">
                 <Detail title="description" item={data?.description} />
@@ -166,9 +169,17 @@ function ActionDialog({ data }: Dialog) {
                 {data?.currency_amount && data?.currency_code ? (
                   <Detail
                     title="Amount"
-                    item={data?.currency_amount !== "Unlimited" && data?.currency_code
-                        ? data?.currency_code + " " + formatCurrency(+data?.currency_amount, data?.currency_code)
-                        : `${data?.currency_symbol} Unlimited`}
+                    item={
+                      data?.currency_amount !== "Unlimited" &&
+                      data?.currency_code
+                        ? data?.currency_code +
+                          " " +
+                          formatCurrency(
+                            +data?.currency_amount,
+                            data?.currency_code
+                          )
+                        : `${data?.currency_symbol} Unlimited`
+                    }
                   />
                 ) : null}
               </div>
@@ -226,8 +237,8 @@ function ActionDialog({ data }: Dialog) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              This action cannot be undone. This will permanently delete this
+              row and remove your data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -253,7 +264,7 @@ function Detail({
   title,
   item,
   custom,
-  className
+  className,
 }: {
   readonly children?: React.ReactNode;
   readonly title: string;

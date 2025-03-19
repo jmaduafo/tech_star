@@ -136,13 +136,13 @@ function Contracts({
         return;
       }
 
-      const stageIndex = stagesData?.findIndex(item => item.id === stage_id)
-      const stageComplete = stageIndex ? stagesData[stageIndex]?.name : null
+      const stageIndex = stagesData?.findIndex((item) => item.id === stage_id);
+      const stageComplete = stageIndex ? stagesData[stageIndex]?.name : null;
 
       setLoading(true);
 
       if (!stageComplete) {
-        console.log("Stage returned null")
+        console.log("Stage returned null");
         return;
       }
 
@@ -377,14 +377,21 @@ function Contracts({
         </div>
       </div>
       <div className="mt-4">
-      {/* DISPLAY OF DATA TABLE WITH RENDERED DATA FROM BACKEND */}
-      {!data ? (
-        <div className="py-8 flex justify-center">
-          <Loading className="w-10 h-10" />
-        </div>
-      ) : (
-        <DataTable columns={contractColumns} data={data} />
-      )}
+        {/* DISPLAY OF DATA TABLE WITH RENDERED DATA FROM BACKEND */}
+        {!data ? (
+          <div className="py-8 flex justify-center">
+            <Loading className="w-10 h-10" />
+          </div>
+        ) : (
+          <DataTable
+            columns={contractColumns}
+            data={data}
+            is_payment={false}
+            // DISPLAYS EXPORT BUTTON IF TRUE
+            is_export
+            team_name={user ? user?.first_name : "My"}
+          />
+        )}
       </div>
     </section>
   );

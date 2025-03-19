@@ -117,7 +117,9 @@ function NonContracts({
 
     try {
       if (!user || !projectId || !contractorId || !stagesData) {
-        console.log("Could not find user or project id or contractor id or stages data")
+        console.log(
+          "Could not find user or project id or contractor id or stages data"
+        );
         return;
       }
 
@@ -343,7 +345,14 @@ function NonContracts({
             <Loading className="w-10 h-10" />
           </div>
         ) : (
-          <DataTable columns={paymentColumns} data={data} />
+          <DataTable
+            columns={paymentColumns}
+            data={data}
+            is_payment
+            // DISPLAYS EXPORT BUTTON IF TRUE
+            is_export
+            team_name={user ? user?.first_name : "My"}
+          />
         )}
       </div>
     </section>
