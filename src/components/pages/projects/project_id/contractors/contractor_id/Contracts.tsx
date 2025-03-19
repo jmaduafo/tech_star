@@ -389,6 +389,7 @@ function Contracts({
             is_payment={false}
             // DISPLAYS EXPORT BUTTON IF TRUE
             is_export
+            advanced
             team_name={user ? user?.first_name : "My"}
           />
         )}

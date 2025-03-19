@@ -38,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   readonly is_payment: boolean;
   readonly is_export?: boolean;
   readonly team_name: string;
+  readonly advanced?: boolean;
 }
 
 function DataTable<TData, TValue>({
@@ -46,6 +47,7 @@ function DataTable<TData, TValue>({
   is_payment,
   team_name,
   is_export,
+  advanced,
 }: DataTableProps<TData, TValue>) {
   const [exportedData, setExportedData] = useState<TData[] | IContent[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -110,11 +112,7 @@ function DataTable<TData, TValue>({
         {is_export ? (
           <Button
             onClick={() =>
-              downloadToExcel(
-                is_payment,
-                "Ria's team",
-                exportedData as IContent[]
-              )
+              downloadToExcel(is_payment, team_name, exportedData as IContent[])
             }
           >
             Export as CSV
@@ -195,44 +193,47 @@ function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
-      {/* PAGINATION NEXT AND PREVIOUS DISPLAY */}
-      <div className="flex justify-between items-end mt-3">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+
+      {/* PAGINATION NEXT AND PREVIOUS DISPLAY AND ROW SELECT */}
+      {advanced ? (
+        <div className="flex justify-between items-end mt-3">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="flex items-center gap-3">
+            {/* PREVIOUS */}
+            <button
+              className={`${
+                table.getCanPreviousPage()
+                  ? "opacity-100 cursor-pointer"
+                  : "opacity-50 cursor-default"
+              } flex items-center gap-1 duration-300`}
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <span>
+                <ChevronLeft className="w-4 h-4" />
+              </span>
+              <span>Previous</span>
+            </button>
+            <p>Page {table.getPageCount()}</p>
+            {/* NEXT */}
+            <button
+              className={`${
+                table.getCanNextPage() ? "block" : "opacity-50"
+              } flex items-center gap-1 duration-300`}
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <span>Next</span>
+              <span>
+                <ChevronRight className="w-4 h-4" />
+              </span>
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* PREVIOUS */}
-          <button
-            className={`${
-              table.getCanPreviousPage()
-                ? "opacity-100 cursor-pointer"
-                : "opacity-50 cursor-default"
-            } flex items-center gap-1 duration-300`}
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span>
-              <ChevronLeft className="w-4 h-4" />
-            </span>
-            <span>Previous</span>
-          </button>
-          <p>Page {table.getPageCount()}</p>
-          {/* NEXT */}
-          <button
-            className={`${
-              table.getCanNextPage() ? "block" : "opacity-50"
-            } flex items-center gap-1 duration-300`}
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span>Next</span>
-            <span>
-              <ChevronRight className="w-4 h-4" />
-            </span>
-          </button>
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }
