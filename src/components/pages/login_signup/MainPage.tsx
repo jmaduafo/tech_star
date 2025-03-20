@@ -5,7 +5,7 @@ import TimeDate from "./TimeDate";
 function MainPage() {
 
   return (
-    <main className="h-screen w-full bg-fixed bg-[url(/images/background1.jpg)] bg-cover bg-center bg-no-repeat">
+    <main className="h-screen w-full">
       <div className="flex h-full">
         <div className="flex-1 flex justify-center items-center">
           <TimeDate/>
