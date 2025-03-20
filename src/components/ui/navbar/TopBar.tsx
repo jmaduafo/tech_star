@@ -4,6 +4,7 @@ import { HiUser, HiMiniCog8Tooth } from "react-icons/hi2";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,6 +22,8 @@ import { useAuth } from "@/context/AuthContext";
 import Submit from "../buttons/Submit";
 import { updateItem } from "@/firebase/actions";
 import { toast } from "@/hooks/use-toast";
+import { db } from "@/firebase/config";
+import { doc, onSnapshot } from "firebase/firestore";
 
 function TopBar() {
   return (
@@ -95,10 +98,23 @@ function SettingButton() {
     }
   }
 
+  async function getBgIndex() {
+    if (!userData) {
+      return;
+    }
+
+    const userDoc = doc(db, "users", userData?.id)
+
+    const unsub = onSnapshot(userDoc, (doc) => {
+      doc.exists() ? setBgSelect(doc.data().bg_image_index) : setBgSelect(0)
+
+      return () => unsub()
+    })
+    
+  }
+
   useEffect(() => {
-    typeof userData?.bg_image_index === "number"
-      ? setBgSelect(userData?.bg_image_index)
-      : setBgSelect(0);
+    getBgIndex()
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -114,6 +130,7 @@ function SettingButton() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>Modify and customize to fit your needs</DialogDescription>
         </DialogHeader>
         <div className="w-full">
           <Header6 text="Set a background" className="text-darkText"/>
@@ -130,7 +147,7 @@ function SettingButton() {
                     type="button"
                     onClick={() => setBgSelect(i)}
                     className={`${
-                      item.image === images[bgSelect].image
+                      i === bgSelect
                         ? "border-2 border-lightText"
                         : "border-none"
                     } rounded-md hover:opacity-80 duration-300 w-full h-[60px] bg-cover bg-center bg-no-repeat`}
