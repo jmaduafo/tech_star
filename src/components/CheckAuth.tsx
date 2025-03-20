@@ -12,26 +12,26 @@ function CheckAuth({ children }: { readonly children: React.ReactNode }) {
   const pathname = usePathname();
   const route = useRouter();
 
-  const [bgIndex, setBgIndex] = useState<number | undefined>();
-    const { userData } = useAuth();
-  
-    function getBgIndex() {
-      if (!userData) {
-        return;
-      }
-  
-      const userDoc = doc(db, "users", userData?.id);
-  
-      const unsub = onSnapshot(userDoc, (doc) => {
-        doc.exists() ? setBgIndex(doc.data().bg_image_index) : setBgIndex(0);
-  
-        return () => unsub();
-      });
+  const [bgIndex, setBgIndex] = useState<number>(0);
+  const { userData } = useAuth();
+
+  function getBgIndex() {
+    if (!userData) {
+      return;
     }
-  
-    useEffect(() => {
-      getBgIndex();
-    }, [userData?.id ?? "guest"]);
+
+    const userDoc = doc(db, "users", userData?.id);
+
+    const unsub = onSnapshot(userDoc, (doc) => {
+      doc.exists() ? setBgIndex(doc.data().bg_image_index) : setBgIndex(0);
+
+      return () => unsub();
+    });
+  }
+
+  useEffect(() => {
+    getBgIndex();
+  }, [userData?.id ?? "guest"]);
 
   // const team_id = pathname.split('/')[1]
 
@@ -49,10 +49,16 @@ function CheckAuth({ children }: { readonly children: React.ReactNode }) {
     });
   }, []);
 
-  return <main style={{
-          backgroundImage: bgIndex ? `url(${images[bgIndex].image})` : `url(${images[0].image})`,
-        }}
-        className={`w-full bg-fixed bg-cover bg-center bg-no-repeat duration-300`}>{children}</main>;
+  return (
+    <main
+      style={{
+        backgroundImage: `url(${images[bgIndex].image})`
+      }}
+      className={`w-full bg-fixed bg-cover bg-center bg-no-repeat duration-300`}
+    >
+      {children}
+    </main>
+  );
 }
 
 export default CheckAuth;
