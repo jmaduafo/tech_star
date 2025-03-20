@@ -4,13 +4,16 @@ import Loading from "../Loading";
 
 function Submit({
   loading,
+  buttonClick
 }: {
   readonly loading: boolean;
+  readonly buttonClick?: () => void;
 }) {
 
   return (
     <button
       type="submit"
+      onClick={buttonClick}
       className="rounded-full w-[160px] h-[60px] bg-dark35 group"
       disabled={loading ?? false}
     >

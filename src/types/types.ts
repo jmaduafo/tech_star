@@ -8,7 +8,7 @@ export type User = {
   password?: string;
   occupation?: string;
   is_admin: boolean;
-  bg_image_index?: number;
+  bg_image_index: number;
   team_id?: string;
   created_at: number;
   updated_at: number | null;

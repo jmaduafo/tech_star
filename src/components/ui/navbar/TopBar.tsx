@@ -1,5 +1,5 @@
-"use client"
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import { HiUser, HiMiniCog8Tooth } from "react-icons/hi2";
 import {
   Dialog,
@@ -17,6 +17,10 @@ import {
 } from "@/components/ui/carousel";
 import { images } from "@/utils/dataTools";
 import Header6 from "@/components/fontsize/Header6";
+import { useAuth } from "@/context/AuthContext";
+import Submit from "../buttons/Submit";
+import { updateItem } from "@/firebase/actions";
+import { toast } from "@/hooks/use-toast";
 
 function TopBar() {
   return (
@@ -56,7 +60,46 @@ function UserButton() {
 }
 
 function SettingButton() {
-  const [ bgSelect, setBgSelect ] = React.useState(images[0].image)
+  const [bgSelect, setBgSelect] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const { userData } = useAuth();
+
+  async function handleImageSubmit() {
+    if (bgSelect === userData?.bg_image_index) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      if (!userData) {
+        return;
+      }
+
+      await updateItem("users", userData.id, {
+        bg_image_index: bgSelect,
+      });
+
+      toast({
+        title: "Background image successfully submitted!",
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh, something went wrong!",
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    typeof userData?.bg_image_index === "number"
+      ? setBgSelect(userData?.bg_image_index)
+      : setBgSelect(0);
+  }, [userData?.id ?? "guest"]);
 
   return (
     <Dialog>
@@ -72,8 +115,8 @@ function SettingButton() {
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <div className="w-full text-dark75">
-          <Header6 text="Set a background"/>
+        <div className="w-full">
+          <Header6 text="Set a background" className="text-darkText"/>
           <Carousel
             className="w-[80%] mx-auto mt-4"
             opts={{
@@ -81,14 +124,16 @@ function SettingButton() {
             }}
           >
             <CarouselContent className="">
-              {images.map((item) => (
-                <CarouselItem
-                  key={item.image}
-                  className="basis-1/3"
-                >
+              {images.map((item, i) => (
+                <CarouselItem key={item.image} className="basis-1/3">
                   <button
-                  onClick={() => setBgSelect(item.image)}
-                    className={`${item.image === bgSelect ? 'border-2 border-lightText' : 'border-none'} rounded-md hover:opacity-80 duration-300 w-full h-[60px] bg-cover bg-center bg-no-repeat`}
+                    type="button"
+                    onClick={() => setBgSelect(i)}
+                    className={`${
+                      item.image === images[bgSelect].image
+                        ? "border-2 border-lightText"
+                        : "border-none"
+                    } rounded-md hover:opacity-80 duration-300 w-full h-[60px] bg-cover bg-center bg-no-repeat`}
                     style={{ backgroundImage: `url(${item.image})` }}
                   ></button>
                 </CarouselItem>
@@ -97,6 +142,9 @@ function SettingButton() {
             <CarouselPrevious />
             <CarouselNext />
           </Carousel>
+          <div className="flex justify-center mt-6 scale-75">
+            <Submit loading={loading} buttonClick={handleImageSubmit}/>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
