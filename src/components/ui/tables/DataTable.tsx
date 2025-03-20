@@ -98,7 +98,7 @@ function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="mb-5 flex items-end gap-4">
+      <div className="mb-5 flex items-end flex-wrap gap-x-4 gap-y-3">
         <input
           placeholder="Filter description..."
           className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
