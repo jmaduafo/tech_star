@@ -29,7 +29,7 @@ import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
 import { optionalS } from "@/utils/optionalS";
 import DataTable from "@/components/ui/tables/DataTable";
-import { nonContractColumns } from "@/components/ui/tables/columns";
+import { paymentColumns } from "@/components/ui/tables/columns";
 import Loading from "@/components/ui/Loading";
 
 function NonContracts({
@@ -346,7 +346,7 @@ function NonContracts({
           </div>
         ) : (
           <DataTable
-            columns={nonContractColumns}
+            columns={paymentColumns}
             data={data}
             is_payment
             // DISPLAYS EXPORT BUTTON IF TRUE
