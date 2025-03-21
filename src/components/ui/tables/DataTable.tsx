@@ -94,11 +94,12 @@ function DataTable<TData, TValue>({
 
   useEffect(() => {
     getExportData();
-  }, [columnFilters]);
+  }, [columnFilters, sorting]);
 
   return (
     <div>
       <div className="mb-5 flex items-end flex-wrap gap-x-4 gap-y-3">
+        {/* SEARCH ENGINE */}
         <input
           placeholder="Filter description..."
           className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
@@ -109,7 +110,8 @@ function DataTable<TData, TValue>({
             table.getColumn("description")?.setFilterValue(e.target.value)
           }
         />
-        {is_export ? (
+        {/* EXPORT AS CSV BUTTON */}
+        {is_export && exportedData.length && data.length ? (
           <Button
             onClick={() =>
               downloadToExcel(is_payment, team_name, exportedData as IContent[])
@@ -118,6 +120,7 @@ function DataTable<TData, TValue>({
             Export as CSV
           </Button>
         ) : null}
+        {/* COLUMN VISIBILITY DROPDOWN */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">

@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import Loading from "@/components/ui/Loading";
 import DataTable from "@/components/ui/tables/DataTable";
 import Header6 from "@/components/fontsize/Header6";
-import { paymentColumns } from "@/components/ui/tables/columns";
+import { latestColumns } from "@/components/ui/tables/columns";
 
 function PaymentDisplay() {
   const [latestPayments, setLatestPayments] = useState<Payment[] | undefined>();
@@ -58,6 +58,7 @@ function PaymentDisplay() {
     <Card className="w-full">
       <div className="flex justify-between items-start">
         <div className="flex items-start gap-5">
+          {/* LATEST HEADING WITH PAYMENTS COUNT */}
           <Header3 text="Latest Payments" />
           {latestPayments ? (
             <Header6
@@ -71,6 +72,7 @@ function PaymentDisplay() {
             />
           ) : null}
         </div>
+        {/* PAYMENTS  */}
         <div>
           {latestPayments?.length ? (
             <TextButton
@@ -88,7 +90,7 @@ function PaymentDisplay() {
           </div>
         ) : (
           <DataTable
-            columns={paymentColumns}
+            columns={latestColumns}
             data={latestPayments}
             is_payment
             team_name={userData ? userData?.first_name : "My"}
