@@ -94,7 +94,7 @@ function DataTable<TData, TValue>({
 
   useEffect(() => {
     getExportData();
-  }, [columnFilters, sorting]);
+  }, [columnFilters, data, sorting]);
 
   return (
     <div>

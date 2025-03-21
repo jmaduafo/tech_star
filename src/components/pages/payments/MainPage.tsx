@@ -21,14 +21,13 @@ import Loading from "@/components/ui/Loading";
 import { currency_list } from "@/utils/dataTools";
 import MultipleSelectBar from "@/components/ui/input/MultipleSelectBar";
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 import CheckedButton from "@/components/ui/buttons/CheckedButton";
 import Reset from "@/components/ui/buttons/Reset";
 
 function MainPage() {
-  const [category, setCategory] = useState("Payment");
+  const [category, setCategory] = useState("Payments");
 
   const [paymentData, setPaymentData] = useState<Payment[] | undefined>();
   const [contractData, setContractData] = useState<Contract[] | undefined>();
@@ -258,7 +257,7 @@ function MainPage() {
               valueChange={setCategory}
               className="w-[160px]"
             >
-              {["Payment", "Contract"].map((item) => {
+              {["Payments", "Contracts"].map((item) => {
                 return (
                   <SelectItem key={item} value={item} className="capitalize">
                     {item}
@@ -345,12 +344,12 @@ function MainPage() {
             <div className="flex justify-center py-8">
               <Loading />
             </div>
-          ) : category === "Payment" ? (
+          ) : category === "Payments" ? (
             <DataTable
               columns={paymentColumns}
               data={filterPaymentData}
               is_payment={true}
-              team_name="Ria"
+              team_name="Harmony"
               is_export
               advanced
             />
