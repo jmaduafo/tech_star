@@ -59,7 +59,8 @@ function LineChartDisplay({ user }: { readonly user: User | undefined}) {
             <SelectBar
               valueChange={(val: string) => setProjectName(val)}
               className="w-[150px]"
-              value="Select a project"
+              value={projectName}
+              placeholder="Select a project"
               label="Project"
             >
               {chartData?.length
@@ -73,9 +74,10 @@ function LineChartDisplay({ user }: { readonly user: User | undefined}) {
                 : null}
             </SelectBar>
             <SelectBar
-              valueChange={(val: string) => setRange(val.toLowerCase())}
+              valueChange={setRange}
               className="w-[150px]"
-              value="Select a range"
+              value={range}
+              placeholder="Select a range"
               label="Project"
             >
               {["Last 7 days", "Last 1 month", "Last 3 months"].map((item) => {

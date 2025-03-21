@@ -233,7 +233,8 @@ function NonContracts({
                   {stagesData ? (
                     <SelectBar
                       valueChange={setStageId}
-                      value="Select the project stage *"
+                      value={stageId}
+                      placeholder="Select the project stage *"
                       label="Stages"
                       className="w-full sm:w-full mb-3"
                     >
@@ -269,7 +270,8 @@ function NonContracts({
                     </div>
                     <SelectBar
                       valueChange={setCurrencyCode}
-                      value="Select a currency"
+                      value={currencyCode}
+                      placeholder="Select a currency"
                       label="Currency"
                       className="w-full"
                     >

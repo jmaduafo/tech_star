@@ -46,9 +46,7 @@ function MainPage() {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedStages, setSelectedStages] = useState<string[]>([]);
   const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
-  const [selectedCurrency, setSelectedCurrency] = useState<
-    string | undefined
-  >();
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("");
 
   const { userData } = useAuth();
 
@@ -224,8 +222,6 @@ function MainPage() {
           selectedCurrency?.includes(i.currency_name)
       )
     );
-
-    console.log(selectedCurrency);
   }
 
   function resetData() {
@@ -234,7 +230,7 @@ function MainPage() {
     setSelectedContractors([]);
     setSelectedStages([]);
     setSelectedProjects([]);
-    setSelectedCurrency(undefined);
+    setSelectedCurrency("");
   }
 
   useEffect(() => {
@@ -252,7 +248,8 @@ function MainPage() {
           {/* MORE SORT AND FILTER OPTIONS */}
           <div>
             <SelectBar
-              value={"Select a category"}
+              value={category}
+              placeholder={"Select a category"}
               label="Categories"
               valueChange={setCategory}
               className="w-[160px]"
@@ -313,7 +310,8 @@ function MainPage() {
                 : null}
             </MultipleSelectBar>
             <SelectBar
-              value={"Select a currency"}
+              value={selectedCurrency}
+              placeholder="Select a currency"
               label="Currencies"
               valueChange={setSelectedCurrency}
             >

@@ -83,7 +83,6 @@ function MainPage() {
 
         setAllStages(stages);
 
-
         return () => unsub();
       });
 

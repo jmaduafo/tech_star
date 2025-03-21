@@ -9,10 +9,12 @@ function ProjectSearch({
   user,
   setSort,
   value,
+  sort,
   setValue,
 }: {
   readonly user: User | undefined;
   readonly setSort: React.Dispatch<React.SetStateAction<string>>;
+  readonly sort: string;
   readonly setValue: React.Dispatch<React.SetStateAction<string>>;
   readonly value: string;
 }) {
@@ -38,7 +40,12 @@ function ProjectSearch({
           />
         </div>
         <div className="">
-          <SelectBar value="Sort by" label="Sort" valueChange={setSort}>
+          <SelectBar
+            placeholder="Sort by"
+            value={sort}
+            label="Sort"
+            valueChange={setSort}
+          >
             {["Sort by activity", "Sort by name"].map((item) => {
               return (
                 <SelectItem key={item} value={item}>

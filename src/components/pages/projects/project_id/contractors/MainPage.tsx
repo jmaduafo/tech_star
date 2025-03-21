@@ -156,6 +156,7 @@ function MainPage() {
         <ContractorsSearch
           user={userData}
           setSort={setSort}
+          sort={sort}
           setValue={setSearchValue}
           value={searchValue}
         />

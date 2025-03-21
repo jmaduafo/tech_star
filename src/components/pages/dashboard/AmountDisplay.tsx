@@ -241,7 +241,8 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
       <div className="flex gap-4">
         <SelectBar
           valueChange={setProjectId}
-          value="Select a project"
+          value={projectId}
+          placeholder="Select a project"
           label="Projects"
         >
           {allProjects?.length
@@ -256,7 +257,8 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
         </SelectBar>
         <SelectBar
           valueChange={setContractorId}
-          value="Select a contractor"
+          value={contractorId}
+          placeholder="Select a contractor"
           label="Contractors"
         >
           {allContractors?.length
@@ -271,7 +273,8 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
         </SelectBar>
         <SelectBar
           valueChange={setCurrencyId}
-          value="Select a currency"
+          value={currencyId}
+          placeholder="Select a currency"
           label="Currencies"
         >
           {allCurrencies?.map((item) => {

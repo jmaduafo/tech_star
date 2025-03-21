@@ -144,7 +144,8 @@ function ContractorsDisplay({
           <div className="mt-5">
             {/* COUNTRY LOCATION */}
             <SelectBar
-              value="Select contractor location "
+              placeholder="Select contractor location"
+              value={contractorLocation}
               valueChange={setContractorLocation}
               label="Countries"
               className="w-full"

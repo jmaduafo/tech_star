@@ -12,6 +12,7 @@ function SelectBar({
   valueChange,
   children,
   value,
+  placeholder,
   label,
   className,
 }: {
@@ -19,12 +20,13 @@ function SelectBar({
   readonly className?: string;
   readonly children: React.ReactNode;
   readonly value: string;
+  readonly placeholder: string;
   readonly label: string;
 }) {
   return (
-    <Select onValueChange={valueChange}>
+    <Select value={value} onValueChange={valueChange}>
       <SelectTrigger className={`${className ?? "w-[120px] sm:w-[180px]" }`}>
-        <SelectValue placeholder={`${value}`} />
+        <SelectValue placeholder={`${placeholder}`} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

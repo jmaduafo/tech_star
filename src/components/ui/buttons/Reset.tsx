@@ -10,7 +10,7 @@ function Reset({
 }) {
   return (
     <button
-      title="Refresh"
+      title="Reset"
       onClick={clickedFn}
       disabled={disabledLogic}
       className={`rounded-full ${disabledLogic ? "opacity-50" : "opacity-100"}`}

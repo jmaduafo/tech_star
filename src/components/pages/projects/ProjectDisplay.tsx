@@ -144,7 +144,8 @@ function ProjectDisplay({
           <div className="flex items-center gap-4 mt-5">
             {/* COUNTRY LOCATION */}
             <SelectBar
-              value="Select country *"
+              placeholder="Select country *"
+              value={projectCountry}
               valueChange={setProjectCountry}
               label="Countries"
               className="flex-1"
@@ -158,7 +159,8 @@ function ProjectDisplay({
               })}
             </SelectBar>
             <SelectBar
-              value="Starting month *"
+              placeholder="Starting month *"
+              value={projectMonth}
               valueChange={setProjectMonth}
               label="Months"
               className="flex-1"

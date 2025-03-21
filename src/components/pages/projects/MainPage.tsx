@@ -13,7 +13,7 @@ import Header1 from "@/components/fontsize/Header1";
 import ContentContainer from "../ContentContainer";
 
 function MainPage() {
-  const { userData, loading } = useAuth();
+  const { userData } = useAuth();
   const [sort, setSort] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
@@ -90,6 +90,7 @@ function MainPage() {
         <ProjectSearch
           user={userData}
           setSort={setSort}
+          sort={sort}
           setValue={setSearchValue}
           value={searchValue}
         />
