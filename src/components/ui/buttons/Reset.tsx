@@ -10,9 +10,10 @@ function Reset({
 }) {
   return (
     <button
+      title="Refresh"
       onClick={clickedFn}
       disabled={disabledLogic}
-      className="rounded-full"
+      className={`rounded-full ${disabledLogic ? "opacity-50" : "opacity-100"}`}
     >
       <RefreshCw strokeWidth={1} className="text-lightText w-6 h-6" />
     </button>

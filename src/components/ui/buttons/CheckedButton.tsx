@@ -14,7 +14,8 @@ function CheckedButton({
     <button
       onClick={clickedFn}
       disabled={disabledLogic}
-      className="rounded-full"
+      title="Filter"
+      className={`rounded-full ${disabledLogic ? "opacity-50" : "opacity-100"}`}
     >
       <CircleCheck strokeWidth={1} className="text-lightText w-6 h-6" />
     </button>

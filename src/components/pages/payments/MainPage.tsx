@@ -268,7 +268,7 @@ function MainPage() {
             </SelectBar>
           </div>
           <div className="flex flex-wrap gap-3 items-center">
-            <MultipleSelectBar value={"Select a project"}>
+            <MultipleSelectBar value={"Select projects"}>
               {projectsData
                 ? projectsData?.map((item) => {
                     return (
@@ -283,7 +283,7 @@ function MainPage() {
                   })
                 : null}
             </MultipleSelectBar>
-            <MultipleSelectBar value={"Select a stage"}>
+            <MultipleSelectBar value={"Select stages"}>
               {stageData
                 ? stageData?.map((item) => {
                     return (
@@ -298,7 +298,7 @@ function MainPage() {
                   })
                 : null}
             </MultipleSelectBar>
-            <MultipleSelectBar value={"Select a contractor"}>
+            <MultipleSelectBar value={"Select contractors"}>
               {contractorData
                 ? contractorData?.map((item) => {
                     return (
@@ -326,7 +326,16 @@ function MainPage() {
                 );
               })}
             </SelectBar>
-            <CheckedButton clickedFn={() => filterData()} />
+            <CheckedButton
+              clickedFn={() => filterData()}
+              disabledLogic={
+                !selectedContractors.length ||
+                !selectedStages.length ||
+                !category ||
+                !selectedCurrency ||
+                !selectedProjects.length
+              }
+            />
             <Reset clickedFn={() => resetData()} />
           </div>
         </div>
