@@ -204,36 +204,38 @@ function DataTable<TData, TValue>({
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className="flex items-center gap-3">
-            {/* PREVIOUS */}
-            <button
-              className={`${
-                table.getCanPreviousPage()
-                  ? "opacity-100 cursor-pointer"
-                  : "opacity-50 cursor-default"
-              } flex items-center gap-1 duration-300`}
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <span>
-                <ChevronLeft className="w-4 h-4" />
-              </span>
-              <span>Previous</span>
-            </button>
-            <p>Page {table.getPageCount()}</p>
-            {/* NEXT */}
-            <button
-              className={`${
-                table.getCanNextPage() ? "block" : "opacity-50"
-              } flex items-center gap-1 duration-300`}
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <span>Next</span>
-              <span>
-                <ChevronRight className="w-4 h-4" />
-              </span>
-            </button>
+          <div className="flex items-center gap-5">
+            <p className="text-[14.5px]">Page {table.getPageCount()}</p>
+            <div className="flex items-center gap-3 text-[14.5px]">
+              {/* PREVIOUS */}
+              <button
+                className={`${
+                  table.getCanPreviousPage()
+                    ? "opacity-100 cursor-pointer"
+                    : "opacity-50 cursor-default"
+                } flex items-center gap-1 duration-300`}
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <span>
+                  <ChevronLeft className="w-4 h-4" />
+                </span>
+                <span>Previous</span>
+              </button>
+              {/* NEXT */}
+              <button
+                className={`${
+                  table.getCanNextPage() ? "block" : "opacity-50"
+                } flex items-center gap-1 duration-300`}
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                <span>Next</span>
+                <span>
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
