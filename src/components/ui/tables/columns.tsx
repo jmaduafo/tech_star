@@ -534,11 +534,11 @@ export const paymentColumns: ColumnDef<Payment>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const contract = row.original;
+      const payment = row.original;
 
       return (
         <div className="flex justify-around">
-          <ActionDialog data={contract} />
+          <ActionDialog data={payment} is_payment />
         </div>
       );
     },

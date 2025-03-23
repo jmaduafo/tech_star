@@ -37,12 +37,14 @@ import { formatCurrency } from "@/utils/currencies";
 import { format } from "timeago.js";
 import { deleteItem } from "@/firebase/actions";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 type Dialog = {
   readonly data: Contract | Payment | undefined;
+  readonly is_payment?: boolean;
 };
 
-function ActionDialog({ data }: Dialog) {
+function ActionDialog({ data, is_payment }: Dialog) {
   const { userData } = useAuth();
 
   const { toast } = useToast();
@@ -88,6 +90,13 @@ function ActionDialog({ data }: Dialog) {
           >
             View details
           </DropdownMenuItem>
+          {!is_payment ? (
+            <Link
+              href={`/projects/${data?.project_id}/contractors/${data?.contractor_id}/contract/${data?.id}`}
+            >
+              <DropdownMenuItem>View payments</DropdownMenuItem>
+            </Link>
+          ) : null}
           {userData?.is_admin ? (
             <>
               <DropdownMenuSeparator />
