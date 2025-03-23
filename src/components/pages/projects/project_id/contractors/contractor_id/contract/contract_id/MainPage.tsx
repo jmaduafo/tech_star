@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import AuthContainer from "@/components/pages/AuthContainer";
 import ContentContainer from "@/components/pages/ContentContainer";
-import { Payment, Stage } from "@/types/types";
+import { Payment } from "@/types/types";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -11,9 +11,7 @@ import {
   where,
   onSnapshot,
   doc,
-  getDoc,
-  getDocs,
-  orderBy,
+  getDoc
 } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import Payments from "./Payments";
@@ -34,7 +32,9 @@ function MainPage() {
   const [projectName, setProjectName] = useState<string | undefined>();
   const [contractorName, setContractorName] = useState<string | undefined>();
   const [contractCode, setContractCode] = useState<string | undefined>();
-  const [stagesData, setStagesData] = useState<Stage[] | undefined>();
+  const [contractDesc, setContractDesc] = useState<string | undefined>();
+  const [stageName, setStageName] = useState<string | undefined>();
+  const [stageId, setStageId] = useState<string | undefined>();
 
   const { userData } = useAuth();
   const params = useParams();
@@ -42,35 +42,6 @@ function MainPage() {
   const projectId = params.project_id ?? "";
   const contractorId = params.contractor_id ?? "";
   const contractId = params.contract_id ?? "";
-
-    // RETRIEVE ALL STAGES
-    async function getStages() {
-      try {
-        if (!userData || !projectId) {
-          return;
-        }
-    
-        const stageq = query(
-          collection(db, "stages"),
-          where("project_id", "==", projectId),
-          where("team_id", "==", userData?.team_id),
-          orderBy("created_at")
-        );
-    
-        const stageRef = await getDocs(stageq)
-    
-        const stages : Stage[] = []
-        stageRef.forEach((doc) => {
-          // doc.data() is never undefined for query doc snapshots
-          stages.push({ ... doc.data() as Stage, id: doc.id})
-        })
-    
-        setStagesData(stages)
-  
-      } catch (err: any) {
-        console.log(err.message)
-      }
-    }
 
   function getPayments() {
     try {
@@ -138,7 +109,7 @@ function MainPage() {
     }
   }
 
-  async function getContractCode() {
+  async function getContractInfo() {
     try {
       if (!userData || typeof contractId !== "string") {
         return;
@@ -148,9 +119,14 @@ function MainPage() {
 
       const docSnap = await getDoc(contractq);
 
-      docSnap?.exists()
-        ? setContractCode(docSnap?.data()?.contract_code)
-        : setContractCode(undefined);
+      if (docSnap?.exists()) {
+        setContractCode(docSnap?.data()?.contract_code);
+        setContractDesc(docSnap?.data()?.description);
+        setStageId(docSnap?.data()?.stage_id)
+        setStageName(docSnap?.data()?.stage_name)
+      } else {
+        setContractCode(undefined);
+      }
     } catch (err: any) {
       console.log(err.message);
     }
@@ -160,7 +136,7 @@ function MainPage() {
     getPayments();
     getProjectName();
     getContractorName();
-    getContractCode();
+    getContractInfo();
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -223,13 +199,15 @@ function MainPage() {
         <Payments
           user={userData}
           data={allPayments}
-          stagesData={stagesData}
+          stageId={stageId}
+          stageName={stageName}
           projectName={projectName}
           projectId={projectId}
           contractorId={contractorId}
           contractId={contractId}
           contractorName={contractorName}
           contractCode={contractCode}
+          contractDesc={contractDesc}
         />
       </ContentContainer>
     </AuthContainer>

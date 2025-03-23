@@ -158,7 +158,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
             <div className="flex justify-between items-start gap-5">
               <div className="flex-1">
                 <Detail
-                  title="Banks"
+                  title="Bank"
                   item={data?.bank_name}
                   className="capitalize"
                 />

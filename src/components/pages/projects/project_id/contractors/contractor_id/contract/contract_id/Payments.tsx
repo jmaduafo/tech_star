@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Amount, Payment, Stage, User } from "@/types/types";
+import { Amount, Payment, User } from "@/types/types";
 import DataTable from "@/components/ui/tables/DataTable";
 import { paymentColumns } from "@/components/ui/tables/columns";
 import Loading from "@/components/ui/Loading";
@@ -33,10 +33,12 @@ import Header3 from "@/components/fontsize/Header3";
 type PaymentType = {
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
-  readonly stagesData: Stage[] | undefined;
   readonly contractorName: string | undefined;
   readonly contractCode: string | undefined;
+  readonly contractDesc: string | undefined;
   readonly projectName: string | undefined;
+  readonly stageId: string | undefined;
+  readonly stageName: string | undefined;
   readonly projectId: string | string[];
   readonly contractorId: string | string[];
   readonly contractId: string | string[];
@@ -48,20 +50,22 @@ function Payments({
   projectName,
   contractorName,
   contractCode,
+  contractDesc,
+  stageId,
+  stageName,
   projectId,
   contractorId,
-  contractId,
-  stagesData,
+  contractId
 }: PaymentType) {
   const [contractDate, setContractDate] = useState<Date>();
   const [bankInputs, setBankInputs] = useState<string[]>([]);
   const [currencyInputs, setCurrencyInputs] = useState<Amount[]>([]);
 
-  const [isComplete, setIsComplete] = useState(false);
+  const [isComplete, setIsComplete] = useState(true);
   const [isUnlimited, setIsUnlimited] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const [stageId, setStageId] = useState("");
+
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
 
@@ -93,14 +97,13 @@ function Payments({
   }
 
   async function handleSubmit(formData: FormData) {
-    const contractDesc = formData.get("desc");
+    const contractDescription = formData.get("desc");
     const contractComment = formData.get("comment");
 
     const values = {
-      desc: contractDesc,
+      desc: contractDescription,
       date: contractDate,
       bank_names: bankInputs,
-      stage_id: stageId,
       currency: currencyInputs,
       comment: contractComment,
     };
@@ -117,18 +120,16 @@ function Payments({
       return;
     }
 
-    const { desc, date, stage_id, bank_names, currency, comment } = result.data;
+    const { desc, date, bank_names, currency, comment } = result.data;
 
     try {
       setLoading(true);
-      if (!user || !projectId || !contractorId || !contractId || !stagesData) {
+      if (!user || !projectId || !contractorId || !contractId ) {
         console.log(
           "Could not find user or project id or contractor id or stages data"
         );
         return;
       }
-
-      const stageIndex = stagesData?.findIndex((item) => item.id === stage_id);
 
       await addItem("payments", {
         date,
@@ -136,10 +137,10 @@ function Payments({
         contractor_id: contractorId,
         contract_id: contractId,
         team_id: user.team_id,
-        stage_id: stage_id,
+        stage_id: stageId,
         project_name: projectName,
         contractor_name: contractorName,
-        stage_name: stageIndex ? stagesData[stageIndex]?.name : null,
+        stage_name: stageName,
         contract_code: contractCode,
         bank_name: bank_names[0],
         currency_amount: currency[0].amount,
@@ -147,9 +148,9 @@ function Payments({
         currency_code: currency[0].code,
         currency_name: currency[0].name,
         is_completed: isComplete,
-        description: desc.trim(),
+        description: desc ? desc.trim() : contractDesc,
         comment: comment ? comment.trim() : null,
-        is_contract: true,
+        is_contract: false,
         created_at: serverTimestamp(),
         updated_at: null,
       });
@@ -215,10 +216,13 @@ function Payments({
                       selected={contractDate}
                       onSelect={setContractDate}
                       initialFocus
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
                     />
                   </PopoverContent>
                   {/* DESCRIPTION INPUT */}
-                  <Input htmlFor="desc" label="Description *" className="my-3">
+                  <Input htmlFor="desc" label="Description" className="my-3">
                     <textarea className="form" id="desc" name="desc"></textarea>
                   </Input>
                   {/* ADD AND DELETE BANK NAMES */}
@@ -229,23 +233,6 @@ function Payments({
                     inputs={bankInputs}
                     disabledLogic={bankInputs.length >= 1}
                   />
-                  {stagesData ? (
-                    <SelectBar
-                      valueChange={setStageId}
-                      value={stageId}
-                      placeholder="Select the project stage *"
-                      label="Stages"
-                      className="w-full sm:w-full mb-3"
-                    >
-                      {stagesData.map((item) => {
-                        return (
-                          <SelectItem key={item.name} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectBar>
-                  ) : null}
                   <Separator />
                   <ObjectArray handleAdd={handleAddCurrency}>
                     <div className="mb-2">
@@ -270,7 +257,7 @@ function Payments({
                     <SelectBar
                       valueChange={setCurrencyCode}
                       value={currencyCode}
-                      placeholder="Select a currency"
+                      placeholder="Select a currency *"
                       label="Currency"
                       className="w-full"
                     >
@@ -284,7 +271,7 @@ function Payments({
                     </SelectBar>
                     <Input
                       htmlFor="amount"
-                      label="Payment amount"
+                      label="Payment amount *"
                       className="mt-3"
                     >
                       <input

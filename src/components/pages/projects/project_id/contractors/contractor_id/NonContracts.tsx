@@ -23,7 +23,7 @@ import { SelectItem } from "@/components/ui/select";
 import Separator from "@/components/ui/Separator";
 import { formatCurrency } from "@/utils/currencies";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreatePaymentSchema } from "@/zod/validation";
+import { CreateNoncontractSchema } from "@/zod/validation";
 import { useToast } from "@/hooks/use-toast";
 import { addItem } from "@/firebase/actions";
 import { serverTimestamp } from "firebase/firestore";
@@ -101,7 +101,7 @@ function NonContracts({
       comment: contractComment,
     };
 
-    const result = CreatePaymentSchema.safeParse(values);
+    const result = CreateNoncontractSchema.safeParse(values);
 
     if (!result.success) {
       toast({
@@ -137,6 +137,7 @@ function NonContracts({
         contractor_name: contractorName,
         stage_name: stageIndex ? stagesData[stageIndex]?.name : null,
         contract_code: null,
+        contract_id: null,
         bank_name: bank_names[0],
         currency_amount: currency[0].amount,
         currency_symbol: currency[0].symbol,
