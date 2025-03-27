@@ -55,7 +55,7 @@ function PaymentDisplay() {
   }, [userData?.id ?? "guest"]);
 
   return (
-    <section className="w-full py-10">
+    <section className="w-full py-4">
       <div className="flex justify-between items-start">
         <div className="flex items-start gap-5">
           {/* LATEST HEADING WITH PAYMENTS COUNT */}

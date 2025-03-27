@@ -128,7 +128,7 @@ function MainPage() {
   
       const noncontractq = query(
         collection(db, "payments"),
-        where("is_contract", "==", false),
+        where("contract_id", "==", null),
         where("contractor_id", "==", contractor_id)
       );
   

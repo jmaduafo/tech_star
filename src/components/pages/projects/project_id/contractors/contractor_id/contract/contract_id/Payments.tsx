@@ -179,7 +179,7 @@ function Payments({
     <section>
       <div className="flex items-end justify-between mb-8">
         <div className="flex items-start gap-5">
-          <Header3 text="Payments" />
+          <Header3 text="All Payments" />
         </div>
         <div>
           {user?.is_admin ? (

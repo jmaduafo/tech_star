@@ -35,7 +35,7 @@ function LineChart({ chartConfig, chartData }: { readonly chartConfig: ChartConf
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent />}
             />
             <Line
               dataKey="desktop"

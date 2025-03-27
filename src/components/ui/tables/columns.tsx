@@ -9,6 +9,7 @@ import { Checkbox } from "../checkbox";
 
 import ActionDialog from "./ActionDialog";
 import { ArrowUpDown } from "lucide-react";
+
 export const contractColumns: ColumnDef<Contract>[] = [
   {
     header: ({ table }) => (

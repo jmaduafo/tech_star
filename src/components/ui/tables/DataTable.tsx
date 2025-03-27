@@ -96,7 +96,6 @@ function DataTable<TData, TValue>({
     getExportData();
   }, [columnFilters, data, sorting]);
 
-  console.log(table.getPageOptions())
   return (
     <div>
       <div className="mb-5 flex items-end flex-wrap gap-x-4 gap-y-3">

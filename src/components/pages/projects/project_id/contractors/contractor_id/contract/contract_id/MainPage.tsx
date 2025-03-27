@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import AuthContainer from "@/components/pages/AuthContainer";
 import ContentContainer from "@/components/pages/ContentContainer";
-import { Payment } from "@/types/types";
+import { Contract, Payment } from "@/types/types";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -26,13 +26,13 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import Banner from "@/components/ui/Banner";
 
 function MainPage() {
   const [allPayments, setAllPayments] = useState<Payment[] | undefined>();
   const [projectName, setProjectName] = useState<string | undefined>();
   const [contractorName, setContractorName] = useState<string | undefined>();
-  const [contractCode, setContractCode] = useState<string | undefined>();
-  const [contractDesc, setContractDesc] = useState<string | undefined>();
+  const [contract, setContract] = useState<Contract | undefined>();
   const [stageName, setStageName] = useState<string | undefined>();
   const [stageId, setStageId] = useState<string | undefined>();
 
@@ -120,12 +120,11 @@ function MainPage() {
       const docSnap = await getDoc(contractq);
 
       if (docSnap?.exists()) {
-        setContractCode(docSnap?.data()?.contract_code);
-        setContractDesc(docSnap?.data()?.description);
+        setContract(docSnap?.data() as Contract);
         setStageId(docSnap?.data()?.stage_id)
         setStageName(docSnap?.data()?.stage_name)
       } else {
-        setContractCode(undefined);
+        setContract(undefined);
       }
     } catch (err: any) {
       console.log(err.message);
@@ -144,7 +143,7 @@ function MainPage() {
       <ContentContainer>
         <div className="">
           <div className="flex items-start gap-5 mb-2 text-lightText">
-            {contractCode ? <Header1 text={contractCode} /> : null}
+            {contract ? <Header1 text={contract.contract_code} /> : null}
             {allPayments ? (
               <Header6
                 text={`${allPayments.length} result${optionalS(
@@ -152,6 +151,9 @@ function MainPage() {
                 )}`}
               />
             ) : null}
+          </div>
+          <div className="mb-3">
+            {contract ? <Banner text={contract.is_completed ? "completed" : "ongoing"}/> : null}
           </div>
         </div>
         {/* BREADCRUMB DISPLAY */}
@@ -185,11 +187,11 @@ function MainPage() {
                   {contractorName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              {contractCode ? (
+              {contract ? (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>{contractCode}</BreadcrumbPage>
+                    <BreadcrumbPage>{contract.contract_code}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </>
               ) : null}
@@ -206,8 +208,8 @@ function MainPage() {
           contractorId={contractorId}
           contractId={contractId}
           contractorName={contractorName}
-          contractCode={contractCode}
-          contractDesc={contractDesc}
+          contractCode={contract ? contract.contract_code : ""}
+          contractDesc={contract ? contract.description : ""}
         />
       </ContentContainer>
     </AuthContainer>

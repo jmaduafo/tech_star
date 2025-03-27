@@ -36,7 +36,7 @@ function PieChart({
       <PieContainer>
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent hideLabel />}
+          content={<ChartTooltipContent />}
         />
         <Pie data={data} dataKey={dataKey} nameKey={nameKey} stroke="0" />
         {data.length > 0 && (

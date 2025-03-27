@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthContainer from "../AuthContainer";
 import ContentContainer from "../ContentContainer";
 import { useAuth } from "@/context/AuthContext";
@@ -204,23 +204,47 @@ function MainPage() {
     setFilterPaymentData(paymentData);
     setFilterContractData(contractData);
 
+    const array = [
+      { index: 0, arr: selectedProjects },
+      { index: 1, arr: selectedContractors },
+      { index: 2, arr: selectedStages },
+      { index: 3, arr: selectedCurrency },
+    ];
+
+    const nonempty = array.filter((i) => i.arr.length);
+
     setFilterPaymentData((prev) =>
-      prev?.filter(
-        (i) =>
-          selectedProjects.includes(i.project_name) &&
-          selectedContractors.includes(i.contractor_name) &&
-          selectedStages.includes(i.stage_name) &&
-          selectedCurrency?.includes(i.currency_name)
-      )
+      prev?.filter((i) => {
+        const filter = [
+          i.project_name,
+          i.contractor_name,
+          i.stage_name,
+          i.currency_name,
+        ];
+        nonempty.forEach((item) => {
+          if (item.arr.length) {
+            item.arr.includes(filter[item.index]);
+          }
+        });
+      })
     );
+    console.log(nonempty);
+
     setFilterContractData((prev) =>
-      prev?.filter(
-        (i) =>
-          selectedProjects.includes(i.project_name) &&
-          selectedContractors.includes(i.contractor_name) &&
-          selectedStages.includes(i.stage_name) &&
-          selectedCurrency?.includes(i.currency_name)
-      )
+      prev?.filter((i) => {
+        const filter = [
+          i.project_name,
+          i.contractor_name,
+          i.stage_name,
+          i.currency_name,
+        ];
+
+        nonempty.forEach((item) => {
+          if (item.arr.length) {
+            return item.arr.includes(filter[item.index]);
+          }
+        });
+      })
     );
   }
 
@@ -240,6 +264,26 @@ function MainPage() {
     getContractors();
     getProjects();
   }, [userData?.id ?? "guest"]);
+
+  const table = category === "Payments" ? (
+    <DataTable
+      columns={paymentColumns}
+      data={filterPaymentData ?? []}
+      is_payment={true}
+      team_name={userData ? userData?.first_name : "My"}
+      is_export
+      advanced
+    />
+  ) : (
+    <DataTable
+      columns={contractColumns}
+      data={filterContractData ?? []}
+      is_payment={false}
+      team_name={userData ? userData?.first_name : "My"}
+      is_export
+      advanced
+    />
+  )
 
   return (
     <AuthContainer>
@@ -325,13 +369,7 @@ function MainPage() {
             </SelectBar>
             <CheckedButton
               clickedFn={() => filterData()}
-              disabledLogic={
-                !selectedContractors.length ||
-                !selectedStages.length ||
-                !category ||
-                !selectedCurrency ||
-                !selectedProjects.length
-              }
+              disabledLogic={!category.length || !selectedProjects.length}
             />
             <Reset clickedFn={() => resetData()} />
           </div>
@@ -342,25 +380,7 @@ function MainPage() {
             <div className="flex justify-center py-8">
               <Loading />
             </div>
-          ) : category === "Payments" ? (
-            <DataTable
-              columns={paymentColumns}
-              data={filterPaymentData}
-              is_payment={true}
-              team_name="Harmony"
-              is_export
-              advanced
-            />
-          ) : (
-            <DataTable
-              columns={contractColumns}
-              data={filterContractData}
-              is_payment={false}
-              team_name="Ria"
-              is_export
-              advanced
-            />
-          )}
+          ) : table}
         </div>
       </ContentContainer>
     </AuthContainer>
