@@ -1,18 +1,18 @@
-import { currency_list } from "./dataTools";
-import { Currencies } from "@/types/types";
+export function convertCurrency (labelValue : number) {
+    let output = ""
+    // Nine Zeroes for Billions
+    if (Math.abs(Number(labelValue)) >= 1.0e+9) {
+        output += (Math.abs(Number(labelValue)) / 1.0e+9).toFixed(2) + "B"
+    } else if (Math.abs(Number(labelValue)) >= 1.0e+6) {
+        output += (Math.abs(Number(labelValue)) / 1.0e+6).toFixed(2) + "M"
+    } else if (Math.abs(Number(labelValue)) >= 1.0e+3) {
+        output += (Math.abs(Number(labelValue)) / 1.0e+3).toFixed(2) + "K"
+    } else {
+        output += Math.abs(Number(labelValue))
+    }
 
-// // arr = contractor?.currencies: string[]
-// export function currencyDisplay(arr: string[]) {
-//     const contractorCurrency: Currency[]= []
-
-//     arr.forEach(i => {
-//         currency_list.forEach(j => {
-//             i === j.code && contractorCurrency.push(j)
-//         })
-//     })
-
-//     return contractorCurrency
-// }
+    return output
+}
 
 export function totalSum(arr: number[]) {
     let total = 0
