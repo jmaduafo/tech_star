@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Amount, Payment, User } from "@/types/types";
+import React, { useEffect, useState } from "react";
+import { Amount, Contract, Payment, User } from "@/types/types";
 import DataTable from "@/components/ui/tables/DataTable";
 import { paymentColumns } from "@/components/ui/tables/columns";
 import Loading from "@/components/ui/Loading";
@@ -34,8 +34,7 @@ type PaymentType = {
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
   readonly contractorName: string | undefined;
-  readonly contractCode: string | undefined;
-  readonly contractDesc: string | undefined;
+  readonly contract: Contract | undefined;
   readonly projectName: string | undefined;
   readonly stageId: string | undefined;
   readonly stageName: string | undefined;
@@ -49,22 +48,21 @@ function Payments({
   data,
   projectName,
   contractorName,
-  contractCode,
-  contractDesc,
+  contract,
   stageId,
   stageName,
   projectId,
   contractorId,
-  contractId
+  contractId,
 }: PaymentType) {
   const [contractDate, setContractDate] = useState<Date>();
-  const [bankInputs, setBankInputs] = useState<string[]>([]);
+  const [bankInputs, setBankInputs] = useState<string[]>([]
+  );
   const [currencyInputs, setCurrencyInputs] = useState<Amount[]>([]);
 
   const [isComplete, setIsComplete] = useState(true);
   const [isUnlimited, setIsUnlimited] = useState(false);
   const [open, setOpen] = useState(false);
-
 
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
@@ -124,7 +122,7 @@ function Payments({
 
     try {
       setLoading(true);
-      if (!user || !projectId || !contractorId || !contractId ) {
+      if (!user || !projectId || !contractorId || !contractId) {
         console.log(
           "Could not find user or project id or contractor id or stages data"
         );
@@ -141,14 +139,14 @@ function Payments({
         project_name: projectName,
         contractor_name: contractorName,
         stage_name: stageName,
-        contract_code: contractCode,
+        contract_code: contract?.contract_code,
         bank_name: bank_names[0],
         currency_amount: currency[0].amount,
         currency_symbol: currency[0].symbol,
         currency_code: currency[0].code,
         currency_name: currency[0].name,
         is_completed: isComplete,
-        description: desc ? desc.trim() : contractDesc,
+        description: desc ? desc.trim() : contract?.description,
         comment: comment ? comment.trim() : null,
         is_contract: false,
         created_at: serverTimestamp(),
@@ -175,6 +173,10 @@ function Payments({
     }
   }
 
+  useEffect(() => {
+    contract?.bank_name ? setBankInputs([contract?.bank_name]) : setBankInputs([])
+  }, [contract])
+
   return (
     <section>
       <div className="flex items-end justify-between mb-8">
@@ -185,7 +187,7 @@ function Payments({
           {user?.is_admin ? (
             <AddButton
               title="payment"
-              desc={`Create a payment for contract ${contractCode}`}
+              desc={`Create a payment for contract ${contract?.contract_code}`}
               setOpen={setOpen}
               open={open}
             >
@@ -232,6 +234,7 @@ function Payments({
                     setInputs={setBankInputs}
                     inputs={bankInputs}
                     disabledLogic={bankInputs.length >= 1}
+                    hideX
                   />
                   <Separator />
                   <ObjectArray handleAdd={handleAddCurrency}>
@@ -261,13 +264,12 @@ function Payments({
                       label="Currency"
                       className="w-full"
                     >
-                      {currency_list.map((item) => {
-                        return (
-                          <SelectItem key={item.name} value={item.code}>
-                            {item.name}
-                          </SelectItem>
-                        );
-                      })}
+                      <SelectItem
+                        key={contract?.currency_code}
+                        value={contract?.currency_code ?? ""}
+                      >
+                        {contract?.currency_name}
+                      </SelectItem>
                     </SelectBar>
                     <Input
                       htmlFor="amount"
@@ -282,15 +284,6 @@ function Payments({
                         id="amount"
                       />
                     </Input>
-                    <div className="flex items-center gap-2 mt-3">
-                      <Switch
-                        id="is_unlimited"
-                        name="is_unlimited"
-                        checked={isUnlimited}
-                        onCheckedChange={setIsUnlimited}
-                      />
-                      <label htmlFor="is_unlimited">Unlimited amount?</label>
-                    </div>
                   </ObjectArray>
                   <Separator />
                   {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}

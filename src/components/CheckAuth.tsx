@@ -15,6 +15,7 @@ function CheckAuth({ children }: { readonly children: React.ReactNode }) {
   const [bgIndex, setBgIndex] = useState<number>(0);
   const { userData } = useAuth();
 
+  // GETS THE CURRENT USER'S CHOSEN BACKGROUND IMAGE INDEX
   function getBgIndex() {
     if (!userData) {
       return;
@@ -33,9 +34,11 @@ function CheckAuth({ children }: { readonly children: React.ReactNode }) {
     getBgIndex();
   }, [userData?.id ?? "guest"]);
 
-  // const team_id = pathname.split('/')[1]
 
   useEffect(() => {
+    // GETS THE STATE OF USER IF THE USER IS LOGGED IN OR NOT
+    // IF LOGGED IN, DIRECT USER TO DASHBOARD
+    // IF NOT, DIRECT USER TO SIGN UP
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         route.push("/");

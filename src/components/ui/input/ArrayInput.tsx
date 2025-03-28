@@ -10,6 +10,7 @@ type Input = {
   readonly inputs: string[];
   readonly disabledLogic?: boolean;
   readonly children?: React.ReactNode;
+  readonly hideX?: boolean;
 };
 
 function ArrayInput({
@@ -18,7 +19,8 @@ function ArrayInput({
   setInputs,
   inputs,
   disabledLogic,
-  children
+  children,
+  hideX
 }: Input) {
   const [value, setValue] = useState("");
 
@@ -43,9 +45,14 @@ function ArrayInput({
               className="flex items-center gap-1 py-1 px-4 text-[13.5px] border border-lightText rounded-full"
             >
               <p className="capitalize">{item}</p>
-              <button type="button" onClick={() => deleteInput(item)}>
+              {
+                !hideX ?
+                <button type="button" onClick={() => deleteInput(item)}>
                 <X className="w-4 h-4" />
               </button>
+              :
+              null
+              }
             </div>
           );
         })}

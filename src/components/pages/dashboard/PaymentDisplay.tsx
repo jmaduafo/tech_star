@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Card from "@/components/ui/MyCard";
 import Header3 from "@/components/fontsize/Header3";
 import {
   collection,

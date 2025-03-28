@@ -223,12 +223,11 @@ function MainPage() {
         ];
         nonempty.forEach((item) => {
           if (item.arr.length) {
-            item.arr.includes(filter[item.index]);
+            return item.arr.includes(filter[item.index]);
           }
         });
       })
     );
-    console.log(nonempty);
 
     setFilterContractData((prev) =>
       prev?.filter((i) => {

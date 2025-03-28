@@ -208,8 +208,7 @@ function MainPage() {
           contractorId={contractorId}
           contractId={contractId}
           contractorName={contractorName}
-          contractCode={contract ? contract.contract_code : ""}
-          contractDesc={contract ? contract.description : ""}
+          contract={contract}
         />
       </ContentContainer>
     </AuthContainer>
