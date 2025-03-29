@@ -50,7 +50,7 @@ function LineChart({
             }}
             
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid vertical={false} stroke="#ffffff20"/>
             <XAxis
               dataKey="date"
               tickLine={false}

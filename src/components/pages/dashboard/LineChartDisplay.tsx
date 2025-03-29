@@ -217,7 +217,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
       </div>
       <div className="h-[80%] w-full">
         {filteredData?.length ? (
-          <div className="mb-8 text-lightText">
+          <div className="mb-10">
             <LineChart chartConfig={chartConfig} chartData={filteredData} />
           </div>
         ) : (

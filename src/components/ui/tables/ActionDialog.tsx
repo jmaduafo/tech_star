@@ -126,7 +126,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Contract overview</DialogTitle>
+            <DialogTitle>{data?.is_contract ? "Contract" : "Payment"} overview</DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
           <div>
