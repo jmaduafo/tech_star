@@ -141,4 +141,5 @@ export type Chart = {
   date: string;
   amount: string;
   project_name: string;
+  currency_code: string;
 };

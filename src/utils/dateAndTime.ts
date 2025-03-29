@@ -45,3 +45,26 @@ export function formatDate(timestamp: TimeStamp) {
 
   return format
 }
+
+export function formatChartDate(timestamp: TimeStamp) {
+  const date = new Date(timestamp.seconds*1000)
+
+  let month = ""
+  let day = ""
+
+  if (date.getMonth().toString().length === 1) {
+    month += "0" + (date.getMonth() + 1)
+  } else {
+    month += (date.getMonth() + 1)
+  }
+
+  if (date.getDate().toString().length === 1) {
+    day += "0" + date.getDate()
+  } else {
+    day += date.getDate()
+  }
+
+  const format = date.getFullYear() + "-" + month + "-" + day
+
+  return format
+}

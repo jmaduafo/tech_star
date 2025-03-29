@@ -1,16 +1,45 @@
-"use client"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { LineChart as LineContainer, Line, CartesianGrid, XAxis } from 'recharts'
-import React from 'react'
+"use client";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  LineChart as LineContainer,
+  Line,
+  CartesianGrid,
+  XAxis,
+} from "recharts";
+import React from "react";
 
 type Chart = {
-    amount: string;
-    date: string;
-}
+  amount: string;
+  date: string;
+};
 
-function LineChart({ chartConfig, chartData }: { readonly chartConfig: ChartConfig, readonly chartData: Chart[]}) {
+function LineChart({
+  chartConfig,
+  chartData,
+}: {
+  readonly chartConfig: ChartConfig;
+  readonly chartData: Chart[];
+}) {
   return (
-    <ChartContainer config={chartConfig}>
+    <div
+      // style={{ position: "relative", width: "100%", height: "100%" }}
+      className="relative w-full h-full"
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+        }}
+      >
+        <ChartContainer config={chartConfig}>
           <LineContainer
             accessibilityLayer
             data={chartData}
@@ -21,32 +50,45 @@ function LineChart({ chartConfig, chartData }: { readonly chartConfig: ChartConf
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
-                })
+                });
               }}
             />
             <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
+              content={
+                <ChartTooltipContent
+                  className="w-[150px]"
+                  nameKey="amount"
+                  labelFormatter={(value) => {
+                    return new Date(value).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    });
+                  }}
+                />
+              }
             />
             <Line
-              dataKey="desktop"
+              dataKey="amount"
               type="natural"
-              stroke="var(--color-desktop)"
+              stroke="white"
               strokeWidth={2}
               dot={false}
             />
           </LineContainer>
         </ChartContainer>
-  )
+      </div>
+    </div>
+  );
 }
 
-export default LineChart
+export default LineChart;

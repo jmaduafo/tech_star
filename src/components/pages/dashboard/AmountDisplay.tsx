@@ -4,7 +4,6 @@ import { currency_list } from "@/utils/dataTools";
 import { SelectItem } from "@/components/ui/select";
 import SelectBar from "@/components/ui/input/SelectBar";
 import Header1 from "@/components/fontsize/Header1";
-import Header5 from "@/components/fontsize/Header5";
 import Header2 from "@/components/fontsize/Header2";
 import Header4 from "@/components/fontsize/Header4";
 import { getQueriedItems } from "@/firebase/actions";
@@ -16,6 +15,7 @@ import { convertCurrency, totalSum } from "@/utils/currencies";
 import Loading from "@/components/ui/Loading";
 import Reset from "@/components/ui/buttons/Reset";
 import CheckedButton from "@/components/ui/buttons/CheckedButton";
+import Header6 from "@/components/fontsize/Header6";
 
 function AmountDisplay({ user }: { readonly user: User | undefined }) {
   const [projectId, setProjectId] = useState("");
@@ -77,7 +77,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
       );
 
       const [contracts, withinContract, outsideContract] = await Promise.all([
-        // RETRIEVE TOTAL CONTRACT FIXED AMOUNT
+        // RETRIEVE ALL CONTRACTS TO GET THE FIXED AMOUNT BY THE SELECTED CURRENCY CODE
         getQueriedItems(
           query(
             collection(db, "contracts"),
@@ -86,7 +86,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
             where("currency_code", "==", updatedSubmit.currency)
           )
         ),
-        // RETRIEVE TOTAL PAYMENTS WITHIN CONTRACT
+        // RETRIEVE ALL PAYMENTS WITHIN CONTRACTS BY THE SELECTED CURRENCY CODE
         getQueriedItems(
           query(
             collection(db, "payments"),
@@ -96,7 +96,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
             where("contract_code", "!=", null)
           )
         ),
-        // RETRIEVE TOTAL PAYMENTS OUTSIDE CONTRACT
+        // RETRIEVE ALL PAYMENTS OUTSIDE CONTRACTS BY THE SELECTED CURRENCY CODE
         getQueriedItems(
           query(
             collection(db, "payments"),
@@ -119,7 +119,6 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
         contracts: totalSum(contracts.map((i) => i.currency_amount)),
       }));
 
-      console.log(allTotals)
     } catch (err: any) {
       console.log(err.message);
     } finally {
@@ -155,7 +154,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
             />
             {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
           </div>
-          <Header5 text="Total Payment Made" />
+          <Header6 text="Total Payment Made" />
         </div>
         <div className="flex gap-16">
           <div>
@@ -166,7 +165,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
               />
               {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
             </div>
-            <Header5 text="Total Revised Contracts" />
+            <Header6 text="Total Revised Contracts" />
           </div>
           <div>
             <div className="flex items-start gap-3">
@@ -176,7 +175,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
               />
               {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
             </div>
-            <Header5 text="Total Within Contract" />
+            <Header6 text="Total Within Contract" />
           </div>
           <div>
             <div className="flex items-start gap-3">
@@ -186,7 +185,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
               />
               {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
             </div>
-            <Header5 text="Total Outside Contract" />
+            <Header6 text="Total Outside Contract" />
           </div>
         </div>
       </div>
