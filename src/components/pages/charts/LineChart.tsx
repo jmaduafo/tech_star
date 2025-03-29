@@ -38,8 +38,9 @@ function LineChart({
           bottom: 0,
           top: 0,
         }}
+        className=""
       >
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="text-lightText">
           <LineContainer
             accessibilityLayer
             data={chartData}
@@ -47,6 +48,7 @@ function LineChart({
               left: 12,
               right: 12,
             }}
+            
           >
             <CartesianGrid vertical={false} />
             <XAxis
@@ -54,6 +56,7 @@ function LineChart({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
+              tick={{ fill: "white", fontSize: 14 }} 
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString("en-US", {

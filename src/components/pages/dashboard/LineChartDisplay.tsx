@@ -28,8 +28,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
 
   let chartConfig = {
     amount: {
-      label: "Amount",
-      color: "text-amber-400",
+      label: currency_list.find(i => i.code === currencyCode)?.symbol
     },
   } satisfies ChartConfig;
 
@@ -85,7 +84,8 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
 
   // ON FILTER CLICK, FILTER PAYMENTS BY THE APPROPRIATE DATE RANGE AND PROJECT NAME
   function filterPayments() {
-    // FILTER ORIGINAL DATA WHERE THE PROJECT NAME IS EQUAL TO THE SELECTED PROJECT NAME TO GET
+    // FILTER ORIGINAL DATA WHERE THE PROJECT NAME AND PROJECT CURRENCY CODE IS EQUAL TO
+    // THE SELECTED PROJECT NAME AND CURRENCY CODE TO GET
     // AN ARRAY OF PAYMENTS MADE FOR THE SELECTED PROJECT
     const projects = chartData?.filter(
       (item) =>
@@ -96,7 +96,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
     if (!projects?.length) {
       setFilteredData([]);
     }
-    
+
     // IF THERE ARE PROJECTS FOUND, ADD THE ARRAY WITHIN THE SELECTED DATE RANGE
     // TO THE NEW FILTER ARRAY
     setFilteredData(
@@ -217,7 +217,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
       </div>
       <div className="h-[80%] w-full">
         {filteredData?.length ? (
-          <div className="mb-8">
+          <div className="mb-8 text-lightText">
             <LineChart chartConfig={chartConfig} chartData={filteredData} />
           </div>
         ) : (
