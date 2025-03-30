@@ -120,14 +120,16 @@ function Payments({
 
     const { desc, date, bank_names, currency, comment } = result.data;
 
+    
+    if (!user || !projectId || !contractorId || !contractId) {
+      console.log(
+        "Could not find user or project id or contractor id or stages data"
+      );
+      return;
+    }
+
     try {
       setLoading(true);
-      if (!user || !projectId || !contractorId || !contractId) {
-        console.log(
-          "Could not find user or project id or contractor id or stages data"
-        );
-        return;
-      }
 
       await addItem("payments", {
         date,
@@ -172,7 +174,7 @@ function Payments({
 
   useEffect(() => {
     contract?.bank_name ? setBankInputs([contract?.bank_name]) : setBankInputs([])
-  }, [contract])
+  }, [contract, open])
 
   return (
     <section>

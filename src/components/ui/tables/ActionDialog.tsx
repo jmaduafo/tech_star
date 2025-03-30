@@ -261,7 +261,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     try {
       setLoadingEdit(true);
 
-      await updateItem("contracts", id, {
+      await updateItem("payments", id, {
         date,
         description: desc,
         currency_amount: currency[0].amount,

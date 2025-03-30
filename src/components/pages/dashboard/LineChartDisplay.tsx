@@ -22,7 +22,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
   const [filteredData, setFilteredData] = useState<Chart[] | undefined>();
   const [projectData, setProjectData] = useState<Project[] | undefined>();
 
-  const [projectName, setProjectName] = useState("");
+  const [projectId, setProjectId] = useState("");
   const [range, setRange] = useState("");
   const [currencyCode, setCurrencyCode] = useState("");
 
@@ -69,7 +69,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
       allPayments.forEach((doc) => {
         arr.push({
           id: doc?.id,
-          project_name: doc?.project_name,
+          project_id: doc?.project_id,
           date: formatChartDate(doc?.date),
           amount: doc?.currency_amount,
           currency_code: doc?.currency_code,
@@ -84,12 +84,12 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
 
   // ON FILTER CLICK, FILTER PAYMENTS BY THE APPROPRIATE DATE RANGE AND PROJECT NAME
   function filterPayments() {
-    // FILTER ORIGINAL DATA WHERE THE PROJECT NAME AND PROJECT CURRENCY CODE IS EQUAL TO
-    // THE SELECTED PROJECT NAME AND CURRENCY CODE TO GET
+    // FILTER ORIGINAL DATA WHERE THE PROJECT ID AND PROJECT CURRENCY CODE IS EQUAL TO
+    // THE SELECTED PROJECT ID AND CURRENCY CODE TO GET
     // AN ARRAY OF PAYMENTS MADE FOR THE SELECTED PROJECT
     const projects = chartData?.filter(
       (item) =>
-        item?.project_name?.toLowerCase() === projectName?.toLowerCase() &&
+        item?.project_id === projectId &&
         item?.currency_code === currencyCode
     );
 
@@ -130,7 +130,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
   }, [user?.id ?? "guest"]);
 
   function reset() {
-    setProjectName("");
+    setProjectId("");
     setRange("");
     setCurrencyCode("");
   }
@@ -156,16 +156,16 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
           <div className="w-full">
             <div className="flex flex-wrap gap-2 mt-2">
               <SelectBar
-                valueChange={setProjectName}
+                valueChange={setProjectId}
                 className="w-[150px]"
-                value={projectName}
+                value={projectId}
                 placeholder="Select a project"
                 label="Project"
               >
                 {projectData?.length
                   ? projectData?.map((item) => {
                       return (
-                        <SelectItem value={item.name} key={item.id}>
+                        <SelectItem value={item.id} key={item.id}>
                           {item.name}
                         </SelectItem>
                       );
@@ -207,7 +207,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
               <CheckedButton
                 clickedFn={filterPayments}
                 disabledLogic={
-                  !projectName.length || !range.length || !currencyCode.length
+                  !projectId.length || !range.length || !currencyCode.length
                 }
               />
               <Reset clickedFn={reset} />
