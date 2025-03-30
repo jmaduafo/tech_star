@@ -39,7 +39,7 @@ import Banner from "../Banner";
 import { formatCurrency } from "@/utils/currencies";
 import { format as formatAgo } from "timeago.js";
 import { format } from "date-fns";
-import { deleteItem, getQueriedItems } from "@/firebase/actions";
+import { deleteItem, getQueriedItems, updateItem } from "@/firebase/actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import Loading from "../Loading";
@@ -65,6 +65,7 @@ import {
 import Header3 from "@/components/fontsize/Header3";
 import Submit from "../buttons/Submit";
 import { db } from "@/firebase/config";
+import { CreateContractSchema } from "@/zod/validation";
 
 type Dialog = {
   readonly data: Contract | Payment | undefined;
@@ -94,8 +95,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
 
-  const [comment, setComment] = useState("");
-  const [desc, setDesc] = useState("");
+  const [userComment, setUserComment] = useState("");
+  const [description, setDescription] = useState("");
   const [contractCode, setContractCode] = useState("");
   const [stageId, setStageId] = useState("");
 
@@ -118,6 +119,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
 
       setStagesData(stages as Stage[]);
 
+      setStageId(data?.stage_id)
       setContractCode(data.contract_code ?? "");
       setContractDate(new Date(data?.date?.seconds * 1000));
       setBankInputs([data.bank_name]);
@@ -138,8 +140,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
           ? data.currency_amount.toString()
           : ""
       );
-      setDesc(data.description);
-      setComment(data.comment ?? "");
+      setDescription(data.description);
+      setUserComment(data.comment ?? "");
     } catch (err: any) {
       console.log(err.message);
     }
@@ -202,13 +204,52 @@ function ActionDialog({ data, is_payment }: Dialog) {
 
   //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
   async function handleEdit(id: string, is_contract: boolean) {
-    if (!is_contract) {
+    if (is_contract) {
       const values = {
         code: contractCode,
-        desc,
+        desc: description,
         date: contractDate,
         bank_names: bankInputs,
+        stage_id: stageId,
+        currency: currencyInputs,
+        comment: userComment
       };
+
+      const result = CreateContractSchema.safeParse(values)
+
+      if (!result.success) {
+        toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong",
+            description: result?.error?.issues[0].message
+        })
+        
+        return;
+      }
+
+      const { code, date, desc, stage_id, currency, bank_names, comment } = result.data
+
+      try {
+        await updateItem("contracts", id, {
+            contract_code: code,
+            date,
+            description: desc,
+            stage_id,
+            stage_name: stagesData?.find(i => i.id === stage_id)?.name,
+            currency_amount: currency[0].amount,
+            currency_symbol: currency[0].symbol,
+            currency_name: currency[0].name,
+            currency_code: currency[0].code,
+            bank_name: bank_names[0],
+            comment: comment ?? null,
+            is_completed: isComplete,
+            updated_at: serverTimestamp()
+        })
+      } catch (err: any) {
+
+      } finally {
+
+      }
     }
     try {
       setLoadingDelete(true);
@@ -470,8 +511,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
                   className="form"
                   id="desc"
                   name="desc"
-                  value={desc}
-                  onChange={(e) => setDesc(e.target.value)}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </Input>
               {/* ADD AND DELETE BANK NAMES */}
@@ -573,7 +614,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
                 ) : null}
               </ObjectArray>
               <Separator />
-              {/* CHECK IF CONTRACTPAYMENT IS COMPLETE OR NOT */}
+              {/* CHECK IF CONTRACT/PAYMENT IS COMPLETE OR NOT */}
               <div className="flex items-center gap-2 mt-3">
                 <Switch
                   id="is_completed"
@@ -595,8 +636,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
                   className="form"
                   id="comment"
                   name="comment"
-                  onChange={(e) => setComment(e.target.value)}
-                  value={comment}
+                  onChange={(e) => setUserComment(e.target.value)}
+                  value={userComment}
                 ></textarea>
               </Input>
               <div className="flex justify-center mt-6 scale-75">
