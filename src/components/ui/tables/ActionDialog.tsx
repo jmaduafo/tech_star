@@ -349,6 +349,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
       if (!paymentsSnap.empty) {
         paymentsSnap.forEach((paymentDoc) => {
           batch.update(doc(db, "payments", paymentDoc.id), {
+            contract_code: code,
             currency_symbol: currency[0].symbol,
             currency_name: currency[0].name,
             currency_code: currency[0].code,
