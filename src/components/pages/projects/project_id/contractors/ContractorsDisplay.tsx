@@ -76,9 +76,10 @@ function ContractorsDisplay({
 
     const { name, importance_level } = result.data;
 
-    setIsLoading(true)
-
+    
     try {
+      setIsLoading(true)
+      
       if (!user || !projectId) {
         return;
       }

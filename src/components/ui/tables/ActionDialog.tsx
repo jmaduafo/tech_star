@@ -39,7 +39,12 @@ import Banner from "../Banner";
 import { formatCurrency } from "@/utils/currencies";
 import { format as formatAgo } from "timeago.js";
 import { format } from "date-fns";
-import { deleteItem, getQueriedItems, updateItem } from "@/firebase/actions";
+import {
+  deleteContractAndPayments,
+  deleteItem,
+  getQueriedItems,
+  updateItem,
+} from "@/firebase/actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import Loading from "../Loading";
@@ -65,7 +70,7 @@ import {
 import Header3 from "@/components/fontsize/Header3";
 import Submit from "../buttons/Submit";
 import { db } from "@/firebase/config";
-import { CreateContractSchema } from "@/zod/validation";
+import { CreateContractSchema, CreatePaymentSchema } from "@/zod/validation";
 
 type Dialog = {
   readonly data: Contract | Payment | undefined;
@@ -119,7 +124,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
 
       setStagesData(stages as Stage[]);
 
-      setStageId(data?.stage_id)
+      setStageId(data?.stage_id);
       setContractCode(data.contract_code ?? "");
       setContractDate(new Date(data?.date?.seconds * 1000));
       setBankInputs([data.bank_name]);
@@ -172,21 +177,42 @@ function ActionDialog({ data, is_payment }: Dialog) {
   }
 
   //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
-  async function handleDelete(id: string, is_contract: boolean) {
+  async function handleDeletePayment(payment_id: string) {
     try {
       setLoadingDelete(true);
 
-      if (!is_contract) {
-        await deleteItem("payments", id);
+      await deleteItem("payments", payment_id);
 
+      toast({
+        title: "Payment was deleted successfully!",
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message,
+      });
+    } finally {
+      setLoadingDelete(false);
+    }
+  }
+
+  //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
+  async function handleDeleteContract(contract_id: string, project_id: string) {
+    try {
+      setLoadingDelete(true);
+
+      const response = await deleteContractAndPayments(contract_id, project_id);
+
+      if (response !== "success") {
         toast({
-          title: "Payment was deleted successfully!",
+          variant: "destructive",
+          title: "Uh oh! Something went wrong",
+          description: response,
         });
 
         return;
       }
-
-      await deleteItem("contracts", id);
 
       toast({
         title: "Contract was deleted successfully!",
@@ -203,71 +229,47 @@ function ActionDialog({ data, is_payment }: Dialog) {
   }
 
   //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
-  async function handleEdit(id: string, is_contract: boolean) {
-    if (is_contract) {
-      const values = {
-        code: contractCode,
-        desc: description,
-        date: contractDate,
-        bank_names: bankInputs,
-        stage_id: stageId,
-        currency: currencyInputs,
-        comment: userComment
-      };
+  async function handleEditPayment(id: string) {
+    const values = {
+      desc: description,
+      date: contractDate,
+      bank_names: bankInputs,
+      currency: currencyInputs,
+      comment: userComment,
+    };
 
-      const result = CreateContractSchema.safeParse(values)
+    const result = CreatePaymentSchema.safeParse(values);
 
-      if (!result.success) {
-        toast({
-            variant: "destructive",
-            title: "Uh oh! Something went wrong",
-            description: result?.error?.issues[0].message
-        })
-        
-        return;
-      }
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: result?.error?.issues[0].message,
+      });
 
-      const { code, date, desc, stage_id, currency, bank_names, comment } = result.data
-
-      try {
-        await updateItem("contracts", id, {
-            contract_code: code,
-            date,
-            description: desc,
-            stage_id,
-            stage_name: stagesData?.find(i => i.id === stage_id)?.name,
-            currency_amount: currency[0].amount,
-            currency_symbol: currency[0].symbol,
-            currency_name: currency[0].name,
-            currency_code: currency[0].code,
-            bank_name: bank_names[0],
-            comment: comment ?? null,
-            is_completed: isComplete,
-            updated_at: serverTimestamp()
-        })
-      } catch (err: any) {
-
-      } finally {
-
-      }
+      return;
     }
+
+    const { date, desc, currency, bank_names, comment } = result.data;
+
     try {
-      setLoadingDelete(true);
+      setLoadingEdit(true);
 
-      if (!is_contract) {
-        await deleteItem("payments", id);
-
-        toast({
-          title: "Payment was deleted successfully!",
-        });
-
-        return;
-      }
-
-      await deleteItem("contracts", id);
+      await updateItem("contracts", id, {
+        date,
+        description: desc,
+        currency_amount: currency[0].amount,
+        currency_symbol: currency[0].symbol,
+        currency_name: currency[0].name,
+        currency_code: currency[0].code,
+        bank_name: bank_names[0],
+        comment: comment ?? null,
+        is_completed: isComplete,
+        updated_at: serverTimestamp(),
+      });
 
       toast({
-        title: "Contract was deleted successfully!",
+        title: "Payment was edited successfully!",
       });
     } catch (err: any) {
       toast({
@@ -276,7 +278,67 @@ function ActionDialog({ data, is_payment }: Dialog) {
         description: err.message,
       });
     } finally {
-      setLoadingDelete(false);
+      setLoadingEdit(false);
+    }
+  }
+
+  //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
+  async function handleEditContract(id: string) {
+    const values = {
+      code: contractCode,
+      desc: description,
+      date: contractDate,
+      bank_names: bankInputs,
+      stage_id: stageId,
+      currency: currencyInputs,
+      comment: userComment,
+    };
+
+    const result = CreateContractSchema.safeParse(values);
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: result?.error?.issues[0].message,
+      });
+
+      return;
+    }
+
+    const { code, date, desc, stage_id, currency, bank_names, comment } =
+      result.data;
+
+    try {
+      setLoadingEdit(true);
+
+      await updateItem("contracts", id, {
+        contract_code: code,
+        date,
+        description: desc,
+        stage_id,
+        stage_name: stagesData?.find((i) => i.id === stage_id)?.name,
+        currency_amount: currency[0].amount,
+        currency_symbol: currency[0].symbol,
+        currency_name: currency[0].name,
+        currency_code: currency[0].code,
+        bank_name: bank_names[0],
+        comment: comment ?? null,
+        is_completed: isComplete,
+        updated_at: serverTimestamp(),
+      });
+
+      toast({
+        title: "Contract was edited successfully!",
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message,
+      });
+    } finally {
+      setLoadingEdit(false);
     }
   }
 
@@ -452,7 +514,9 @@ function ActionDialog({ data, is_payment }: Dialog) {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit {data?.is_contract ? "contract" : "payment"}</DialogTitle>
+            <DialogTitle>
+              Edit {data?.is_contract ? "contract" : "payment"}
+            </DialogTitle>
             <DialogDescription>Modify your item here.</DialogDescription>
           </DialogHeader>
           {/* Add your edit form inside DialogContent */}
@@ -472,15 +536,17 @@ function ActionDialog({ data, is_payment }: Dialog) {
             ) : null}
             {/* DATE PICKER POPUP */}
             <Popover>
-              <p className={`text-[14.5px] text-darkText ${data?.is_contract ? "my-3" : "mt-0 mb-[5px]"}`}>
+              <p
+                className={`text-[14.5px] text-darkText ${
+                  data?.is_contract ? "my-3" : "mt-0 mb-[5px]"
+                }`}
+              >
                 {data?.is_contract ? "Contract" : "Payment"} date *
               </p>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
-                  className={
-                    `text-dark90 w-full justify-start text-left font-normal`
-                  }
+                  className={`text-dark90 w-full justify-start text-left font-normal`}
                 >
                   <CalendarIcon />
                   {contractDate ? (
@@ -590,7 +656,9 @@ function ActionDialog({ data, is_payment }: Dialog) {
                 </SelectBar>
                 <Input
                   htmlFor="amount"
-                  label={`${data?.is_contract ? "Contract" : "Payment"} amount *`}
+                  label={`${
+                    data?.is_contract ? "Contract" : "Payment"
+                  } amount *`}
                   className="mt-3"
                 >
                   <input
@@ -623,7 +691,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
                   onCheckedChange={setIsComplete}
                 />
                 <label htmlFor="is_completed">
-                  Is this {data?.is_contract ? "contract" : "payment"} complete? *
+                  Is this {data?.is_contract ? "contract" : "payment"} complete?
+                  *
                 </label>
               </div>
               {/* OPTIONAL COMMENT INPUT */}
@@ -641,7 +710,14 @@ function ActionDialog({ data, is_payment }: Dialog) {
                 ></textarea>
               </Input>
               <div className="flex justify-center mt-6 scale-75">
-                <Submit loading={loading} />
+                <Submit
+                  loading={loadingEdit}
+                  buttonClick={() =>
+                    data?.is_contract
+                      ? handleEditContract(data?.id)
+                      : handleEditPayment(data?.id as string)
+                  }
+                />
               </div>
             </Popover>
           </form>
@@ -663,7 +739,11 @@ function ActionDialog({ data, is_payment }: Dialog) {
             </AlertDialogCancel>
             {data ? (
               <AlertDialogAction
-                onClick={() => handleDelete(data?.id, data?.is_contract)}
+                onClick={() => {
+                  data?.is_contract
+                    ? handleDeleteContract(data?.id, data?.project_id)
+                    : handleDeletePayment(data?.id);
+                }}
               >
                 {loadingDelete ? <Loading /> : "Continue"}
               </AlertDialogAction>

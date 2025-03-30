@@ -8,11 +8,13 @@ import {
   DocumentData,
   Query,
   getCountFromServer,
-  CollectionReference,
   doc,
   DocumentReference,
   getDoc,
   getDocs,
+  writeBatch,
+  query,
+  where,
 } from "firebase/firestore";
 
 export async function getUserData(id: string) {
@@ -29,16 +31,19 @@ export async function getAllItems(collectionName: string) {
 
   try {
     // Display only projects by a specific team
-    const allItems: DocumentData[] = [];
     const unsub = onSnapshot(dataRef, (snap) => {
+      const allItems: DocumentData[] = [];
+
       snap.forEach((item) => {
         allItems.push(item.data());
       });
+
+      unsub();
+
+      return allItems;
     });
 
-    unsub();
 
-    return allItems;
   } catch (err: any) {
     console.error(err.message);
   }
@@ -145,56 +150,33 @@ export async function updateQueriedItem(
   }
 }
 
-// Get one project
+export async function deleteContractAndPayments(contractId: string, projectId: string) {
+  try {
+    // Start a batch operation
+    const batch = writeBatch(db);
 
-// Get all payments under one contract
+    // Query all payments linked to the contract
+    const paymentsQuery = query(
+      collection(db, "payments"),
+      where("contract_id", "==", contractId),
+      where("project_id", "==", projectId)
+    );
 
-// Get all stages
+    const paymentsSnapshot = await getDocs(paymentsQuery);
 
-// Get all contracts under one stage
+    // Add each payment delete operation to the batch
+    paymentsSnapshot.forEach((paymentDoc) => {
+      batch.delete(doc(db, "payments", paymentDoc.id));
+    });
 
-// Get all non-contracts under one stage
+    // Delete the contract itself
+    batch.delete(doc(db, "contracts", contractId));
 
-// Get all payments under one stage
+    // Commit the batch operation
+    await batch.commit();
 
-// Create a project
-
-// Create a contractor
-
-// Create a payment
-
-// Create a stage
-
-// Update a project
-
-// Update a contractor
-
-// Update a payment
-
-// Update a stage
-
-// Delete a project
-
-// Delete a contractor
-
-// Delete a payment
-
-// Delete a stage
-
-// /Payments
-
-// Get all payments
-
-// /Team
-
-// Get all users under one team
-
-// Get all admins
-
-// Create a user (only admin can create a user)
-
-// Update a user (only admin can update a user)
-
-// Delete a user (only admin can delete a user)
-
-// /Charts
+    return "success"
+  } catch (error: any) {
+    return error.message
+  }
+}

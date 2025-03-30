@@ -75,9 +75,10 @@ function StagesSearch({
 
     const { name, description } = result.data;
 
-    setLoading(true);
-
+    
     try {
+      setLoading(true);
+      
       if (!user) {
         return;
       }

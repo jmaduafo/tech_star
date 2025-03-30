@@ -116,6 +116,8 @@ function NonContracts({
     const { desc, date, stage_id, bank_names, currency, comment } = result.data;
 
     try {
+      setLoading(true);
+      
       if (!user || !projectId || !contractorId || !stagesData) {
         console.log(
           "Could not find user or project id or contractor id or stages data"
@@ -125,7 +127,6 @@ function NonContracts({
 
       const stageIndex = stagesData?.findIndex((item) => item.id === stage_id);
 
-      setLoading(true);
 
       await addItem("payments", {
         date,

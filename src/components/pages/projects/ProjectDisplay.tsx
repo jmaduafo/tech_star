@@ -72,9 +72,10 @@ function ProjectDisplay({
 
     const { name, country, year, month } = result.data;
 
-    setLoading(true)
-
+    
     try {
+      setLoading(true)
+      
       if (!user) {
         return;
       }

@@ -42,7 +42,7 @@ function MainPage() {
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
 
-  const { userData, loading } = useAuth();
+  const { userData } = useAuth();
 
   // GET SELECTED PROJECT NAME TO DISPLAY IN BREADCRUMB DISPLAY
   async function getProjectName() {
@@ -61,9 +61,9 @@ function MainPage() {
 
   // GET ALL THE STAGES DATA FROM BACKEND
   function getAllStages() {
-    setStageLoading(true);
-
     try {
+      setStageLoading(true);
+
       if (!userData) {
         return;
       }
@@ -76,16 +76,15 @@ function MainPage() {
 
       const unsub = onSnapshot(stageq, (snap) => {
         const stages: Stage[] = [];
-        
-        snap.forEach(doc => {
-          stages.push({...doc.data() as Stage, id: doc.id})
+
+        snap.forEach((doc) => {
+          stages.push({ ...(doc.data() as Stage), id: doc.id });
         });
 
         setAllStages(stages);
 
         return () => unsub();
       });
-
     } catch (err: any) {
       console.log(err.message);
     } finally {
@@ -96,7 +95,6 @@ function MainPage() {
   useEffect(() => {
     getAllStages();
     getProjectName();
-
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -151,7 +149,6 @@ function MainPage() {
         <div className="mt-10">
           <StagesDisplay
             user={userData}
-            loading={loading}
             projectId={project_id}
             sort={sort}
             searchValue={searchValue}

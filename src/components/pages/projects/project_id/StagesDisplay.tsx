@@ -31,7 +31,6 @@ import { Switch } from "@/components/ui/switch";
 
 function StagesDisplay({
   user,
-  loading,
   sort,
   searchValue,
   projectId,
@@ -42,7 +41,6 @@ function StagesDisplay({
   readonly sort: string;
   readonly projectId: string;
   readonly searchValue: string;
-  readonly loading: boolean;
   readonly stageLoading: boolean;
   readonly data: Stage[] | undefined;
 }) {
@@ -50,7 +48,7 @@ function StagesDisplay({
     data.map((item) => {
       return (
         <Fragment key={item.id}>
-          <StageCard item={item} loading={loading} user={user} />
+          <StageCard item={item} loading={stageLoading} user={user} />
         </Fragment>
       );
     })
@@ -62,7 +60,7 @@ function StagesDisplay({
 
   return (
     <section>
-      {loading
+      {stageLoading
         ? [0, 1, 2, 3].map((each, i) => {
             return (
               <Fragment key={`${each}_${i}`}>
@@ -79,12 +77,12 @@ export default StagesDisplay;
 
 function StageCard({
   item,
-  loading,
   user,
+  loading
 }: {
-  readonly loading: boolean;
   readonly item: Stage;
   readonly user: User | undefined;
+  readonly loading: boolean
 }) {
   const { toast } = useToast();
 

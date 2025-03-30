@@ -132,6 +132,8 @@ function Contracts({
       result.data;
 
     try {
+      setLoading(true);
+      
       if (!user || !projectId || !contractorId || !stagesData) {
         return;
       }
@@ -139,7 +141,6 @@ function Contracts({
       const stageIndex = stagesData?.findIndex((item) => item.id === stage_id);
       const stageComplete = stageIndex ? stagesData[stageIndex]?.name : null;
 
-      setLoading(true);
 
       if (!stageComplete) {
         console.log("Stage returned null");
