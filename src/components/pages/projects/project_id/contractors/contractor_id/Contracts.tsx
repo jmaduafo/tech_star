@@ -131,21 +131,12 @@ function Contracts({
     const { code, desc, date, stage_id, bank_names, currency, comment } =
       result.data;
 
+    if (!user || !projectId || !contractorId || !stagesData) {
+      return;
+    }
+
     try {
       setLoading(true);
-      
-      if (!user || !projectId || !contractorId || !stagesData) {
-        return;
-      }
-
-      const stageIndex = stagesData?.findIndex((item) => item.id === stage_id);
-      const stageComplete = stageIndex ? stagesData[stageIndex]?.name : null;
-
-
-      if (!stageComplete) {
-        console.log("Stage returned null");
-        return;
-      }
 
       await addItem("contracts", {
         date,
@@ -153,9 +144,6 @@ function Contracts({
         contractor_id: contractorId,
         team_id: user.team_id,
         stage_id: stage_id,
-        project_name: projectName,
-        contractor_name: contractorName,
-        stage_name: stageComplete,
         contract_code: code,
         bank_name: bank_names[0],
         currency_amount: currency[0].amount,

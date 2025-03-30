@@ -62,10 +62,14 @@ import Separator from "@/components/ui/Separator";
 import { Switch } from "@/components/ui/switch";
 import {
   collection,
+  doc,
+  getDoc,
+  getDocs,
   orderBy,
   query,
   serverTimestamp,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import Header3 from "@/components/fontsize/Header3";
 import Submit from "../buttons/Submit";
@@ -105,7 +109,9 @@ function ActionDialog({ data, is_payment }: Dialog) {
   const [contractCode, setContractCode] = useState("");
   const [stageId, setStageId] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [contractorName, setContractorName] = useState<string | undefined>();
+  const [projectName, setProjectName] = useState<string | undefined>();
+  const [stageName, setStageName] = useState<string | undefined>();
 
   async function loadEditEntries() {
     try {
@@ -271,6 +277,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
       toast({
         title: "Payment was edited successfully!",
       });
+
+      setEditDialogOpen(false);
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -282,7 +290,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
+  //   HANDLES UPDATE OF CONTRACT AND SUBSEQUENTLY UPDATES PAYMENTS UNDER THE UPDATED CONTRACT
   async function handleEditContract(id: string) {
     const values = {
       code: contractCode,
@@ -312,12 +320,21 @@ function ActionDialog({ data, is_payment }: Dialog) {
     try {
       setLoadingEdit(true);
 
-      await updateItem("contracts", id, {
+      const batch = writeBatch(db);
+
+      // Retrieve all payments linked to this contract
+      const paymentsQ = query(
+        collection(db, "payments"),
+        where("contract_id", "==", id)
+      );
+      const paymentsSnap = await getDocs(paymentsQ);
+
+      // Update contract as part of batch
+      batch.update(doc(db, "contracts", id), {
         contract_code: code,
         date,
         description: desc,
         stage_id,
-        stage_name: stagesData?.find((i) => i.id === stage_id)?.name,
         currency_amount: currency[0].amount,
         currency_symbol: currency[0].symbol,
         currency_name: currency[0].name,
@@ -328,9 +345,27 @@ function ActionDialog({ data, is_payment }: Dialog) {
         updated_at: serverTimestamp(),
       });
 
+      // Update payments if any exist
+      if (!paymentsSnap.empty) {
+        paymentsSnap.forEach((paymentDoc) => {
+          batch.update(doc(db, "payments", paymentDoc.id), {
+            currency_symbol: currency[0].symbol,
+            currency_name: currency[0].name,
+            currency_code: currency[0].code,
+            bank_name: bank_names[0],
+            stage_id,
+            description: desc,
+          });
+        });
+      }
+
+      await batch.commit();
+
       toast({
         title: "Contract was edited successfully!",
       });
+
+      setEditDialogOpen(false);
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -342,8 +377,30 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
+  // RETRIEVE ALL THE NAMES PERTAINING TO PROJECT, CONTRACTOR, STAGES, AND CONTRACT
+  async function getNames() {
+    try {
+      if (!data) {
+        return;
+      }
+
+      const [project, contractor, stage] = await Promise.all([
+        getDoc(doc(db, "projects", data?.project_id)),
+        getDoc(doc(db, "contractors", data?.contractor_id)),
+        getDoc(doc(db, "stages", data?.stage_id)),
+      ]);
+
+      setProjectName(project?.data()?.name);
+      setContractorName(contractor?.data()?.name);
+      setStageName(stage?.data()?.name);
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }
+
   useEffect(() => {
     loadEditEntries();
+    getNames();
   }, []);
 
   const ongoing =
@@ -412,10 +469,10 @@ function ActionDialog({ data, is_payment }: Dialog) {
             {/* CONTRACTOR NAME & PROJECT NAME */}
             <div className="flex justify-between items-start gap-5">
               <div className="flex-1">
-                <Detail title="contractor" item={data?.contractor_name} />
+                <Detail title="contractor" item={contractorName} />
               </div>
               <div className="flex-1">
-                <Detail title="project name" item={data?.project_name} />
+                <Detail title="project name" item={projectName} />
               </div>
             </div>
             {/* CONTRACT CODE & BANK NAMES  */}
@@ -429,7 +486,10 @@ function ActionDialog({ data, is_payment }: Dialog) {
               </div>
               <div className="flex-1">
                 {data?.date ? (
-                  <Detail title="Contract date" item={formatDate(data?.date)} />
+                  <Detail
+                    title={`${data?.is_contract ? "Contract" : "Payment"} date`}
+                    item={formatDate(data?.date)}
+                  />
                 ) : null}
               </div>
             </div>
@@ -449,8 +509,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
             {/* STAGE NAME & CONTRACT AMOUNTS */}
             <div className="flex justify-between items-start gap-5">
               <div className="flex-1">
-                {data?.stage_name ? (
-                  <Detail title="Stage" item={data.stage_name} />
+                {data?.stage_id ? (
+                  <Detail title="Stage" item={stageName} />
                 ) : null}
               </div>
               <div className="flex-1">
@@ -499,7 +559,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
                 {data?.updated_at ? (
                   <Detail
                     title="Updated"
-                    item={formatAgo(data?.updated_at?.seconds)}
+                    item={formatAgo(data?.updated_at?.seconds * 1000)}
                   />
                 ) : null}
               </div>
