@@ -16,6 +16,7 @@ import Loading from "@/components/ui/Loading";
 import Reset from "@/components/ui/buttons/Reset";
 import CheckedButton from "@/components/ui/buttons/CheckedButton";
 import Header6 from "@/components/fontsize/Header6";
+import Card from "@/components/ui/MyCard";
 
 function AmountDisplay({ user }: { readonly user: User | undefined }) {
   const [projectId, setProjectId] = useState("");
@@ -143,7 +144,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
     allTotals?.contractPayments ||
     allTotals?.noncontractPayments ? (
       <div className="mt-6 flex justify-between items-end">
-        <div>
+        <div className="flex flex-col items-center">
           <div className="flex items-start gap-3">
             <Header1
               text={convertCurrency(

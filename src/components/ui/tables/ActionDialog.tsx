@@ -790,8 +790,9 @@ function ActionDialog({ data, is_payment }: Dialog) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this
-              row and remove your data from our servers.
+              {data?.is_contract
+                ? "This action cannot be undone. This will permanently delete this contract and remove all payments under this contract from our servers."
+                : "This action cannot be undone. This will permanently delete this row and remove this payment from our servers."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

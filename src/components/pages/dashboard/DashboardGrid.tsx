@@ -10,7 +10,7 @@ import LineChartDisplay from "./LineChartDisplay";
 import { useAuth } from "@/context/AuthContext";
 
 function DashboardGrid() {
-  const { userData, loading } = useAuth()
+  const { userData } = useAuth()
 
   return (
     <div className="dashGrid h-[80vh] gap-6">
@@ -19,7 +19,7 @@ function DashboardGrid() {
         <Greeting user={userData}/>
       </Card>
       {/* Amount Display */}
-      <div className="calc backdrop-blur-0">
+      <div className="calc">
         <AmountDisplay user={userData}/>
       </div>
       {/* Line chart */}
