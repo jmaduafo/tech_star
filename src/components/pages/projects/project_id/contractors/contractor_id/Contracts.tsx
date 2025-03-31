@@ -190,7 +190,7 @@ function Contracts({
           ) : null}
         </div>
         <div>
-          {user?.is_admin ? (
+          {user?.is_owner || user?.role === "admin" ? (
             <AddButton
               title="contract"
               desc="Create a contract and add payments"

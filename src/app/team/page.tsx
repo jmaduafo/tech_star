@@ -1,9 +1,10 @@
+import MainPage from '@/components/pages/team/MainPage'
 import React from 'react'
 
-function Members() {
+function Team() {
   return (
-    <div>Members</div>
+    <MainPage/>
   )
 }
 
-export default Members
+export default Team

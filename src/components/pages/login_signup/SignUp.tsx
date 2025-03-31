@@ -54,20 +54,24 @@ function SignUp() {
       // Check if there is an email in the schema that is the same as the entered email
       const findEmail = query(usersRef, where("email", "==", newEmail));
   
-      const notUnique = [];
       const unsub = onSnapshot(findEmail, (doc) => {
+        const notUnique = [];
+
         doc.forEach((item) => {
           notUnique.push(item.data().email);
         });
+
+        if (notUnique.length) {
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong!",
+            description: "This email address is already in use.",
+          });
+        }
+
+        return () => unsub()
       });
   
-      if (notUnique.length) {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong!",
-          description: "This email address is already in use.",
-        });
-      }
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -121,7 +125,8 @@ function SignUp() {
           try {
             // Instantly create a new team after user is registered
             const newTeam = await addDoc(teamsRef, {
-              team_name: first_name + "'s team",
+              name: first_name + "'s team",
+              organization_name: null
             });
 
             // If new team is created, add new team id to the new user's document in "users" schema
@@ -133,11 +138,17 @@ function SignUp() {
                 id: user?.uid,
                 first_name,
                 last_name,
+                full_name: first_name + " " + last_name,
                 email,
                 team_id: newTeam?.id,
-                is_admin: true,
+                is_owner: true,
+                is_online: true,
                 bg_image_index: 0,
+                hire_type: "independent",
+                role: "admin",
+                location: null,
                 created_at: serverTimestamp(),
+                updated_at: null,
               });
 
               // Take user to dashboard
@@ -149,8 +160,6 @@ function SignUp() {
               title: "Uh oh! Something went wrong!",
               description: err.message,
             });
-          } finally {
-            setLoading(false);
           }
         }
 

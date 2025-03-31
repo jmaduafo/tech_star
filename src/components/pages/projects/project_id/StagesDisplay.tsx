@@ -163,7 +163,7 @@ function StageCard({
       <div className="flex justify-between items-center rounded-tr-3xl rounded-tl-3xl py-4 px-5 bg-light25">
         <Header4 text={item.name} />
         {/* EDIT BUTTON: ONLY ADMIN CAN EDIT */}
-        {user?.is_admin ? (
+        {user?.is_owner || user?.role === "admin" ? (
           <div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

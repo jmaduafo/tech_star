@@ -17,7 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import Loading from "@/components/ui/Loading";
 import DataTable from "@/components/ui/tables/DataTable";
 import Header6 from "@/components/fontsize/Header6";
-import { latestColumns, paymentColumns } from "@/components/ui/tables/columns";
+import { paymentColumns } from "@/components/ui/tables/columns";
 
 function PaymentDisplay() {
   const [latestPayments, setLatestPayments] = useState<Payment[] | undefined>();

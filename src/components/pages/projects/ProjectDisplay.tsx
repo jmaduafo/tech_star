@@ -111,7 +111,7 @@ function ProjectDisplay({
     }
   }
 
-  const checkAdmin = user?.is_admin ? (
+  const checkAdmin = user?.is_owner || user?.role === "admin" ? (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {/* BUTTON TO ADD NEW PROJECT; ONLY ADMIN CAN ADD A NEW PROJECT */}

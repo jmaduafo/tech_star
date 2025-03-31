@@ -4,12 +4,16 @@ export type User = {
   id: string;
   first_name: string;
   last_name: string;
+  full_name: string;
   email: string;
   password?: string;
   occupation?: string;
-  is_admin: boolean;
+  is_owner: boolean;
   bg_image_index: number;
-  team_id?: string;
+  team_id: string;
+  role: "admin" | "editor" | "viewer";
+  hire_type: "employee" | "contractor" | "independent" | null;
+  is_online: boolean;
   created_at: number;
   updated_at: number | null;
 };
@@ -19,8 +23,9 @@ export type User = {
 // and remove users as well as assign the role of admin
 export type Team = {
   id: string;
-  organization_name?: string;
-  team_name: string;
+  // Owner can add the name of the company or organization that they're under
+  organization_name?: string | null;
+  name: string;
 };
 
 export type TimeStamp = {

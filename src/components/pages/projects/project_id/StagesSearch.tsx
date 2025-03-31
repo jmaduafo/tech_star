@@ -126,7 +126,7 @@ function StagesSearch({
           />
         </div>
         {/* ONLY ADMIN CAN CREATE A STAGE */}
-        {user?.is_admin ? (
+        {user?.is_owner || user?.role === "admin" ? (
           <div>
             <AddButton
               buttonTitle="stages"

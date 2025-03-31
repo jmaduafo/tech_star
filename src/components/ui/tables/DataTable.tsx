@@ -100,16 +100,30 @@ function DataTable<TData, TValue>({
     <div>
       <div className="mb-5 flex items-end flex-wrap gap-x-4 gap-y-3">
         {/* SEARCH ENGINE */}
-        <input
-          placeholder="Filter description..."
-          className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
-          value={
-            (table.getColumn("description")?.getFilterValue() as string) || ""
-          }
-          onChange={(e) =>
-            table.getColumn("description")?.setFilterValue(e.target.value)
-          }
-        />
+        {table.getAllColumns().find(x => x.id === 'description') ? (
+          <input
+            placeholder="Filter by description"
+            className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
+            value={
+              (table.getColumn("description")?.getFilterValue() as string) || ""
+            }
+            onChange={(e) =>
+              table.getColumn("description")?.setFilterValue(e.target.value)
+            }
+          />
+        ) : (
+          <input
+            placeholder="Filter by name"
+            className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
+            value={
+              (table.getColumn("full_name")?.getFilterValue() as string) ||
+              ""
+            }
+            onChange={(e) =>
+              table.getColumn("full_name")?.setFilterValue(e.target.value)
+            }
+          />
+        )}
         {/* EXPORT AS CSV BUTTON */}
         {is_export && exportedData.length && data.length ? (
           <Button
@@ -205,8 +219,11 @@ function DataTable<TData, TValue>({
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
           <div className="flex items-center gap-5">
-            <p className="text-[14.5px]">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</p>
-            
+            <p className="text-[14.5px]">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </p>
+
             <div className="flex items-center gap-3 text-[14.5px]">
               {/* PREVIOUS */}
               <button

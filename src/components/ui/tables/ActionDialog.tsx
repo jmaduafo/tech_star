@@ -71,7 +71,6 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import Header3 from "@/components/fontsize/Header3";
 import Submit from "../buttons/Submit";
 import { db } from "@/firebase/config";
 import { CreateContractSchema, CreatePaymentSchema } from "@/zod/validation";
@@ -113,6 +112,8 @@ function ActionDialog({ data, is_payment }: Dialog) {
   const [projectName, setProjectName] = useState<string | undefined>();
   const [stageName, setStageName] = useState<string | undefined>();
 
+  //  WHEN BROWSER FIRST RENDERS, ADDS THE PRE EXISTING DATA OF CONTRACT OR PAYMENT TO
+  //  THE APPROPRIATE INPUT FIELDS TO PREPARE FOR EDIT FUNCTIONALITY
   async function loadEditEntries() {
     try {
       if (!data || !userData) {
@@ -158,7 +159,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  // FOR EDIT DIALOG, SETS THE CURRENCY AMOUNT AND CODE
+  // SETS THE CURRENCY AMOUNT,NAME, SYMBOL, AND CODE
   function handleAddCurrency() {
     if (
       (currencyCode.length && +currencyAmount > 0) ||
@@ -182,7 +183,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
+  //   HANDLES DELETION OF PAYMENT FROM DATABASE
   async function handleDeletePayment(payment_id: string) {
     try {
       setLoadingDelete(true);
@@ -203,7 +204,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
+  //   HANDLES DELETION OF CONTRACT FROM DATABASE
   async function handleDeleteContract(contract_id: string, project_id: string) {
     try {
       setLoadingDelete(true);
@@ -234,7 +235,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  //   HANDLES DELETION OF CONTRACT OR PAYMENT FROM DATABASE
+  //   HANDLES UPDATE OF PAYMENT FROM DATABASE
   async function handleEditPayment(id: string) {
     const values = {
       desc: description,
@@ -290,7 +291,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  //   HANDLES UPDATE OF CONTRACT AND SUBSEQUENTLY UPDATES PAYMENTS UNDER THE UPDATED CONTRACT
+  //   HANDLES UPDATE OF CONTRACT AND SUBSEQUENTLY UPDATES ALL PAYMENTS UNDER THE UPDATED CONTRACT
   async function handleEditContract(id: string) {
     const values = {
       code: contractCode,
@@ -378,7 +379,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
     }
   }
 
-  // RETRIEVE ALL THE NAMES PERTAINING TO PROJECT, CONTRACTOR, STAGES, AND CONTRACT
+  // RETRIEVE ALL THE NAMES PERTAINING TO PROJECT, CONTRACTOR, AND STAGE
   async function getNames() {
     try {
       if (!data) {
@@ -432,7 +433,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
               <DropdownMenuItem>View payments</DropdownMenuItem>
             </Link>
           ) : null}
-          {userData?.is_admin ? (
+          {userData?.is_owner || userData?.role === "admin" ? (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem

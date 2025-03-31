@@ -184,7 +184,7 @@ function NonContracts({
           ) : null}
         </div>
         <div>
-          {user?.is_admin ? (
+          {user?.is_owner || user?.role === "admin"? (
             <AddButton
               title="non-contract"
               desc="Create a stand-alone payment"

@@ -5,7 +5,6 @@ import Header4 from "@/components/fontsize/Header4";
 import Header2 from "@/components/fontsize/Header2";
 import { Skeleton } from "@/components/ui/skeleton";
 import TimeDate from "../login_signup/TimeDate";
-import { useAuth } from "@/context/AuthContext";
 import { User } from "@/types/types";
 
 function Greeting({ user }: { readonly user: User | undefined}) {
@@ -41,7 +40,7 @@ function Greeting({ user }: { readonly user: User | undefined}) {
         ) }
 
         <div className="mt-3">
-          {user?.is_admin ? (
+          {user?.is_owner ? (
             <p className="px-3 py-[1px] text-[13.5px] rounded-full border-[1.5px] border-lightText w-fit">
               Admin
             </p>

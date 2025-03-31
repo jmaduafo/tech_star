@@ -16,7 +16,6 @@ import Loading from "@/components/ui/Loading";
 import Reset from "@/components/ui/buttons/Reset";
 import CheckedButton from "@/components/ui/buttons/CheckedButton";
 import Header6 from "@/components/fontsize/Header6";
-import Card from "@/components/ui/MyCard";
 
 function AmountDisplay({ user }: { readonly user: User | undefined }) {
   const [projectId, setProjectId] = useState("");
@@ -63,16 +62,19 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
     allData();
   }, [user?.id ?? "guest"]);
 
+  // RETRIEVES CALCULATIONS OF REVISED CONTRACTS & PAYMENTS WITHIN AND OUTSIDE CONTRACTS  
   async function totalAmount() {
     try {
       setLoading(true);
 
+      // Gets the project id, contractor id, and currency code that user selected
       const updatedSubmit = {
         project: projectId,
         contractor: contractorId,
         currency: currencyCode,
       };
 
+      // Sets the appropriate currency symbol according to the selected currency code
       setCurrencySymbol(
         currency_list.find((i) => i.code === currencyCode)?.symbol ?? ""
       );
@@ -109,6 +111,8 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
         ),
       ]);
 
+      // Uses a custom function from utils folder to calculate all the totals based on an array
+      // of numbers of just the amounts
       setAllTotals((prevTotals) => ({
         ...prevTotals,
         noncontractPayments: totalSum(
