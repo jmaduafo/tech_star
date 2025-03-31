@@ -118,7 +118,6 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
         ),
         contracts: totalSum(contracts.map((i) => i.currency_amount)),
       }));
-
     } catch (err: any) {
       console.log(err.message);
     } finally {
@@ -156,8 +155,8 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
           </div>
           <Header6 text="Total Payment Made" />
         </div>
-        <div className="flex gap-16">
-          <div>
+        <div className="flex gap-10">
+          <div className="flex flex-col items-center">
             <div className="flex items-start gap-3">
               <Header2
                 text={convertCurrency(allTotals.contracts)}
@@ -165,9 +164,9 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
               />
               {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
             </div>
-            <Header6 text="Total Revised Contracts" />
+            <p className="text-[14.5px]">Total Revised Contracts</p>
           </div>
-          <div>
+          <div className="flex flex-col items-center">
             <div className="flex items-start gap-3">
               <Header2
                 text={convertCurrency(allTotals.contractPayments)}
@@ -175,9 +174,9 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
               />
               {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
             </div>
-            <Header6 text="Total Within Contract" />
+            <p className="text-[14.5px]">Total Within Contract</p>
           </div>
-          <div>
+          <div className="flex flex-col items-center">
             <div className="flex items-start gap-3">
               <Header2
                 text={convertCurrency(allTotals.noncontractPayments)}
@@ -185,7 +184,40 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
               />
               {currencySymbol.length ? <Header4 text={currencySymbol} /> : null}
             </div>
-            <Header6 text="Total Outside Contract" />
+            <p className="text-[14.5px]">Total Outside Contract</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex items-start gap-3">
+              <Header2
+                text={`${allTotals.contracts -
+                  (allTotals.noncontractPayments + allTotals.contractPayments) < 0 ? "-" : ""}${convertCurrency(
+                  allTotals.contracts -
+                    (allTotals.noncontractPayments + allTotals.contractPayments)
+                )}`}
+                className={`${
+                  allTotals.contracts -
+                    (allTotals.noncontractPayments +
+                      allTotals.contractPayments) <
+                  0
+                    ? "text-red-500"
+                    : "text-lightText"
+                } font-medium`}
+              />
+              {currencySymbol.length ? (
+                <Header4
+                  text={currencySymbol}
+                  className={`${
+                    allTotals.contracts -
+                      (allTotals.noncontractPayments +
+                        allTotals.contractPayments) <
+                    0
+                      ? "text-red-500"
+                      : "text-lightText"
+                  }`}
+                />
+              ) : null}
+            </div>
+            <p className="text-[14.5px]">Total Balance</p>
           </div>
         </div>
       </div>
