@@ -10,6 +10,7 @@ import { Checkbox } from "../checkbox";
 import ActionDialog from "./ActionDialog";
 import { ArrowUpDown } from "lucide-react";
 import OnlineStatus from "../OnlineStatus";
+import UserAction from "./UserAction";
 
 export const contractColumns: ColumnDef<Contract>[] = [
   {
@@ -539,9 +540,9 @@ export const teamColumns: ColumnDef<User>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      // const team = row.original;
+      const team = row.original;
 
-      return <div className="flex justify-around">Action</div>;
+      return !team?.is_owner ? <UserAction data={team} /> : null
     },
   },
 ];

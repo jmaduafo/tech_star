@@ -183,7 +183,7 @@ function Payments({
           <Header3 text="All Payments" />
         </div>
         <div>
-          {user?.is_admin && !contract?.is_completed ? (
+          {user?.is_owner|| user?.role === "admin" && !contract?.is_completed ? (
             <AddButton
               title="payment"
               desc={`Create a payment for contract ${contract?.contract_code}`}
