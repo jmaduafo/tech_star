@@ -30,7 +30,6 @@ import { SelectItem } from "@/components/ui/select";
 import Submit from "@/components/ui/buttons/Submit";
 import { CreateMemberSchema } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
-import { addItem } from "@/firebase/actions";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 function MainPage() {
@@ -38,8 +37,8 @@ function MainPage() {
   const [teamName, setTeamName] = useState<string | undefined>();
 
   const [userLocation, setUserLocation] = useState("");
-  const [userHireType, setUserHireType] = useState("employee");
-  const [userRole, setUserRole] = useState("viewer");
+  const [userHireType, setUserHireType] = useState("Employee");
+  const [userRole, setUserRole] = useState("Viewer");
   const [userJobTitle, setUserJobTitle] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -152,8 +151,8 @@ function MainPage() {
                 email,
                 team_id: userData?.team_id,
                 job_title,
-                role,
-                hire_type,
+                role: role.toLowerCase(),
+                hire_type: hire_type.toLowerCase(),
                 id: user?.uid,
                 location,
                 is_owner: false,
@@ -163,11 +162,14 @@ function MainPage() {
                 is_online: false,
               });
 
+              setOpen(false);
+              
               toast({
                 title: "Member was successfully added!",
                 description:
                   "The new member can now log in on their device and are allowed access to the team's data",
               });
+
             } catch (err: any) {
               toast({
                 variant: "destructive",
@@ -221,7 +223,12 @@ function MainPage() {
             ) : null}
           </div>
           {userData?.is_owner ? (
-            <AddButton title={"member"} desc={"Create a new team member"}>
+            <AddButton
+              title={"member"}
+              desc={"Create a new team member"}
+              setOpen={setOpen}
+              open={open}
+            >
               <form action={addMember}>
                 {/* FIRST NAME */}
                 <Input htmlFor={"first_name"} label={"First name *"}>
@@ -317,7 +324,7 @@ function MainPage() {
                   label={"Roles"}
                   className="mt-5"
                 >
-                  {["viewer", "editor", "admin"].map((item) => {
+                  {["Viewer", "Editor", "Admin"].map((item) => {
                     return (
                       <SelectItem
                         value={item}
@@ -337,7 +344,7 @@ function MainPage() {
                   label={"Hire type"}
                   className="mt-5"
                 >
-                  {["employee", "contractor", "independent"].map((item) => {
+                  {["Employee", "Contractor", "Independent"].map((item) => {
                     return (
                       <SelectItem
                         value={item}
