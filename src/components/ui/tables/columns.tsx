@@ -542,7 +542,7 @@ export const teamColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const team = row.original;
 
-      return !team?.is_owner ? <UserAction data={team} /> : null
+      return team?.is_owner ? <UserAction data={team} /> : null
     },
   },
 ];

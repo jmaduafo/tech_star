@@ -144,6 +144,7 @@ function SignUp() {
                 is_owner: true,
                 is_online: true,
                 bg_image_index: 0,
+                job_title: null,
                 hire_type: "independent",
                 role: "admin",
                 location: null,

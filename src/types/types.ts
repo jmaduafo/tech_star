@@ -12,7 +12,8 @@ export type User = {
   bg_image_index: number;
   team_id: string;
   role: "admin" | "editor" | "viewer";
-  hire_type: "employee" | "contractor" | "independent" | null;
+  job_title: string | null,
+  hire_type: "employee" | "contractor" | "independent";
   is_online: boolean;
   created_at: number;
   updated_at: number | null;

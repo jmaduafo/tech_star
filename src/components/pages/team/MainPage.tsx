@@ -18,16 +18,36 @@ import {
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
+  setDoc,
   where,
 } from "firebase/firestore";
-import { db } from "@/firebase/config";
+import { auth, db } from "@/firebase/config";
+import Input from "@/components/ui/input/Input";
+import SelectBar from "@/components/ui/input/SelectBar";
+import { country_list, job_titles } from "@/utils/dataTools";
+import { SelectItem } from "@/components/ui/select";
+import Submit from "@/components/ui/buttons/Submit";
+import { CreateMemberSchema } from "@/zod/validation";
+import { toast } from "@/hooks/use-toast";
+import { addItem } from "@/firebase/actions";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 function MainPage() {
   const [teamData, setTeamData] = useState<User[] | undefined>();
   const [teamName, setTeamName] = useState<string | undefined>();
 
+  const [userLocation, setUserLocation] = useState("");
+  const [userHireType, setUserHireType] = useState("employee");
+  const [userRole, setUserRole] = useState("viewer");
+  const [userJobTitle, setUserJobTitle] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
   const { userData } = useAuth();
 
+  // GETS ALL THE MEMBERS /USERS UNDER A TEAM
   async function getAllMembers() {
     try {
       if (!userData) {
@@ -62,6 +82,123 @@ function MainPage() {
     }
   }
 
+  async function addMember(formData: FormData) {
+    const firstName = formData.get("first_name");
+    const lastName = formData.get("last_name");
+    const userEmail = formData.get("email");
+    const userPassword = formData.get("password");
+    const userConfirm = formData.get("confirm_password");
+
+    const values = {
+      first_name: firstName,
+      last_name: lastName,
+      email: userEmail,
+      password: userPassword,
+      confirm: userConfirm,
+      location: userLocation,
+      job_title: userJobTitle,
+      role: userRole,
+      hire_type: userHireType,
+    };
+
+    if (values.confirm !== values.password) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description:
+          "The password does not match the confirm password field. Please try again.",
+      });
+
+      return;
+    }
+
+    const result = CreateMemberSchema.safeParse(values);
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: result.error.issues[0].message,
+      });
+
+      return;
+    }
+
+    const {
+      first_name,
+      last_name,
+      email,
+      password,
+      job_title,
+      role,
+      hire_type,
+      location,
+    } = result.data;
+
+    try {
+      setLoading(true);
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+
+          async function create() {
+            try {
+              await setDoc(doc(db, "users", user?.uid), {
+                first_name,
+                last_name,
+                full_name: first_name + " " + last_name,
+                email,
+                job_title,
+                role,
+                hire_type,
+                id: user?.uid,
+                location,
+                is_owner: false,
+                bg_image_index: 0,
+                created_at: serverTimestamp(),
+                updated_at: null,
+                is_online: false,
+              });
+
+              toast({
+                title: "Member was successfully added!",
+                description:
+                  "The new member can now log in on their device and are allowed access to the team's data",
+              });
+            } catch (err: any) {
+              toast({
+                variant: "destructive",
+                title: "Uh oh! Something went wrong",
+                description: err.message,
+              });
+            }
+          }
+
+          create();
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+
+          toast({
+            variant: "destructive",
+            title: `Error code: ${errorCode}`,
+            description: errorMessage,
+          });
+        });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     getAllMembers();
   }, [userData?.team_id]);
@@ -82,9 +219,142 @@ function MainPage() {
               />
             ) : null}
           </div>
-          <AddButton title={"member"} desc={"Create a new team member"}>
-            <div></div>
-          </AddButton>
+          {userData?.is_owner ? (
+            <AddButton title={"member"} desc={"Create a new team member"}>
+              <form action={addMember}>
+                {/* FIRST NAME */}
+                <Input htmlFor={"first_name"} label={"First name *"}>
+                  <input
+                    type="text"
+                    className="form"
+                    name="first_name"
+                    id="first_name"
+                  />
+                </Input>
+                {/* LAST NAME */}
+                <Input
+                  htmlFor={"last_name"}
+                  label={"Last name *"}
+                  className="mt-3"
+                >
+                  <input
+                    type="text"
+                    className="form"
+                    name="last_name"
+                    id="last_name"
+                  />
+                </Input>
+                {/* EMAIL */}
+                <Input htmlFor={"email"} label={"Email *"} className="mt-3">
+                  <input type="text" className="form" name="email" id="email" />
+                </Input>
+                <div className="flex gap-4 items-start">
+                  {/* PASSWORD */}
+                  <Input
+                    htmlFor={"password"}
+                    label={"Password *"}
+                    className="mt-3 flex-1"
+                  >
+                    <input
+                      type="password"
+                      className="form"
+                      name="password"
+                      id="password"
+                    />
+                  </Input>
+                  {/* CONFIRM PASSWORD */}
+                  <Input
+                    htmlFor={"confirm_password *"}
+                    label={"Confirm password"}
+                    className="mt-3 flex-1"
+                  >
+                    <input
+                      type="password"
+                      className="form"
+                      name="confirm_password"
+                      id="confirm_password"
+                    />
+                  </Input>
+                </div>
+                {/* LOCATION */}
+                <SelectBar
+                  value={userLocation}
+                  valueChange={setUserLocation}
+                  placeholder={"Select member's location *"}
+                  label={"Countries"}
+                  className="mt-5"
+                >
+                  {country_list.map((item) => {
+                    return (
+                      <SelectItem value={item.name} key={item.code}>
+                        {item.name}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+                {/* JOB TITLE */}
+                <SelectBar
+                  value={userJobTitle}
+                  valueChange={setUserJobTitle}
+                  placeholder={"Select a job title *"}
+                  label={"Job title"}
+                  className="mt-5"
+                >
+                  {job_titles.map((item) => {
+                    return (
+                      <SelectItem value={item} key={item}>
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+                {/* ROLES */}
+                <SelectBar
+                  value={userRole}
+                  valueChange={setUserRole}
+                  placeholder={"Select a role *"}
+                  label={"Roles"}
+                  className="mt-5"
+                >
+                  {["viewer", "editor", "admin"].map((item) => {
+                    return (
+                      <SelectItem
+                        value={item}
+                        key={item}
+                        className="capitalize"
+                      >
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+                {/* HIRE TYPE */}
+                <SelectBar
+                  value={userHireType}
+                  valueChange={setUserHireType}
+                  placeholder={"Select a hire type *"}
+                  label={"Hire type"}
+                  className="mt-5"
+                >
+                  {["employee", "contractor", "independent"].map((item) => {
+                    return (
+                      <SelectItem
+                        value={item}
+                        key={item}
+                        className="capitalize"
+                      >
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+                {/* SUBMIT BUTTON */}
+                <div className="flex justify-center mt-6 scale-75">
+                  <Submit loading={loading} />
+                </div>
+              </form>
+            </AddButton>
+          ) : null}
         </div>
         <div>
           {!teamData ? (

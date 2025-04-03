@@ -21,6 +21,47 @@ export const CreateUserSchema = z.object({
     }),
 });
 
+export const CreateMemberSchema = z.object({
+  first_name: z.string().min(1, {
+    message: "First name must be filled in",
+  }),
+  last_name: z.string().min(1, {
+    message: "Last name must be filled in",
+  }),
+  email: z
+    .string()
+    .min(1, { message: "This field has to be filled." })
+    .email("This is not a valid email."),
+  password: z
+    .string()
+    .min(6, {
+      message: "Password must be at least 6 characters",
+    })
+    .max(100, {
+      message: "Password is too long. Must be 100 characters at most.",
+  }),
+  confirm: z
+    .string()
+    .min(6, {
+      message: "Password must be at least 6 characters",
+    })
+    .max(100, {
+      message: "Password is too long. Must be 100 characters at most.",
+  }),
+  location: z.string().min(1, {
+    message: "You must select a location",
+  }),
+  job_title: z.string().min(1, {
+    message: "You must select a job title",
+  }),
+  role: z.string().min(1, {
+    message: "You must select a role",
+  }),
+  hire_type: z.string().min(1, {
+    message: "You must select a hire type",
+  }),
+});
+
 export const LoginUserSchema = z.object({
   email: z
     .string()
