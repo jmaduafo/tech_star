@@ -150,6 +150,7 @@ function MainPage() {
                 last_name,
                 full_name: first_name + " " + last_name,
                 email,
+                team_id: userData?.team_id,
                 job_title,
                 role,
                 hire_type,
