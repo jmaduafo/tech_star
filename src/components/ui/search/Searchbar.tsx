@@ -1,4 +1,5 @@
-import React from "react";
+"use client"
+import React, {useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 
 function Searchbar({
@@ -16,9 +17,9 @@ function Searchbar({
   readonly setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   // readonly children: React.ReactNode;
 }) {
-  const searchRef = React.useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // THE OPTION LIST CLOSES WHEN USER CLICKS OUT OF SEARCH BAR
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -48,11 +49,6 @@ function Searchbar({
           className="placeholder-dark50 text-[15px] py-0"
         />
       </div>
-      {/* {open ? (
-        <div className="absolute px-2 py-1.5 bg-light70 backdrop-blur-lg text-dark75 text-[14px] border-t border-t-light90 left-0 top-full w-full rounded-br-xl rounded-bl-xl">
-          {children}
-        </div>
-      ) : null} */}
     </div>
   );
 }

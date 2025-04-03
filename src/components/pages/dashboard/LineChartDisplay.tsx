@@ -13,7 +13,7 @@ import { query, collection, where, orderBy } from "firebase/firestore";
 import { getQueriedItems } from "@/firebase/actions";
 import { formatChartDate } from "@/utils/dateAndTime";
 import { ChartConfig } from "@/components/ui/chart";
-import LineChart from "../charts/LineChart";
+import LineChart from "../../ui/charts/LineChart";
 import NotAvailable from "@/components/ui/NotAvailable";
 import { currency_list } from "@/utils/dataTools";
 

@@ -7,7 +7,7 @@ import { db } from "@/firebase/config";
 import { ChartConfig } from "@/components/ui/chart";
 import NotAvailable from "@/components/ui/NotAvailable";
 import Loading from "@/components/ui/Loading";
-import PieChart from "../charts/PieChart";
+import PieChart from "../../ui/charts/PieChart";
 import { Project, User } from "@/types/types";
 
 type Chart = {

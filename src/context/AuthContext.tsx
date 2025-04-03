@@ -10,7 +10,7 @@ import {
 } from "react";
 import { auth, db } from "@/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { User } from "@/types/types";
 
 // Define context type
@@ -38,17 +38,22 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
         setLoading(true);
 
         const userRef = doc(db, "users", user?.uid);
-        const userSnap = await getDoc(userRef);
-        let firebaseData = {};
+  
+        const unsub = onSnapshot(userRef, (snap) => {
+          let firebaseData = {};
 
-        if (userSnap?.exists()) {
-          firebaseData = userSnap.data();
-        }
-        setUserData(firebaseData as User);
+          if (snap?.exists()) {
+            firebaseData = snap.data();
+          }
+          
+          setUserData(firebaseData as User);
+
+          return unsub()
+        });
       } catch (err: any) {
-        console.log(err.message)
+        console.log(err.message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     });
 
@@ -57,13 +62,12 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
 
   const memoizedUser = useMemo(() => userData, [userData]);
 
-  const value = useMemo(() => ({ userData: memoizedUser, loading }), [memoizedUser, loading]);   
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ userData: memoizedUser, loading }),
+    [memoizedUser, loading]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // Hook to use Auth Context

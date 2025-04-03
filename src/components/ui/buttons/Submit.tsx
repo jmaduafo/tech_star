@@ -4,9 +4,17 @@ import Loading from "../Loading";
 
 function Submit({
   loading,
-  buttonClick
+  buttonClick,
+  width_height,
+  arrow_width_height,
+  width,
+  disabledLogic
 }: {
+  readonly disabledLogic?: boolean;
   readonly loading: boolean;
+  readonly width_height?: string;
+  readonly arrow_width_height?: string;
+  readonly width?: string;
   readonly buttonClick?: () => void;
 }) {
 
@@ -14,18 +22,18 @@ function Submit({
     <button
       type="submit"
       onClick={buttonClick}
-      className="rounded-full w-[160px] h-[60px] bg-dark35 group"
-      disabled={loading ?? false}
+      className={`rounded-full bg-dark35 group ${width_height ?? "w-[160px] h-[60px]"} ${disabledLogic ? "opacity-60" : "opacity-100"}`}
+      disabled={!!(loading || disabledLogic)}
     >
       <span
         className={`${
-          loading ? "w-full" : "w-[60px]"
+          loading ? "w-full" : width ?? "w-[60px]"
         } duration-300 rounded-full flex justify-end items-center h-full bg-darkText px-1 group-hover:bg-dark75`}
       >
         {loading ? (
           <Loading className="mr-2" />
         ) : (
-          <HiChevronRight className="w-10 h-10" />
+          <HiChevronRight className={`${arrow_width_height ?? "w-10 h-10"}`} />
         )}
       </span>
     </button>
