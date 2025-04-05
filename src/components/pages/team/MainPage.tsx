@@ -37,8 +37,8 @@ function MainPage() {
   const [teamName, setTeamName] = useState<string | undefined>();
 
   const [userLocation, setUserLocation] = useState("");
-  const [userHireType, setUserHireType] = useState("Employee");
-  const [userRole, setUserRole] = useState("Viewer");
+  const [userHireType, setUserHireType] = useState("");
+  const [userRole, setUserRole] = useState("");
   const [userJobTitle, setUserJobTitle] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -163,7 +163,7 @@ function MainPage() {
               });
 
               setOpen(false);
-              
+
               toast({
                 title: "Member was successfully added!",
                 description:
@@ -272,8 +272,8 @@ function MainPage() {
                   </Input>
                   {/* CONFIRM PASSWORD */}
                   <Input
-                    htmlFor={"confirm_password *"}
-                    label={"Confirm password"}
+                    htmlFor={"confirm_password"}
+                    label={"Confirm password *"}
                     className="mt-3 flex-1"
                   >
                     <input
