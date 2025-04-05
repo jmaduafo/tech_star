@@ -7,12 +7,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Input from "../input/Input";
-import Submit from "../buttons/Submit";
+import Input from "../../../input/Input";
+import Submit from "../../../buttons/Submit";
 import { User } from "@/types/types";
-import { signInWithEmailAndPassword, updatePassword } from "firebase/auth";
+import { signInWithEmailAndPassword, updateEmail, updatePassword } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import { updateItem } from "@/firebase/actions";
 
 function ProfileSettings({ user }: { readonly user: User | undefined }) {
   const [names, setNames] = useState({
@@ -24,6 +25,8 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
   const [newPassword, setNewPassword] = useState("");
 
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [namesLoading, setNamesLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const [nextSlide, setNextSlide] = useState(false);
 
   function setData() {
@@ -35,10 +38,63 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     setUserEmail(user?.email ?? "");
   }
 
-  async function changeNames() {}
+  async function changeNames() {
+    if (!names.first_name.length || !names.last_name.length) {
+      toast({
+        variant: "destructive",
+        title: `Uh oh! Something went wrong`,
+        description: "Both names must be filled in",
+      });
 
-  async function changeEmail() {}
+      return;
+    }
 
+    try {
+      setNamesLoading(true);
+
+      if (!user) {
+        return;
+      }
+
+      await updateItem("user", user?.id, {
+        first_name: names.first_name,
+        last_name: names.last_name,
+        full_name: names.first_name + " " + names.last_name,
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: `Uh oh! Something went wrong`,
+        description: err.message,
+      });
+    } finally {
+      setNamesLoading(false);
+    }
+  }
+
+  async function changeEmail() {
+    if (!userEmail.length) {
+      toast({
+        variant: "destructive",
+        title: `Uh oh! Something went wrong`,
+        description: "Email field must be filled in",
+      });
+
+      return;
+    }
+
+    if (!auth) {
+        return
+    }
+
+    signInWithEmailAndPassword(auth, 'you@domain.example', 'correcthorsebatterystaple')
+    .then(function(userCredential) {
+        const user = userCredential.user
+        updateEmail(user, 'newyou@domain.example')
+    })
+  }
+
+  //   ALLOW FOR USER TO SIGN IN BEFORE CHANGING THEIR PASSWORD
   async function signInUser() {
     setPasswordLoading(true);
 

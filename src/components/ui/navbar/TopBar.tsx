@@ -10,9 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/context/AuthContext";
-import AppearanceSettings from "./AppearanceSettings";
-import ProfileSettings from "./ProfileSettings";
-import SecuritySettings from "./SecuritySettings";
+import AppearanceSettings from "./settings/appearance/AppearanceSettings";
+import ProfileSettings from "./settings/profile/ProfileSettings";
+import SecuritySettings from "./settings/security/SecuritySettings";
 
 function TopBar() {
   return (

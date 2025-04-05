@@ -7,13 +7,13 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-} from "../carousel";
+} from "../../../carousel";
 import { User } from "@/types/types";
 import { updateItem } from "@/firebase/actions";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { doc, onSnapshot } from "firebase/firestore";
-import Submit from "../buttons/Submit";
+import Submit from "../../../buttons/Submit";
 import {
   Accordion,
   AccordionItem,
