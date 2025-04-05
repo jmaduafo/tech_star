@@ -31,7 +31,7 @@ function Submit({
         } duration-300 rounded-full flex justify-end items-center h-full bg-darkText px-1 group-hover:bg-dark75`}
       >
         {loading ? (
-          <Loading className="mr-2" />
+          <Loading className="mr-2 w-6 h-6" />
         ) : (
           <HiChevronRight className={`${arrow_width_height ?? "w-10 h-10"}`} />
         )}
