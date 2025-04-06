@@ -11,7 +11,7 @@ import {
   addDoc,
   collection,
   doc,
-  onSnapshot,
+  getDocs,
   query,
   serverTimestamp,
   setDoc,
@@ -31,11 +31,10 @@ function SignUp() {
   });
   const [viewPass, setViewPass] = useState(false);
 
-  const [ loading, setLoading ] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const { toast } = useToast();
   const route = useRouter();
-
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -46,45 +45,19 @@ function SignUp() {
     });
   }
 
-
-  async function checkUniqueUser(newEmail: string) {
-    const usersRef = collection(db, "users")
-
-    try {
-      // Check if there is an email in the schema that is the same as the entered email
-      const findEmail = query(usersRef, where("email", "==", newEmail));
+  async function checkUniqueUser(email: string): Promise<boolean> {
+    const usersRef = collection(db, "users");
+    const findEmail = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(findEmail);
   
-      const unsub = onSnapshot(findEmail, (doc) => {
-        const notUnique = [];
-
-        doc.forEach((item) => {
-          notUnique.push(item.data().email);
-        });
-
-        if (notUnique.length) {
-          toast({
-            variant: "destructive",
-            title: "Uh oh! Something went wrong!",
-            description: "This email address is already in use.",
-          });
-        }
-
-        return () => unsub()
-      });
-  
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong!",
-        description: err.message,
-      });
-
-    }
+    return !snapshot.empty; // true if email exists
   }
 
-  
-  async function handleSubmit(formData: FormData) {
-    setLoading(true)
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
 
     const data = {
       first_name: formData.get("first_name"),
@@ -102,81 +75,62 @@ function SignUp() {
         description: userResult.error.issues[0].message,
       });
 
-      setLoading(false)
+      setLoading(false);
 
       return;
     }
 
     const { first_name, last_name, email, password } = userResult.data;
 
-    
-    await checkUniqueUser(email);
-
-    setLoading(true)
-
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-
-        const teamsRef = collection(db, "teams");
-
-        async function create() {
-          try {
-            // Instantly create a new team after user is registered
-            const newTeam = await addDoc(teamsRef, {
-              name: first_name + "'s team",
-              organization_name: null
-            });
-
-            // If new team is created, add new team id to the new user's document in "users" schema
-            if (newTeam) {
-              // newly authenticated user should relate to "users" collection with same id
-              const newUserRef = doc(db, "users", user?.uid);
-
-              await setDoc(newUserRef, {
-                id: user?.uid,
-                first_name,
-                last_name,
-                full_name: first_name + " " + last_name,
-                email,
-                team_id: newTeam?.id,
-                is_owner: true,
-                is_online: true,
-                bg_image_index: 0,
-                job_title: null,
-                hire_type: "independent",
-                role: "admin",
-                location: null,
-                created_at: serverTimestamp(),
-                updated_at: null,
-              });
-
-              // Take user to dashboard
-              route.push('/dashboard');
-            }
-          } catch (err: any) {
-            toast({
-              variant: "destructive",
-              title: "Uh oh! Something went wrong!",
-              description: err.message,
-            });
-          }
-        }
-
-        create();
-        // ...
-      })
-      .catch((err) => {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong!",
-          description: err.message,
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+    const isEmailTaken = await checkUniqueUser(email);
+    if (isEmailTaken) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong!",
+        description: "This email address is already in use.",
       });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      const user = userCredential.user;
+  
+      const newTeam = await addDoc(collection(db, "teams"), {
+        name: `${first_name}'s team`,
+        organization_name: null,
+      });
+  
+      await setDoc(doc(db, "users", user.uid), {
+        id: user.uid,
+        first_name,
+        last_name,
+        full_name: `${first_name} ${last_name}`,
+        email,
+        team_id: newTeam.id,
+        is_owner: true,
+        is_online: true,
+        bg_image_index: 0,
+        job_title: null,
+        hire_type: "independent",
+        role: "admin",
+        location: null,
+        created_at: serverTimestamp(),
+        updated_at: null,
+      });
+  
+      route.push("/dashboard");
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong!",
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -186,11 +140,15 @@ function SignUp() {
         className="mt-4"
         text="Create an account to streamline your workflow and manage projects with ease."
       />
-      <form className="mt-10" action={handleSubmit}>
+      <form className="mt-10" onSubmit={handleSubmit}>
         <div className="flex gap-3">
           <div>
             <IconInput
-              icon={<div className="w-6 h-6 flex justify-center items-center"><p>A</p></div>}
+              icon={
+                <div className="w-6 h-6 flex justify-center items-center">
+                  <p>A</p>
+                </div>
+              }
               input={
                 <input
                   placeholder="First name"
@@ -205,7 +163,11 @@ function SignUp() {
           </div>
           <div>
             <IconInput
-              icon={<div className="w-6 h-6 flex justify-center items-center"><p>Z</p></div>}
+              icon={
+                <div className="w-6 h-6 flex justify-center items-center">
+                  <p>Z</p>
+                </div>
+              }
               input={
                 <input
                   placeholder="Last name"

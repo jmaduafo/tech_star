@@ -10,10 +10,15 @@ import {
 import Input from "../../../input/Input";
 import Submit from "../../../buttons/Submit";
 import { User } from "@/types/types";
-import { signInWithEmailAndPassword, updateEmail, updatePassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  updateEmail,
+  updatePassword,
+} from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { updateItem } from "@/firebase/actions";
+import ChangeNames from "./ChangeNames";
 
 function ProfileSettings({ user }: { readonly user: User | undefined }) {
   const [names, setNames] = useState({
@@ -25,7 +30,6 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
   const [newPassword, setNewPassword] = useState("");
 
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [namesLoading, setNamesLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [nextSlide, setNextSlide] = useState(false);
 
@@ -36,40 +40,6 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     });
 
     setUserEmail(user?.email ?? "");
-  }
-
-  async function changeNames() {
-    if (!names.first_name.length || !names.last_name.length) {
-      toast({
-        variant: "destructive",
-        title: `Uh oh! Something went wrong`,
-        description: "Both names must be filled in",
-      });
-
-      return;
-    }
-
-    try {
-      setNamesLoading(true);
-
-      if (!user) {
-        return;
-      }
-
-      await updateItem("user", user?.id, {
-        first_name: names.first_name,
-        last_name: names.last_name,
-        full_name: names.first_name + " " + names.last_name,
-      });
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: `Uh oh! Something went wrong`,
-        description: err.message,
-      });
-    } finally {
-      setNamesLoading(false);
-    }
   }
 
   async function changeEmail() {
@@ -84,14 +54,17 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     }
 
     if (!auth) {
-        return
+      return;
     }
 
-    signInWithEmailAndPassword(auth, 'you@domain.example', 'correcthorsebatterystaple')
-    .then(function(userCredential) {
-        const user = userCredential.user
-        updateEmail(user, 'newyou@domain.example')
-    })
+    signInWithEmailAndPassword(
+      auth,
+      "you@domain.example",
+      "correcthorsebatterystaple"
+    ).then(function (userCredential) {
+      const user = userCredential.user;
+      updateEmail(user, "newyou@domain.example");
+    });
   }
 
   //   ALLOW FOR USER TO SIGN IN BEFORE CHANGING THEIR PASSWORD
@@ -157,55 +130,7 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     <section className="mb-6">
       <Header6 text="Profile settings" className="text-darkText mb-4" />
       {/* UPDATE NAME, EMAIL, OR USERNAME */}
-      <div>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Update names</AccordionTrigger>
-            <AccordionContent>
-              <form>
-                <Input htmlFor={"first_name"} label={"First name"}>
-                  <input
-                    className="form"
-                    id="first_name"
-                    name="first_name"
-                    value={names.first_name}
-                    onChange={(e) =>
-                      setNames({ ...names, first_name: e.target.value })
-                    }
-                  />
-                </Input>
-                <Input
-                  htmlFor={"last_name"}
-                  label={"Last name"}
-                  className="mt-3"
-                >
-                  <input
-                    className="form"
-                    id="last_name"
-                    name="last_name"
-                    value={names.last_name}
-                    onChange={(e) =>
-                      setNames({ ...names, last_name: e.target.value })
-                    }
-                  />
-                </Input>
-                <div className="flex justify-end mt-4">
-                  <Submit
-                    loading={false}
-                    width_height="w-[85px] h-[40px]"
-                    width="w-[40px]"
-                    arrow_width_height="w-6 h-6"
-                    disabledLogic={
-                      user?.first_name === names.first_name &&
-                      user?.last_name === names.last_name
-                    }
-                  />
-                </div>
-              </form>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+      <ChangeNames names={names} setNames={setNames} user={user} />
       <div>
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">

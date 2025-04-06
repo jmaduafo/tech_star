@@ -42,11 +42,13 @@ function CheckAuth({ children }: { readonly children: React.ReactNode }) {
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         route.push("/");
+        setBgIndex(0)
       }
 
       if (user) {
         if (pathname === "/") {
           route.push(`/dashboard`);
+          getBgIndex();
         }
       }
     });

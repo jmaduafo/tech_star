@@ -77,6 +77,33 @@ export const LoginUserSchema = z.object({
     }),
 });
 
+export const NamesValidation = z.object({
+  first_name: z.string().min(1, {
+    message: "First name must be filled in",
+  }),
+  last_name: z.string().min(1, {
+    message: "Last name must be filled in",
+  }),
+});
+
+export const PasswordValidation = z.object({
+  password: z
+    .string()
+    .min(6, {
+      message: "Password must be at least 6 characters",
+    })
+    .max(100, {
+      message: "Password is too long. Must be 100 characters at most.",
+    }),
+});
+
+export const EmailValidation = z.object({
+  email: z
+    .string()
+    .min(1, { message: "This field has to be filled." })
+    .email("This is not a valid email."),
+});
+
 export const CreateProjectSchema = z.object({
   name: z.string().min(1, { message: "You must enter a name." }),
   country: z.string().min(1, { message: "You must select a country." }),

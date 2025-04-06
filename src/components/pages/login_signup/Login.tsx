@@ -21,7 +21,7 @@ function Login() {
   });
 
   const { toast } = useToast();
-  const route = useRouter()
+  const route = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -32,9 +32,13 @@ function Login() {
     });
   }
 
-  async function handleSubmit(formData: FormData) {
-    setLoading(true)
-    
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
     const data = {
       email: formData.get("email"),
       password: formData.get("password"),
@@ -49,30 +53,29 @@ function Login() {
         description: userResult.error.issues[0].message,
       });
 
-      setLoading(false)
+      setLoading(false);
 
       return;
     }
 
     const { email, password } = userResult.data;
 
-    setLoading(true)
-
     await signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed in
         const user = userCredential.user;
 
         if (user) {
-          route.push('/dashboard');
+          route.push("/dashboard");
         }
-
       })
       .catch((err) => {
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong!",
-          description: "You are not a registered user. Please sign up instead. (" + err.message + ")" ,
+          description:
+            "You are not a registered user. Please sign up instead. (" +
+            err.message +
+            ")",
         });
       })
       .finally(() => {
@@ -87,7 +90,7 @@ function Login() {
         className="mt-4"
         text="Sign in to access your account and stay on top of  your company finances effortlessly."
       />
-      <form className="mt-10" action={handleSubmit}>
+      <form className="mt-10" onSubmit={handleSubmit}>
         <div>
           <IconInput
             icon={<CiMail className="w-6 h-6" />}
@@ -109,6 +112,7 @@ function Login() {
             input={
               <input
                 placeholder="Password"
+                // CHANGE THE TYPE BASED ON BUTTON CLICK
                 type={viewPass ? "text" : "password"}
                 name="password"
                 value={userInfo.password}
@@ -116,6 +120,7 @@ function Login() {
                 className="placeholder-dark50"
               />
             }
+            // BUTTON TO HIDE OR VIEW PASSWORD TEXT
             otherLogic={
               <button
                 type="button"

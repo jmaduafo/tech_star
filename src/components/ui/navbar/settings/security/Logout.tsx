@@ -31,7 +31,7 @@ function Logout() {
       onClick={logout}
       className={`text-left outline-none border-b border-b-dark10 py-4 `}
     >
-      {loading ? <Loading className="w-5 h-5" /> : "Logout"}
+      {loading ? <Loading className="w-6 h-6" /> : "Logout"}
     </button>
   )
 }
