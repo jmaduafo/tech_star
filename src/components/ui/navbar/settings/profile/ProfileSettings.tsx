@@ -1,24 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Header6 from "@/components/fontsize/Header6";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import Input from "../../../input/Input";
-import Submit from "../../../buttons/Submit";
-import { User } from "@/types/types";
-import {
-  signInWithEmailAndPassword,
-  updateEmail,
-  updatePassword,
-} from "firebase/auth";
-import { auth } from "@/firebase/config";
-import { toast } from "@/hooks/use-toast";
-import { updateItem } from "@/firebase/actions";
 import ChangeNames from "./ChangeNames";
+import ChangeEmail from "./ChangeEmail";
+import ChangePassword from "./ChangePassword";
+import { User } from "@/types/types";
 
 function ProfileSettings({ user }: { readonly user: User | undefined }) {
   const [names, setNames] = useState({
@@ -26,12 +12,6 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     last_name: "",
   });
   const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [emailLoading, setEmailLoading] = useState(false);
-  const [nextSlide, setNextSlide] = useState(false);
 
   function setData() {
     setNames({
@@ -40,86 +20,6 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     });
 
     setUserEmail(user?.email ?? "");
-  }
-
-  async function changeEmail() {
-    if (!userEmail.length) {
-      toast({
-        variant: "destructive",
-        title: `Uh oh! Something went wrong`,
-        description: "Email field must be filled in",
-      });
-
-      return;
-    }
-
-    if (!auth) {
-      return;
-    }
-
-    signInWithEmailAndPassword(
-      auth,
-      "you@domain.example",
-      "correcthorsebatterystaple"
-    ).then(function (userCredential) {
-      const user = userCredential.user;
-      updateEmail(user, "newyou@domain.example");
-    });
-  }
-
-  //   ALLOW FOR USER TO SIGN IN BEFORE CHANGING THEIR PASSWORD
-  async function signInUser() {
-    setPasswordLoading(true);
-
-    signInWithEmailAndPassword(auth, userEmail, userPassword)
-      .then((userCredential) => {
-        // Signed in
-
-        setNextSlide(true);
-        // ...
-      })
-      .catch((error) => {
-        let errorMessage = error.message;
-
-        toast({
-          variant: "destructive",
-          title: `Uh oh! Something went wrong`,
-          description: `Password was incorrect: ${errorMessage}`,
-        });
-      })
-      .finally(() => {
-        setPasswordLoading(false);
-      });
-  }
-
-  async function changePassword() {
-    setPasswordLoading(true);
-
-    const user = auth.currentUser;
-
-    if (!user) {
-      return;
-    }
-
-    updatePassword(user, newPassword)
-      .then(() => {
-        // Update successful.
-        toast({
-          title: `Password was updated successfully!`,
-        });
-      })
-      .catch((error) => {
-        let errorMessage = error.message;
-
-        toast({
-          variant: "destructive",
-          title: `Uh oh! Something went wrong`,
-          description: `${errorMessage}`,
-        });
-      })
-      .finally(() => {
-        setPasswordLoading(false);
-      });
   }
 
   useEffect(() => {
@@ -131,99 +31,12 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
       <Header6 text="Profile settings" className="text-darkText mb-4" />
       {/* UPDATE NAME, EMAIL, OR USERNAME */}
       <ChangeNames names={names} setNames={setNames} user={user} />
-      <div>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Update email</AccordionTrigger>
-            <AccordionContent>
-              <form>
-                <Input htmlFor={"user_email"} label={"Email"} className="mt-3">
-                  <input
-                    className="form"
-                    id="user_email"
-                    name="user_email"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                  />
-                </Input>
-                <div className="flex justify-end mt-4">
-                  <Submit
-                    loading={false}
-                    width_height="w-[85px] h-[40px]"
-                    width="w-[40px]"
-                    arrow_width_height="w-6 h-6"
-                    disabledLogic={user?.email === userEmail}
-                  />
-                </div>
-              </form>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-      <div>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Change password</AccordionTrigger>
-            <AccordionContent>
-              {nextSlide ? (
-                // IF USER IS SIGNED IN SUCCESSFULLY, THEY ARE ALLOWED TO CHANGE THEIR OLD
-                // PASSWORD TO A NEW ONE
-                <form action={changePassword} className="duration-300">
-                  <Input
-                    htmlFor={"user_password"}
-                    label={"Enter new password"}
-                    className="mt-3"
-                  >
-                    <input
-                      className="form"
-                      id="new_password"
-                      name="new_password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                  </Input>
-                  <div className="flex justify-end mt-4">
-                    <Submit
-                      loading={passwordLoading}
-                      width_height="w-[85px] h-[40px]"
-                      width="w-[40px]"
-                      arrow_width_height="w-6 h-6"
-                    />
-                  </div>
-                </form>
-              ) : (
-                // SHOW THIS INITIALLY AND APPOINT FOR USER TO ENTER THEIR CURRENT PASSWORD AND SIGN IN
-                // BEFORE BEING ALLOWED TO UPDATE THEIR PASSWORD
-                <form action={signInUser} className="duration-300">
-                  <Input
-                    htmlFor={"user_password"}
-                    label={"Enter current password"}
-                    className="mt-3"
-                  >
-                    <input
-                      className="form"
-                      id="user_password"
-                      name="user_password"
-                      type="password"
-                      value={userPassword}
-                      onChange={(e) => setUserPassword(e.target.value)}
-                    />
-                  </Input>
-                  <div className="flex justify-end mt-4">
-                    <Submit
-                      loading={passwordLoading}
-                      width_height="w-[85px] h-[40px]"
-                      width="w-[40px]"
-                      arrow_width_height="w-6 h-6"
-                    />
-                  </div>
-                </form>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+      <ChangeEmail
+        userEmail={userEmail}
+        setUserEmail={setUserEmail}
+        user={user}
+      />
+      <ChangePassword user={user} />
     </section>
   );
 }

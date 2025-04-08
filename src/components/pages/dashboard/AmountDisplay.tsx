@@ -40,18 +40,16 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
       return;
     }
 
-    const projectq = query(
-      collection(db, "projects"),
-      where("team_id", "==", user?.team_id)
-    );
-
-    const contractorq = query(
-      collection(db, "contractors"),
-      where("team_id", "==", user?.team_id)
-    );
-
-    const projects = await getQueriedItems(projectq);
-    const contractors = await getQueriedItems(contractorq);
+    const [ projects, contractors ] = await Promise.all([
+      getQueriedItems(query(
+        collection(db, "projects"),
+        where("team_id", "==", user?.team_id)
+      )),
+      getQueriedItems(query(
+        collection(db, "contractors"),
+        where("team_id", "==", user?.team_id)
+      ))
+    ])
 
     projects?.length && setAllProjects(projects as Project[]);
 
@@ -80,7 +78,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
       );
 
       const [contracts, withinContract, outsideContract] = await Promise.all([
-        // RETRIEVE ALL CONTRACTS TO GET THE FIXED AMOUNT BY THE SELECTED CURRENCY CODE
+        // RETRIEVE ALL CONTRACTS TO GET THE TOTAL FIXED AMOUNT BASED ON THE SELECTED CURRENCY CODE
         getQueriedItems(
           query(
             collection(db, "contracts"),
@@ -89,7 +87,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
             where("currency_code", "==", updatedSubmit.currency)
           )
         ),
-        // RETRIEVE ALL PAYMENTS WITHIN CONTRACTS BY THE SELECTED CURRENCY CODE
+        // RETRIEVE ALL PAYMENTS WITHIN CONTRACTS BASED ON THE SELECTED CURRENCY CODE
         getQueriedItems(
           query(
             collection(db, "payments"),
@@ -99,7 +97,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
             where("contract_code", "!=", null)
           )
         ),
-        // RETRIEVE ALL PAYMENTS OUTSIDE CONTRACTS BY THE SELECTED CURRENCY CODE
+        // RETRIEVE ALL PAYMENTS OUTSIDE CONTRACTS BASED ON THE SELECTED CURRENCY CODE
         getQueriedItems(
           query(
             collection(db, "payments"),
@@ -227,7 +225,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
         </div>
       </div>
     ) : (
-      <div className="py-6 flex justify-center items-center">
+      <div className="py-8 flex justify-center items-center">
         <NotAvailable text="No payments available" />
         <p></p>
       </div>
