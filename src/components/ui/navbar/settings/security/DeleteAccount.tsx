@@ -34,7 +34,11 @@ function DeleteAccount() {
 
   const router = useRouter();
 
-  async function handleDelete(formData: FormData) {
+  async function handleDelete(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData();
     const userPassword = formData.get("password");
     const userEmail = formData.get("email");
 
@@ -52,55 +56,57 @@ function DeleteAccount() {
         description: result.error.issues[0].message,
       });
 
+      setLoading(false);
+
       return;
     }
 
     const { email, password } = result.data;
 
-    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
+      if (user) {
+        // ONCE USER IS SIGNED IN, THEN DELETE USER FROM THE AUTH DATABASE
+        deleteUser(user)
+          .then(() => {
+            const del = async () => {
+              try {
+                // THEN ALSO DELETE USER FROM FIRESTORE
+                await deleteItem("users", user?.uid);
+              } catch (err: any) {
+                console.log(err.message);
+              }
+            };
 
-        if (user) {
-          // ONCE USER IS SIGNED IN, THEN DELETE USER FROM THE AUTH DATABASE
-          deleteUser(user)
-            .then(() => {
-              const del = async () => {
-                try {
-                  // THEN ALSO DELETE USER FROM FIRESTORE
-                  await deleteItem("users", user?.uid);
-                } catch (err: any) {
-                  console.log(err.message);
-                }
-              };
+            del();
 
-              del();
-
-              //  ONCE DELETED, NAVIGATE TO THE ROOT PAGE
-              router.push("/");
-              router.refresh();
-            })
-            .catch((error) => {
-              toast({
-                variant: "destructive",
-                title: "Uh oh! Something went wrong",
-                description: error.message,
-              });
+            //  ONCE DELETED, NAVIGATE TO THE ROOT PAGE
+            router.push("/");
+            router.refresh();
+          })
+          .catch((error) => {
+            toast({
+              variant: "destructive",
+              title: "Uh oh! Something went wrong",
+              description: error.message,
             });
-        }
-      })
-      .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong",
-          description: error.message,
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+          });
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message,
       });
+    } finally {
+      setLoading(false);
+    }
   }
   return (
     <>
@@ -146,7 +152,7 @@ function DeleteAccount() {
               to delete your account.
             </DialogDescription>
           </DialogHeader>
-          <form action={handleDelete}>
+          <form onSubmit={handleDelete}>
             <Input htmlFor={"email"} label={"Email"}>
               <input className="form" id="email" name="email" />
             </Input>
