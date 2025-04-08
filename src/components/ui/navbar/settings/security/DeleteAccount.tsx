@@ -158,12 +158,12 @@ function DeleteAccount() {
                 name="password"
               />
             </Input>
-            <div className="flex justify-center mt-5">
+            <div className="flex justify-end mt-4">
               <Submit
                 loading={loading}
-                width_height="w-[100px] h-[45px]"
-                width="w-[45px]"
-                arrow_width_height="w-8 h-8"
+                width_height="w-[85px] h-[40px]"
+                width="w-[40px]"
+                arrow_width_height="w-6 h-6"
               />
             </div>
           </form>

@@ -11,15 +11,12 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
     first_name: "",
     last_name: "",
   });
-  const [userEmail, setUserEmail] = useState("");
 
   function setData() {
     setNames({
       first_name: user?.first_name ?? "",
       last_name: user?.last_name ?? "",
     });
-
-    setUserEmail(user?.email ?? "");
   }
 
   useEffect(() => {
@@ -32,8 +29,6 @@ function ProfileSettings({ user }: { readonly user: User | undefined }) {
       {/* UPDATE NAME, EMAIL, OR USERNAME */}
       <ChangeNames names={names} setNames={setNames} user={user} />
       <ChangeEmail
-        userEmail={userEmail}
-        setUserEmail={setUserEmail}
         user={user}
       />
       <ChangePassword user={user} />

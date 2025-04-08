@@ -65,7 +65,7 @@ export const CreateMemberSchema = z.object({
 export const LoginUserSchema = z.object({
   email: z
     .string()
-    .min(1, { message: "This field has to be filled." })
+    .min(1, { message: "Email field cannot be left empty." })
     .email("This is not a valid email."),
   password: z
     .string()
