@@ -1,87 +1,40 @@
 "use client";
-import React, { useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import Header1 from "@/components/fontsize/Header1";
 import Header6 from "@/components/fontsize/Header6";
 import IconInput from "@/components/ui/input/IconInput";
 import { CiMail, CiLock } from "react-icons/ci";
 import { HiEye, HiEyeSlash } from "react-icons/hi2";
 import Submit from "@/components/ui/buttons/Submit";
-import { LoginUserSchema } from "@/zod/validation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebase/config";
+import { signInUser } from "@/zod/actions";
 
 function Login() {
-  const [loading, setLoading] = useState(false);
-  const [viewPass, setViewPass] = useState(false);
-  const [userInfo, setUserInfo] = useState({
-    email: "",
-    password: "",
+  const [state, action, isLoading] = useActionState(signInUser, {
+    data: {
+      email: "",
+      password: "",
+    },
+    message: "",
+    success: false,
   });
-
-  const { toast } = useToast();
+  const [viewPass, setViewPass] = useState(false);
   const route = useRouter();
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-
-    setUserInfo({
-      ...userInfo,
-      [name]: value,
-    });
-  }
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    setLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-
-    const data = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-    };
-
-    const userResult = LoginUserSchema.safeParse(data);
-
-    if (!userResult.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message?.length) {
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong!",
-        description: userResult.error.issues[0].message,
+        title: "Uh oh! Something went wrong",
+        description: state?.message,
       });
 
-      setLoading(false);
-
-      return;
+    } else if (state?.success) {
+      route.push("/dashboard");
     }
-
-    const { email, password } = userResult.data;
-
-    await signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-
-        if (user) {
-          route.push("/dashboard");
-        }
-      })
-      .catch((err) => {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong!",
-          description:
-            "You are not a registered user. Please sign up instead. (" +
-            err.message +
-            ")",
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }
+    
+  }, [state]);
 
   return (
     <div>
@@ -90,7 +43,7 @@ function Login() {
         className="mt-4"
         text="Sign in to access your account and stay on top of  your company finances effortlessly."
       />
-      <form className="mt-10" onSubmit={handleSubmit}>
+      <form className="mt-10" action={action}>
         <div>
           <IconInput
             icon={<CiMail className="w-6 h-6" />}
@@ -99,8 +52,7 @@ function Login() {
                 placeholder="Email"
                 type="text"
                 name="email"
-                value={userInfo.email}
-                onChange={handleChange}
+                defaultValue={state?.data?.email}
                 className="placeholder-dark50"
               />
             }
@@ -115,8 +67,7 @@ function Login() {
                 // CHANGE THE TYPE BASED ON BUTTON CLICK
                 type={viewPass ? "text" : "password"}
                 name="password"
-                value={userInfo.password}
-                onChange={handleChange}
+                defaultValue={state?.data?.password}
                 className="placeholder-dark50"
               />
             }
@@ -137,7 +88,7 @@ function Login() {
           />
         </div>
         <div className="mt-[6em] flex justify-center">
-          <Submit loading={loading} />
+          <Submit loading={isLoading} />
         </div>
       </form>
     </div>

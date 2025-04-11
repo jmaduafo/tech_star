@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,95 +19,39 @@ import {
 } from "@/components/ui/dialog";
 import Input from "@/components/ui/input/Input";
 import Submit from "@/components/ui/buttons/Submit";
-import { LoginUserSchema } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
-import { deleteUser, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebase/config";
-import { deleteItem } from "@/firebase/actions";
 import { useRouter } from "next/navigation";
+import { deleteThisUser } from "@/zod/actions";
 
 function DeleteAccount() {
-  const [loading, setLoading] = useState(false);
+  const [state, action, isLoading] = useActionState(deleteThisUser, {
+    data: {
+      email: "",
+      password: "",
+    },
+    message: "",
+    success: false,
+  });
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
 
   const router = useRouter();
 
-  async function handleDelete(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData();
-    const userPassword = formData.get("password");
-    const userEmail = formData.get("email");
-
-    const values = {
-      email: userEmail,
-      password: userPassword,
-    };
-
-    const result = LoginUserSchema.safeParse(values);
-
-    if (!result.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message?.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
+        description: state?.message,
       });
 
-      setLoading(false);
-
-      return;
+    } else if (state?.success) {
+      router.push("/");
     }
+    
+  }, [state]);
 
-    const { email, password } = result.data;
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      if (user) {
-        // ONCE USER IS SIGNED IN, THEN DELETE USER FROM THE AUTH DATABASE
-        deleteUser(user)
-          .then(() => {
-            const del = async () => {
-              try {
-                // THEN ALSO DELETE USER FROM FIRESTORE
-                await deleteItem("users", user?.uid);
-              } catch (err: any) {
-                console.log(err.message);
-              }
-            };
-
-            del();
-
-            //  ONCE DELETED, NAVIGATE TO THE ROOT PAGE
-            router.push("/");
-            router.refresh();
-          })
-          .catch((error) => {
-            toast({
-              variant: "destructive",
-              title: "Uh oh! Something went wrong",
-              description: error.message,
-            });
-          });
-      }
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
   return (
     <>
       <button
@@ -152,9 +96,14 @@ function DeleteAccount() {
               to delete your account.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleDelete}>
+          <form action={action}>
             <Input htmlFor={"email"} label={"Email"}>
-              <input className="form" id="email" name="email" />
+              <input
+                className="form"
+                id="email"
+                name="email"
+                defaultValue={state?.data?.email}
+              />
             </Input>
             <Input htmlFor={"password"} label={"Password"} className="mt-3">
               <input
@@ -162,11 +111,12 @@ function DeleteAccount() {
                 type="password"
                 id="password"
                 name="password"
+                defaultValue={state?.data?.password}
               />
             </Input>
             <div className="flex justify-end mt-4">
               <Submit
-                loading={loading}
+                loading={isLoading}
                 width_height="w-[85px] h-[40px]"
                 width="w-[40px]"
                 arrow_width_height="w-6 h-6"

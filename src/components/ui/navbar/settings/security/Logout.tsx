@@ -1,31 +1,32 @@
-"use client"
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/firebase/config';
-import Loading from '@/components/ui/Loading';
+"use client";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase/config";
+import Loading from "@/components/ui/Loading";
 
 function Logout() {
-    const [loading, setLoading] = useState(false);
-    
-      const router = useRouter();
-    
-      function logout() {
-        setLoading(true);
-    
-        signOut(auth)
-          .then(() => {
-            // Sign-out successful.
-            router.push("/");
-            router.refresh()
-          })
-          .catch((error) => {
-            console.log(error.message);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  function logout() {
+    setLoading(true);
+
+    signOut(auth)
+      .then(() => {
+        // Sign-out successful.
+        router.push("/");
+        router.refresh();
+      })
+      .catch((error) => {
+        console.log(error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  
   return (
     <button
       onClick={logout}
@@ -33,7 +34,7 @@ function Logout() {
     >
       {loading ? <Loading className="w-6 h-6" /> : "Logout"}
     </button>
-  )
+  );
 }
 
-export default Logout
+export default Logout;

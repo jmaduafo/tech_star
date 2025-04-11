@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useActionState } from "react";
+import React, { useState, useActionState, useEffect } from "react";
 import Submit from "@/components/ui/buttons/Submit";
 import {
   Dialog,
@@ -41,30 +41,34 @@ function ChangeEmail({ user }: Email) {
   const [signInOpen, setSignInOpen] = useState(false);
   const [newEmailOpen, setNewEmailOpen] = useState(false);
 
-  if (!signInState?.success) {
-    toast({
-      variant: "destructive",
-      title: "Uh oh! Something went wrong",
-      description: signInState?.message,
-    });
-  } else {
-    setSignInOpen(false);
-    setNewEmailOpen(true);
-  }
+  useEffect(() => {
+    if (!signInState?.success && signInState?.message?.length) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: signInState?.message,
+      });
 
-  if (!emailState?.success) {
-    toast({
-      variant: "destructive",
-      title: "Uh oh! Something went wrong",
-      description: emailState?.message,
-    });
-  } else {
-    setNewEmailOpen(false);
+    } else if (signInState?.success) {
+      setSignInOpen(false);
+      setNewEmailOpen(true);
 
-    toast({
-      title: "Email was updated successfully!",
-    });
-  }
+    } else if (!emailState?.success && emailState?.message?.length) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: emailState?.message,
+      });
+
+    } else if (emailState?.success) {
+      setNewEmailOpen(false);
+
+      toast({
+        title: "Email was updated successfully!",
+      });
+    }
+    
+  }, [emailState]);
 
   return (
     <>

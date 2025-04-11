@@ -5,23 +5,25 @@ import {
   signInWithEmailAndPassword,
   updateEmail,
   updatePassword,
+  deleteUser,
 } from "firebase/auth";
 import {
   CreateUserSchema,
   EmailValidation,
   LoginUserSchema,
+  NamesValidation,
   PasswordValidation,
 } from "./validation";
 import { auth, db } from "@/firebase/config";
-import { checkUniqueUser } from "@/firebase/actions";
+import { checkUniqueUser, deleteItem, updateItem } from "@/firebase/actions";
 import {
   addDoc,
   collection,
   setDoc,
   doc,
   serverTimestamp,
+  getDoc,
 } from "firebase/firestore";
-import { User } from "@/types/types";
 
 export async function signInUser(prevState: any, formData: FormData) {
   const values = {
@@ -143,77 +145,196 @@ export async function createAdmin(prevState: any, formData: FormData) {
   }
 }
 
-export async function createUser(prevState: any, formData: FormData, admin: User | undefined) {
-    const values = {
-        first_name: formData.get("first_name"),
-        last_name: formData.get("last_name"),
-        email: formData.get("email"),
-        password: formData.get("password"),
-      };
-    
-      const result = CreateUserSchema.safeParse(values);
-    
-      if (!result.success) {
+export async function createUser(prevState: any, formData: FormData) {
+  const values = {
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
+
+  const result = CreateUserSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { first_name, last_name, email, password } = result.data;
+
+  const isEmailTaken = await checkUniqueUser(email);
+
+  if (isEmailTaken) {
+    return {
+      message: "Email has already been used. Please choose another email.",
+      success: false,
+    };
+  }
+
+  try {
+    const authUser = auth.currentUser;
+
+    if (!authUser) {
+        return
+    }
+
+    const [getUser, userCredential] = await Promise.all([
+      getDoc(doc(db, "users", authUser?.uid)),
+      createUserWithEmailAndPassword(auth, email, password),
+    ]);
+
+    const user = userCredential?.user
+
+    await setDoc(doc(db, "users", user?.uid), {
+      id: authUser.uid,
+      first_name,
+      last_name,
+      full_name: `${first_name} ${last_name}`,
+      email,
+      team_id: getUser?.data()?.team_id,
+      is_owner: false,
+      is_online: true,
+      bg_image_index: 0,
+      job_title: null,
+      hire_type: "independent",
+      role: "viewer",
+      location: null,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        first_name: "",
+        last_name: "",
+        email: "",
+        password: "",
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
+export async function deleteThisUser(prevState: any, formData: FormData) {
+  const values = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
+
+  const result = LoginUserSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result?.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { email, password } = result.data;
+
+  try {
+    // FIRST LOG USER IN
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    // ONCE USER IS SIGNED IN, THEN DELETE USER FROM THE AUTH DATABASE
+    if (!user) {
+      return;
+    }
+
+    deleteUser(user)
+      .then(() => {
+        const del = async () => {
+          try {
+            // THEN ALSO DELETE USER FROM FIRESTORE
+            await deleteItem("users", user?.uid);
+          } catch (err: any) {
+            console.log(err.message);
+          }
+        };
+
+        del();
+      })
+      .catch((error) => {
         return {
-          message: result.error.issues[0].message,
+          message: error.message,
           success: false,
         };
-      }
-    
-      const { first_name, last_name, email, password } = result.data;
-    
-      const isEmailTaken = await checkUniqueUser(email);
-    
-      if (isEmailTaken) {
-        return {
-          message: "Email has already been used. Please choose another email.",
-          success: false,
-        };
-      }
-    
-      try {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-    
-        const user = userCredential.user;
-    
-        await setDoc(doc(db, "users", user.uid), {
-          id: user.uid,
-          first_name,
-          last_name,
-          full_name: `${first_name} ${last_name}`,
-          email,
-          team_id: admin?.team_id,
-          is_owner: false,
-          is_online: true,
-          bg_image_index: 0,
-          job_title: null,
-          hire_type: "independent",
-          role: "viewer",
-          location: null,
-          created_at: serverTimestamp(),
-          updated_at: null,
-        });
-    
-        return {
-          data: {
-            first_name: "",
-            last_name: "",
-            email: "",
-            password: "",
-          },
-          message: "success",
-          success: true,
-        };
-      } catch (err: any) {
-        return {
-          message: err.message,
-          success: false,
-        };
-      }
+      });
+
+    //  ONCE DELETED, RETURN SUCCESS MESSAGE
+    return {
+      data: {
+        email: "",
+        password: "",
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
+export async function changeNames(prevState: any, formData: FormData) {
+  const values = {
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+  };
+
+  const result = NamesValidation.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { first_name, last_name } = result.data;
+
+  try {
+    const user = auth?.currentUser;
+
+    if (!user) {
+      return;
+    }
+
+    await updateItem("user", user?.uid, {
+      first_name,
+      last_name,
+      full_name: first_name + " " + last_name,
+    });
+
+    return {
+      data: {
+        first_name: "",
+        last_name: "",
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
 }
 
 export async function changeEmail(prevState: any, formData: FormData) {

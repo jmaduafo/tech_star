@@ -1,5 +1,5 @@
 "use client";
-import React, { useActionState, useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import Submit from "@/components/ui/buttons/Submit";
 import Input from "@/components/ui/input/Input";
 import {
@@ -40,30 +40,34 @@ function ChangePassword({ user }: { readonly user: User | undefined }) {
   const [signInOpen, setSignInOpen] = useState(false);
   const [newPasswordOpen, setNewPasswordOpen] = useState(false);
 
-    if (!signInState?.success) {
+  useEffect(() => {
+    if (!signInState?.success && signInState?.message?.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
         description: signInState?.message,
       });
-    } else {
+
+    } else if (signInState?.success) {
       setSignInOpen(false);
       setNewPasswordOpen(true);
-    }
-  
-    if (!passwordState?.success) {
+
+    } else if (!passwordState?.success && passwordState?.message?.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
         description: passwordState?.message,
       });
-    } else {
+
+    } else if (passwordState?.success) {
       setNewPasswordOpen(false);
-  
+
       toast({
-        title: "Email was updated successfully!",
+        title: "Password was updated successfully!",
       });
     }
+    
+  }, [passwordState]);
 
   return (
     <>
