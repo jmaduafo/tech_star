@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
 import Submit from "@/components/ui/buttons/Submit";
 import Input from "@/components/ui/input/Input";
 import {
@@ -9,129 +9,61 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LoginUserSchema, PasswordValidation } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
-import { signInWithEmailAndPassword, updatePassword } from "firebase/auth";
-import { auth } from "@/firebase/config";
 import { User } from "@/types/types";
+import { changePassword, signInUser } from "@/zod/actions";
 
 function ChangePassword({ user }: { readonly user: User | undefined }) {
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [signInState, signInAction, signInLoading] = useActionState(
+    signInUser,
+    {
+      data: {
+        email: "",
+        password: "",
+      },
+      message: "",
+      success: false,
+    }
+  );
 
-  const [currentLoading, setCurrentLoading] = useState(false);
-  const [newLoading, setNewLoading] = useState(false);
+  const [passwordState, passwordAction, passwordLoading] = useActionState(
+    changePassword,
+    {
+      data: {
+        password: "",
+      },
+      message: "",
+      success: false,
+    }
+  );
 
   const [signInOpen, setSignInOpen] = useState(false);
   const [newPasswordOpen, setNewPasswordOpen] = useState(false);
 
-  async function signInUser(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setCurrentLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-
-    const values = {
-      email: formData.get("user_email"),
-      password: formData.get("user_password"),
-    };
-
-    const result = LoginUserSchema.safeParse(values);
-
-    if (!result.success) {
+    if (!signInState?.success) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
+        description: signInState?.message,
       });
-
-      setCurrentLoading(false);
-
-      return;
+    } else {
+      setSignInOpen(false);
+      setNewPasswordOpen(true);
     }
-
-    const { email, password } = result.data;
-
-    try {
-      if (!user) {
-        return;
-      }
-
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      if (userCredential.user) {
-        setUserEmail("");
-        setUserPassword("");
-        setSignInOpen(false);
-        setNewPasswordOpen(true);
-      }
-    } catch (err: any) {
+  
+    if (!passwordState?.success) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: err.message,
+        description: passwordState?.message,
       });
-    } finally {
-      setCurrentLoading(false);
-    }
-  }
-
-  async function changePassword(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setNewLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-
-    const values = {
-      password: formData.get("user_password"),
-    };
-
-    const result = PasswordValidation.safeParse(values);
-
-    if (!result.success) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
-      });
-
-      setNewLoading(false);
-
-      return;
-    }
-
-    const { password } = result.data;
-
-    try {
-      const user = auth.currentUser;
-
-      if (!user) {
-        return;
-      }
-
-      await updatePassword(user, password);
-
-      toast({
-        title: "Password was updated successfull!",
-      });
-
-      setNewPassword("");
+    } else {
       setNewPasswordOpen(false);
-    } catch (err: any) {
+  
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
+        title: "Email was updated successfully!",
       });
-    } finally {
-      setNewLoading(false);
     }
-  }
 
   return (
     <>
@@ -139,7 +71,7 @@ function ChangePassword({ user }: { readonly user: User | undefined }) {
         onClick={() => {
           setSignInOpen(true);
         }}
-        className={`w-full text-[14px] text-dark75 text-left outline-none border-b border-b-dark10 py-4`}
+        className={`w-full text-[14px] text-left outline-none border-b border-b-dark10 py-4 text-dark75 hover:text-darkText duration-300`}
       >
         Update password
       </button>
@@ -151,14 +83,13 @@ function ChangePassword({ user }: { readonly user: User | undefined }) {
             <DialogTitle>Sign in</DialogTitle>
             <DialogDescription>Log in to update password</DialogDescription>
           </DialogHeader>
-          <form onSubmit={signInUser} className="duration-300">
+          <form action={signInAction} className="duration-300">
             <Input htmlFor={"user_email"} label={"Email"} className="">
               <input
                 className="form"
                 id="user_email"
                 name="user_email"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
+                defaultValue={signInState?.data?.email}
               />
             </Input>
             <Input
@@ -171,13 +102,12 @@ function ChangePassword({ user }: { readonly user: User | undefined }) {
                 id="user_password"
                 name="user_password"
                 type="password"
-                value={userPassword}
-                onChange={(e) => setUserPassword(e.target.value)}
+                defaultValue={signInState?.data?.password}
               />
             </Input>
             <div className="flex justify-end mt-4">
               <Submit
-                loading={currentLoading}
+                loading={signInLoading}
                 width_height="w-[85px] h-[40px]"
                 width="w-[40px]"
                 arrow_width_height="w-6 h-6"
@@ -194,24 +124,23 @@ function ChangePassword({ user }: { readonly user: User | undefined }) {
               Insert a new password and update the changes
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={changePassword} className="duration-300">
+          <form action={passwordAction} className="duration-300">
             <Input
-              htmlFor={"user_password"}
+              htmlFor={"password"}
               label={"Enter new password"}
               className="mt-3"
             >
               <input
                 className="form"
-                id="user_password"
-                name="user_password"
+                id="password"
+                name="password"
                 type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                defaultValue={passwordState?.data?.password}
               />
             </Input>
             <div className="flex justify-end mt-4">
               <Submit
-                loading={newLoading}
+                loading={passwordLoading}
                 width_height="w-[85px] h-[40px]"
                 width="w-[40px]"
                 arrow_width_height="w-6 h-6"

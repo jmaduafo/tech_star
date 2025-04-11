@@ -29,7 +29,7 @@ function Logout() {
   return (
     <button
       onClick={logout}
-      className={`text-left outline-none border-b border-b-dark10 py-4 `}
+      className={`text-left outline-none border-b border-b-dark10 py-4 text-dark75 hover:text-darkText duration-300`}
     >
       {loading ? <Loading className="w-6 h-6" /> : "Logout"}
     </button>

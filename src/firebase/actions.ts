@@ -26,6 +26,14 @@ export async function getUserData(id: string) {
   return user
 }
 
+export async function checkUniqueUser(email: string): Promise<boolean> {
+  const usersRef = collection(db, "users");
+  const findEmail = query(usersRef, where("email", "==", email));
+  const snapshot = await getDocs(findEmail);
+
+  return !snapshot.empty; // true if email exists
+}
+
 export async function getAllItems(collectionName: string) {
   const dataRef = collection(db, collectionName);
 

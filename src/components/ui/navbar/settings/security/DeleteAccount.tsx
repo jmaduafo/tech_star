@@ -115,7 +115,7 @@ function DeleteAccount() {
           setAlertOpen(true);
           setSignInOpen(false);
         }}
-        className={`text-left outline-none border-b border-b-dark10 py-4 text-red-600 `}
+        className={`text-left outline-none border-b border-b-dark10 py-4 text-[#dc2626c4] hover:text-[#dc2626] duration-300 `}
       >
         Delete account
       </button>
