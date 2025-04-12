@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/tables/columns";
 import {
   collection,
-  onSnapshot,
   orderBy,
   query,
   where,
@@ -25,6 +24,7 @@ import SelectBar from "@/components/ui/input/SelectBar";
 import { SelectItem } from "@/components/ui/select";
 import CheckedButton from "@/components/ui/buttons/CheckedButton";
 import Reset from "@/components/ui/buttons/Reset";
+import { getQueriedItems } from "@/firebase/actions";
 
 function MainPage() {
   const [category, setCategory] = useState("Payments");
@@ -66,141 +66,66 @@ function MainPage() {
     );
   };
 
-  function getPayments() {
+  const getAllData = async () => {
     try {
       if (!userData) {
         return;
       }
 
-      const paymentq = query(
-        collection(db, "payments"),
-        where("team_id", "==", userData?.team_id),
-        orderBy("created_at", "desc")
-      );
+      const [projects, contractors, stages, payments, contracts] =
+        await Promise.all([
+          getQueriedItems(
+            query(
+              collection(db, "projects"),
+              where("team_id", "==", userData?.team_id)
+            )
+          ),
+          getQueriedItems(
+            query(
+              collection(db, "contractors"),
+              where("team_id", "==", userData?.team_id)
+            )
+          ),
+          getQueriedItems(
+            query(
+              collection(db, "stages"),
+              where("team_id", "==", userData?.team_id),
+              orderBy("created_at", "desc")
+            )
+          ),
+          getQueriedItems(
+            query(
+              collection(db, "payments"),
+              where("team_id", "==", userData?.team_id),
+              orderBy("created_at", "desc")
+            )
+          ),
+          getQueriedItems(
+            query(
+              collection(db, "contracts"),
+              where("team_id", "==", userData?.team_id),
+              orderBy("created_at", "desc")
+            )
+          ),
+        ]);
 
-      const unsub = onSnapshot(paymentq, (snap) => {
-        const payments: Payment[] = [];
-        snap.forEach((doc) => {
-          payments.push({ ...(doc.data() as Payment), id: doc.id });
-        });
+      setProjectsData(projects as Project[]);
+      setContractorData(contractors as Contractor[]);
+      setStageData(stages as Stage[]);
 
-        setPaymentData(payments);
-        setFilterPaymentData(payments);
+      setPaymentData(payments as Payment[]);
+      setFilterPaymentData(payments as Payment[]);
 
-        return () => unsub();
-      });
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  function getContracts() {
-    try {
-      if (!userData) {
-        return;
-      }
-
-      const contractq = query(
-        collection(db, "contracts"),
-        where("team_id", "==", userData?.team_id),
-        orderBy("created_at", "desc")
-      );
-
-      const unsub = onSnapshot(contractq, (snap) => {
-        const contracts: Contract[] = [];
-        snap.forEach((doc) => {
-          contracts.push({ ...(doc.data() as Contract), id: doc.id });
-        });
-
-        setContractData(contracts);
-        setFilterContractData(contracts);
-
-        return () => unsub();
-      });
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  function getStages() {
-    try {
-      if (!userData) {
-        return;
-      }
-
-      const stageq = query(
-        collection(db, "stages"),
-        where("team_id", "==", userData?.team_id),
-        orderBy("created_at", "desc")
-      );
-
-      const unsub = onSnapshot(stageq, (snap) => {
-        const stages: Stage[] = [];
-        snap.forEach((doc) => {
-          stages.push({ ...(doc.data() as Stage), id: doc.id });
-        });
-
-        setStageData(stages);
-
-        return () => unsub();
-      });
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-  function getProjects() {
-    try {
-      if (!userData) {
-        return;
-      }
-
-      const projectq = query(
-        collection(db, "projects"),
-        where("team_id", "==", userData?.team_id)
-      );
-
-      const unsub = onSnapshot(projectq, (snap) => {
-        const projects: Project[] = [];
-        snap.forEach((doc) => {
-          projects.push({ ...(doc.data() as Project), id: doc.id });
-        });
-
-        setProjectsData(projects);
-
-        return () => unsub();
-      });
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  function getContractors() {
-    try {
-      if (!userData) {
-        return;
-      }
-
-      const contractorq = query(
-        collection(db, "contractors"),
-        where("team_id", "==", userData?.team_id)
-      );
-
-      const unsub = onSnapshot(contractorq, (snap) => {
-        const contractors: Contractor[] = [];
-        snap.forEach((doc) => {
-          contractors.push({ ...(doc.data() as Contractor), id: doc.id });
-        });
-
-        setContractorData(contractors);
-
-        return () => unsub();
-      });
+      setContractData(contracts as Contract[]);
+      setFilterContractData(contracts as Contract[]);
     } catch (err: any) {
       console.log(err.message);
     }
   }
 
   function filterData() {
+    // SET MUTATED ARRAYS STATE TO CONTAIN ALL OF THE ORIGINAL DATA SO THAT
+    // IT PROPERLY FILTERS
     setFilterPaymentData(paymentData);
     setFilterContractData(contractData);
 
@@ -257,32 +182,29 @@ function MainPage() {
   }
 
   useEffect(() => {
-    getContracts();
-    getPayments();
-    getStages();
-    getContractors();
-    getProjects();
+    getAllData()
   }, [userData?.id ?? "guest"]);
 
-  const table = category === "Payments" ? (
-    <DataTable
-      columns={paymentColumns}
-      data={filterPaymentData ?? []}
-      is_payment={true}
-      team_name={userData ? userData?.first_name : "My"}
-      is_export
-      advanced
-    />
-  ) : (
-    <DataTable
-      columns={contractColumns}
-      data={filterContractData ?? []}
-      is_payment={false}
-      team_name={userData ? userData?.first_name : "My"}
-      is_export
-      advanced
-    />
-  )
+  const table =
+    category === "Payments" ? (
+      <DataTable
+        columns={paymentColumns}
+        data={filterPaymentData ?? []}
+        is_payment={true}
+        team_name={userData ? userData?.first_name : "My"}
+        is_export
+        advanced
+      />
+    ) : (
+      <DataTable
+        columns={contractColumns}
+        data={filterContractData ?? []}
+        is_payment={false}
+        team_name={userData ? userData?.first_name : "My"}
+        is_export
+        advanced
+      />
+    );
 
   return (
     <AuthContainer>
@@ -379,7 +301,9 @@ function MainPage() {
             <div className="flex justify-center py-8">
               <Loading />
             </div>
-          ) : table}
+          ) : (
+            table
+          )}
         </div>
       </ContentContainer>
     </AuthContainer>

@@ -30,18 +30,19 @@ function MainPage() {
         collection(db, "projects"),
         where("team_id", "==", userData?.team_id)
       );
-
-      const projects: Project[] = [];
-
+      
       const unsub = onSnapshot(projectq, (snap) => {
+        const projects: Project[] = [];
+        
         snap.forEach((item) => {
           projects.push({ ...(item.data() as Project), id: item?.id });
         });
 
         setAllProjects(projects);
+         
+        return () => unsub();
       });
 
-      return unsub;
     } catch (err: any) {
       console.log(err.message);
     }

@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment } from "react";
+import React, { Fragment, useActionState, useEffect } from "react";
 import { Project, User } from "@/types/types";
 import Card from "@/components/ui/MyCard";
 import { Plus } from "lucide-react";
@@ -21,11 +21,9 @@ import SelectBar from "@/components/ui/input/SelectBar";
 import { country_list, months } from "@/utils/dataTools";
 import { SelectItem } from "@/components/ui/select";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreateProjectSchema } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
-import { addItem } from "@/firebase/actions";
-import { serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { createProject } from "@/zod/actions";
 
 function ProjectDisplay({
   user,
@@ -40,152 +38,133 @@ function ProjectDisplay({
   readonly allProjects: Project[] | undefined;
   readonly filterSearch: Project[];
 }) {
-  const [projectMonth, setProjectMonth] = React.useState("");
-  const [projectCountry, setProjectCountry] = React.useState("");
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      createProject(prevState, formData, user),
+    {
+      data: {
+        month: "",
+        city: "",
+        country: "",
+        name: "",
+        year: "",
+      },
+      message: "",
+      success: false,
+    }
+  );
 
-  const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
-  async function createProject(formData: FormData) {
-    const project_name = formData.get("name");
-    const project_year = formData.get("year");
-    const city_name = formData.get("city");
-
-    const values = {
-      name: project_name,
-      year: project_year && +project_year,
-      month: projectMonth,
-      country: projectCountry,
-    };
-
-    const result = CreateProjectSchema.safeParse(values);
-
-    if (!result.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message?.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result?.error?.issues[0]?.message,
+        description: state?.message,
       });
-
-      return;
-    }
-
-    const { name, country, year, month } = result.data;
-
-    
-    try {
-      setLoading(true)
-      
-      if (!user) {
-        return;
-      }
-
-      await addItem("projects", {
-        name: name.trim(),
-        team_id: user?.team_id,
-        country,
-        city: city_name ?? null,
-        start_month: month,
-        start_year: year,
-        is_ongoing: true,
-        created_at: serverTimestamp(),
-        updated_at: null
-      });
-
-      setProjectMonth("");
-      setProjectCountry("");
-      setOpen(false);
-
+    } else if (state?.success) {
       toast({
-        variant: "default",
-        title: "Project created succesfully!",
+        title: "Project was created successfully!",
       });
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err?.message,
-      });
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  const checkAdmin = user?.is_owner || user?.role === "admin" ? (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {/* BUTTON TO ADD NEW PROJECT; ONLY ADMIN CAN ADD A NEW PROJECT */}
-        <button>
-          <Card className="h-[200px] text-lightText cursor-pointer flex justify-center items-center hover:opacity-80 duration-300 hover:shadow-md">
-            <div className="">
-              <div className="flex justify-center">
-                <Plus strokeWidth={1} className="w-16 h-16" />
+      setOpen(false)
+    }
+  }, [state]);
+
+  const checkAdmin =
+    user?.is_owner || user?.role === "admin" ? (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {/* BUTTON TO ADD NEW PROJECT; ONLY ADMIN CAN ADD A NEW PROJECT */}
+          <button>
+            <Card className="h-[200px] text-lightText cursor-pointer flex justify-center items-center hover:opacity-80 duration-300 hover:shadow-md">
+              <div className="">
+                <div className="flex justify-center">
+                  <Plus strokeWidth={1} className="w-16 h-16" />
+                </div>
+                <Header5 text="Add new project" className="text-center" />
               </div>
-              <Header5 text="Add new project" className="text-center" />
+            </Card>
+          </button>
+        </DialogTrigger>
+        {/* CREATE PROJECT DIALOG POPUP */}
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create a project</DialogTitle>
+            <DialogDescription>
+              Start a project and manage finances
+            </DialogDescription>
+          </DialogHeader>
+          <form action={action}>
+            {/* PROJECT NAME */}
+            <Input label="Project name *" htmlFor="name">
+              <input
+                name="name"
+                className="form"
+                type="text"
+                defaultValue={state?.data?.name}
+              />
+            </Input>
+            <Input label="City" htmlFor="city" className="mt-3">
+              <input
+                name="city"
+                className="form"
+                type="text"
+                defaultValue={state?.data?.city}
+              />
+            </Input>
+            <div className="flex items-center gap-4 mt-5">
+              {/* COUNTRY LOCATION */}
+              <SelectBar
+                placeholder="Select country *"
+                defaultValue={state?.data?.country}
+                label="Countries"
+                className="flex-1"
+              >
+                {country_list.map((item) => {
+                  return (
+                    <SelectItem key={item.name} value={item.name}>
+                      {item.name}
+                    </SelectItem>
+                  );
+                })}
+              </SelectBar>
+              <SelectBar
+                placeholder="Starting month *"
+                defaultValue={state?.data?.month}
+                label="Months"
+                className="flex-1"
+              >
+                {months.map((item) => {
+                  return (
+                    <SelectItem key={item} value={item}>
+                      {item}
+                    </SelectItem>
+                  );
+                })}
+              </SelectBar>
             </div>
-          </Card>
-        </button>
-      </DialogTrigger>
-      {/* CREATE PROJECT DIALOG POPUP */}
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create a project</DialogTitle>
-          <DialogDescription>
-            Start a project and manage finances
-          </DialogDescription>
-        </DialogHeader>
-        <form action={createProject}>
-          {/* PROJECT NAME */}
-          <Input label="Project name *" htmlFor="name">
-            <input name="name" className="form" type="text" />
-          </Input>
-          <Input label="City" htmlFor="city" className="mt-3">
-            <input name="city" className="form" type="text" />
-          </Input>
-          <div className="flex items-center gap-4 mt-5">
-            {/* COUNTRY LOCATION */}
-            <SelectBar
-              placeholder="Select country *"
-              value={projectCountry}
-              valueChange={setProjectCountry}
-              label="Countries"
-              className="flex-1"
+            <Input
+              label="Starting year *"
+              htmlFor="year"
+              className="flex-1 mt-3"
             >
-              {country_list.map((item) => {
-                return (
-                  <SelectItem key={item.name} value={item.name}>
-                    {item.name}
-                  </SelectItem>
-                );
-              })}
-            </SelectBar>
-            <SelectBar
-              placeholder="Starting month *"
-              value={projectMonth}
-              valueChange={setProjectMonth}
-              label="Months"
-              className="flex-1"
-            >
-              {months.map((item) => {
-                return (
-                  <SelectItem key={item} value={item}>
-                    {item}
-                  </SelectItem>
-                );
-              })}
-            </SelectBar>
-          </div>
-          <Input label="Starting year *" htmlFor="year" className="flex-1 mt-3">
-            <input name="year" className="form" type="number" />
-          </Input>
-          <div className="flex justify-center mt-6 scale-75">
-            <Submit loading={loading} />
-          </div>
-        </form>
-        <DialogFooter className=""></DialogFooter>
-      </DialogContent>
-    </Dialog>
-  ) : null;
+              <input
+                name="year"
+                className="form"
+                type="number"
+                defaultValue={state?.data?.year}
+              />
+            </Input>
+            <div className="flex justify-center mt-6 scale-75">
+              <Submit loading={isLoading} />
+            </div>
+          </form>
+          <DialogFooter className=""></DialogFooter>
+        </DialogContent>
+      </Dialog>
+    ) : null;
 
   const filtered =
     filterSearch?.length && searchValue.length
@@ -215,7 +194,7 @@ function ProjectDisplay({
 
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 w-full">
-      {loading
+      {isLoading
         ? [0, 1, 2, 3, 4, 5].map((each, i) => {
             return (
               <Fragment key={`${each}_${i}`}>

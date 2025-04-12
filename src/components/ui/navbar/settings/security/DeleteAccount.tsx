@@ -48,6 +48,7 @@ function DeleteAccount() {
 
     } else if (state?.success) {
       router.push("/");
+      router.refresh();
     }
     
   }, [state]);

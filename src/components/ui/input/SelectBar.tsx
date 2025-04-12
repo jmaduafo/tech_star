@@ -15,16 +15,20 @@ function SelectBar({
   placeholder,
   label,
   className,
+  defaultValue,
+  name
 }: {
   readonly valueChange?: (value: string) => void ;
   readonly className?: string;
   readonly children: React.ReactNode;
-  readonly value: string;
+  readonly value?: string;
   readonly placeholder: string;
   readonly label: string;
+  readonly defaultValue?: string;
+  readonly name?: string;
 }) {
   return (
-    <Select value={value} onValueChange={valueChange}>
+    <Select value={value} onValueChange={valueChange} defaultValue={defaultValue} name={name}>
       <SelectTrigger className={`${className ?? "w-[120px] sm:w-[180px]" }`}>
         <SelectValue placeholder={`${placeholder}`} />
       </SelectTrigger>

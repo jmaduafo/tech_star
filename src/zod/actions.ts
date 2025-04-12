@@ -8,6 +8,7 @@ import {
   deleteUser,
 } from "firebase/auth";
 import {
+  CreateProjectSchema,
   CreateUserSchema,
   EmailValidation,
   LoginUserSchema,
@@ -15,7 +16,12 @@ import {
   PasswordValidation,
 } from "./validation";
 import { auth, db } from "@/firebase/config";
-import { checkUniqueUser, deleteItem, updateItem } from "@/firebase/actions";
+import {
+  addItem,
+  checkUniqueUser,
+  deleteItem,
+  updateItem,
+} from "@/firebase/actions";
 import {
   addDoc,
   collection,
@@ -24,6 +30,7 @@ import {
   serverTimestamp,
   getDoc,
 } from "firebase/firestore";
+import { User } from "@/types/types";
 
 export async function signInUser(prevState: any, formData: FormData) {
   const values = {
@@ -177,7 +184,7 @@ export async function createUser(prevState: any, formData: FormData) {
     const authUser = auth.currentUser;
 
     if (!authUser) {
-        return
+      return;
     }
 
     const [getUser, userCredential] = await Promise.all([
@@ -185,7 +192,7 @@ export async function createUser(prevState: any, formData: FormData) {
       createUserWithEmailAndPassword(auth, email, password),
     ]);
 
-    const user = userCredential?.user
+    const user = userCredential?.user;
 
     await setDoc(doc(db, "users", user?.uid), {
       id: authUser.uid,
@@ -414,5 +421,63 @@ export async function changePassword(prevState: any, formData: FormData) {
       success: false,
       message: err.message,
     };
+  }
+}
+
+export async function createProject(prevState: any, formData: FormData, user: User | undefined) {
+  const project_year = formData.get("year");
+
+  const values = {
+    name: formData.get("name"),
+    year: project_year && +project_year,
+    city: formData.get("city"),
+    month: formData.get("month"),
+    country: formData.get("country"),
+  };
+
+  const result = CreateProjectSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { name, country, year, city, month } = result.data;
+
+  try {
+    if (!user) {
+      return;
+    }
+
+    await addItem("projects", {
+      name: name.trim(),
+      team_id: user?.team_id,
+      country,
+      city: city ?? null,
+      start_month: month,
+      start_year: year,
+      is_ongoing: true,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        month: "",
+        city: "",
+        country: "",
+        name: "",
+        year: "",
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false
+    }
   }
 }
