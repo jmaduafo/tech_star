@@ -19,6 +19,16 @@ export type User = {
   updated_at: number | null;
 };
 
+export type UserItem = {
+  id: string;
+  team_id?: string;
+}
+
+export type Item = {
+  id: string;
+  team_id?: string;
+}
+
 // When a new user logs in for the first time, they are put into a brand new team
 // and are automatically set as an admin. They are the only ones that can add, edit,
 // and remove users as well as assign the role of admin

@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useActionState, useEffect, useState } from "react";
 import Header4 from "@/components/fontsize/Header4";
 import Paragraph from "@/components/fontsize/Paragraph";
 import Banner from "@/components/ui/Banner";
@@ -23,11 +23,9 @@ import Submit from "@/components/ui/buttons/Submit";
 import Input from "@/components/ui/input/Input";
 import { Skeleton } from "@/components/ui/skeleton";
 import NotAvailable from "@/components/ui/NotAvailable";
-import { useToast } from "@/hooks/use-toast";
-import { EditStageSchema } from "@/zod/validation";
-import { updateItem } from "@/firebase/actions";
-import { serverTimestamp } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { editStage } from "@/zod/actions";
 
 function StagesDisplay({
   user,
@@ -48,7 +46,7 @@ function StagesDisplay({
     data.map((item) => {
       return (
         <Fragment key={item.id}>
-          <StageCard item={item} loading={stageLoading} user={user} />
+          <StageCard item={item} user={user} />
         </Fragment>
       );
     })
@@ -77,93 +75,49 @@ export default StagesDisplay;
 
 function StageCard({
   item,
-  user,
-  loading
+  user
 }: {
   readonly item: Stage;
-  readonly user: User | undefined;
-  readonly loading: boolean
+  readonly user: User | undefined
 }) {
-  const { toast } = useToast();
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      editStage(prevState, formData, { id: item?.id }),
+    {
+      data: {
+        name: item?.name,
+        desc: item?.description,
+        is_complete: item?.is_completed,
+      },
+      message: "",
+      success: false,
+    }
+  );
 
-  const [values, setValues] = useState({
-    name: item.name,
-    desc: item.description,
-  });
+  const [open, setOpen] = useState(false);
 
-  const [isComplete, setIsComplete] = useState<boolean>(item.is_completed);
-  const [open, setOpen] = React.useState(false);
-
-  function handleChange(
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-  ) {
-    const { name, value } = e.target;
-
-    setValues({
-      ...values,
-      [name]: value,
-    });
-  }
-
-  async function handleEditStage(formData: FormData) {
-    const editName = formData.get("name");
-    const editDesc = formData.get("desc");
-
-    const vals = {
-      name: editName,
-      description: editDesc,
-      is_completed: isComplete,
-    };
-
-    const result = EditStageSchema.safeParse(vals);
-
-    if (!result.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
-      });
-
-      return;
-    }
-
-    const { name, description, is_completed } = result.data;
-
-    try {
-      if (!user) {
-        return;
-      }
-
-      // updateItem(collectionName: string, id: string, items: object)
-      await updateItem("stages", item?.id, {
-        name: name.trim(),
-        description: description.trim(),
-        is_completed,
-        updated_at: serverTimestamp(),
-      });
-
+        description: state?.message
+      })
+    } else if (state?.success) {
       toast({
-        title: "Stage updated successfully!",
-      });
+        title: "Stage was successfully updated!"
+      })
 
       setOpen(false)
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
-      });
     }
-  }
+  }, [state])
 
   return (
     <div className="rounded-3xl bg-light10 backdrop-blur-3xl mb-5">
       <div className="flex justify-between items-center rounded-tr-3xl rounded-tl-3xl py-4 px-5 bg-light25">
         <Header4 text={item.name} />
         {/* EDIT BUTTON: ONLY ADMIN CAN EDIT */}
-        {user?.is_owner || user?.role === "admin" ? (
+        {user?.is_owner || user?.role === "admin" || user?.role === "editor" ? (
           <div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -183,19 +137,18 @@ function StageCard({
                       <DialogHeader>
                         <DialogTitle>Edit stage</DialogTitle>
                         <DialogDescription>
-                          Make changes to your stage here. Save when you're
+                          Make changes to your stage here. Save when you are
                           done.
                         </DialogDescription>
                       </DialogHeader>
-                      <form action={handleEditStage}>
+                      <form action={action}>
                         <Input htmlFor="name" label="Stage name">
                           <input
                             name="name"
                             id="name"
                             className="form"
                             type="text"
-                            onChange={handleChange}
-                            value={values.name}
+                            defaultValue={state?.data?.name}
                           />
                         </Input>
                         <Input
@@ -207,21 +160,19 @@ function StageCard({
                             name="desc"
                             id="desc"
                             className="form"
-                            onChange={handleChange}
-                            value={values.desc}
+                            defaultValue={state?.data?.desc}
                           ></textarea>
                         </Input>
                         <div className="flex items-center justify-end gap-2 mt-3">
                           <Switch
                             id="is_completed"
                             name="is_completed"
-                            checked={isComplete}
-                            onCheckedChange={setIsComplete}
+                            defaultChecked={state?.data?.is_complete}
                           />
                           <label htmlFor="is_completed">Completed?</label>
                         </div>
                         <div className="flex justify-center mt-6 scale-75">
-                          <Submit loading={loading} />
+                          <Submit loading={isLoading} />
                         </div>
                       </form>
                     </DialogContent>

@@ -68,7 +68,7 @@ function ChangeEmail({ user }: Email) {
       });
     }
     
-  }, [emailState]);
+  }, [emailState, signInState]);
 
   return (
     <>

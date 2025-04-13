@@ -67,7 +67,7 @@ function ChangePassword({ user }: { readonly user: User | undefined }) {
       });
     }
     
-  }, [passwordState]);
+  }, [passwordState, signInState]);
 
   return (
     <>

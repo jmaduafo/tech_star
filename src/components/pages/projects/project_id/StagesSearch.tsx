@@ -3,12 +3,10 @@ import AddButton from "@/components/ui/buttons/AddButton";
 import Searchbar from "@/components/ui/search/Searchbar";
 import { User } from "@/types/types";
 import Input from "@/components/ui/input/Input";
-import React from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreateStagesSchema } from "@/zod/validation";
-import { useToast } from "@/hooks/use-toast";
-import { addItem } from "@/firebase/actions";
-import { serverTimestamp } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
+import { createStage } from "@/zod/actions";
 
 function StagesSearch({
   user,
@@ -23,15 +21,20 @@ function StagesSearch({
   readonly value: string;
   readonly projectId: string;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      createStage(prevState, formData, { id: user?.id as string, team_id: user?.team_id }, projectId),
+    {
+      data: {
+        name: "",
+        desc: "",
+      },
+      message: "",
+      success: false,
+    }
+  );
 
-  const [values, setValues] = React.useState({
-    name: "",
-    desc: "",
-  });
-
-  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);
@@ -39,79 +42,19 @@ function StagesSearch({
     !e.target.value.length ? setOpen(false) : setOpen(true);
   }
 
-  function handleChange(
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-  ) {
-    const { name, value } = e.target;
-
-    setValues({
-      ...values,
-      [name]: value,
-    });
-  }
-
-  async function addStage(formData: FormData) {
-    const stageName = formData.get("name");
-    const stageDesc = formData.get("desc");
-
-    const values = {
-      name: stageName,
-      description: stageDesc,
-    };
-
-    const result = CreateStagesSchema.safeParse(values);
-
-    if (!result.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message?.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result?.error?.issues[0]?.message,
+        description: state?.message,
       });
-
-      return;
-    }
-
-    const { name, description } = result.data;
-
-    
-    try {
-      setLoading(true);
-      
-      if (!user) {
-        return;
-      }
-
-      await addItem("stages", {
-        name: name.trim(),
-        description: description.trim(),
-        team_id: user?.team_id,
-        project_id: projectId,
-        is_completed: false,
-        created_at: serverTimestamp(),
-        updated_at: null,
-      });
-
+    } else if (state?.success) {
       toast({
-        variant: "default",
-        title: "Project created succesfully!",
+        title: "Stage was created successfully!",
       });
-
-      setValues({
-        name: "",
-        desc: "",
-      });
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err?.message,
-      });
-    } finally {
-      setLoading(false);
     }
-  }
+  }, [state]);
 
   return (
     <section>
@@ -133,15 +76,14 @@ function StagesSearch({
               title="stage"
               desc="Add key stages of your project to track progress effectively"
             >
-              <form action={addStage}>
+              <form action={action}>
                 <Input htmlFor="name" label="Stage name">
                   <input
                     name="name"
                     id="name"
                     className="form"
                     type="text"
-                    onChange={handleChange}
-                    value={values.name}
+                    defaultValue={state?.data?.name}
                   />
                 </Input>
                 <Input htmlFor="desc" label="Description" className="mt-3">
@@ -149,12 +91,13 @@ function StagesSearch({
                     name="desc"
                     id="desc"
                     className="form"
-                    onChange={handleChange}
-                    value={values.desc}
+                    defaultValue={state?.data?.desc}
                   ></textarea>
                 </Input>
                 <div className="flex justify-center mt-6 scale-75">
-                  <Submit loading={loading} />
+                  <Submit
+                    loading={isLoading}
+                  />
                 </div>
               </form>
             </AddButton>

@@ -9,7 +9,9 @@ import {
 } from "firebase/auth";
 import {
   CreateProjectSchema,
+  CreateStagesSchema,
   CreateUserSchema,
+  EditStageSchema,
   EmailValidation,
   LoginUserSchema,
   NamesValidation,
@@ -30,7 +32,7 @@ import {
   serverTimestamp,
   getDoc,
 } from "firebase/firestore";
-import { User } from "@/types/types";
+import { Item, UserItem } from "@/types/types";
 
 export async function signInUser(prevState: any, formData: FormData) {
   const values = {
@@ -130,7 +132,7 @@ export async function createAdmin(prevState: any, formData: FormData) {
       hire_type: "independent",
       role: "admin",
       location: null,
-      created_at: serverTimestamp(),
+      // created_at: serverTimestamp(),
       updated_at: null,
     });
 
@@ -424,7 +426,11 @@ export async function changePassword(prevState: any, formData: FormData) {
   }
 }
 
-export async function createProject(prevState: any, formData: FormData, user: User | undefined) {
+export async function createProject(
+  prevState: any,
+  formData: FormData,
+  user: UserItem | undefined
+) {
   const project_year = formData.get("year");
 
   const values = {
@@ -477,7 +483,114 @@ export async function createProject(prevState: any, formData: FormData, user: Us
   } catch (err: any) {
     return {
       message: err.message,
-      success: false
+      success: false,
+    };
+  }
+}
+
+export async function createStage(
+  prevState: any,
+  formData: FormData,
+  user: UserItem | undefined,
+  project_id: string | undefined
+) {
+
+  const values = {
+    name: formData.get("name"),
+    description: formData.get("desc")
+  };
+
+  const result = CreateStagesSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { name, description } = result.data;
+
+  if (!project_id) {
+    console.log("Project ID is undefined")
+    return;
+  }
+
+  try {
+    await addItem("stages", {
+      name: name.trim(),
+      team_id: user?.team_id,
+      project_id,
+      description: description.trim(),
+      is_completed: false,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        name: "",
+        desc: ""
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
+export async function editStage(
+  prevState: any,
+  formData: FormData,
+  item: Item | undefined
+) {
+  const values = {
+    name: formData.get("name"),
+    description: formData.get("desc"),
+    is_completed: formData.get("is_complete"),
+  };
+
+  const result = EditStageSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { name, description, is_completed } = result.data;
+
+  try {
+    if (!item) {
+      return;
     }
+
+    await updateItem("stages", item?.id, {
+      name: name.trim(),
+      description: description.trim(),
+      is_completed,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        name: "",
+        desc: "",
+        is_complete: false
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
   }
 }

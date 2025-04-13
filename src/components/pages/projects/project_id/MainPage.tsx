@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getDocumentItem } from "@/firebase/actions";
+import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
 import Header4 from "@/components/fontsize/Header4";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +25,6 @@ import {
   query,
   collection,
   where,
-  onSnapshot,
   orderBy,
 } from "firebase/firestore";
 import { optionalS } from "@/utils/optionalS";
@@ -37,7 +36,8 @@ function MainPage() {
   const [searchValue, setSearchValue] = useState("");
 
   const [allStages, setAllStages] = useState<Stage[] | undefined>();
-  const [stageLoading, setStageLoading] = useState(false);
+  
+  const [loading, setLoading] = useState(false);
 
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
@@ -45,56 +45,37 @@ function MainPage() {
   const { userData } = useAuth();
 
   // GET SELECTED PROJECT NAME TO DISPLAY IN BREADCRUMB DISPLAY
-  async function getProjectName() {
+  const getAllData = async () => {
+    setLoading(true)
+
     try {
       if (!userData) {
         return;
       }
 
-      const project = await getDocumentItem("projects", project_id);
+      const [ project, stages ] = await Promise.all([
+        // GET PROJECT NAME FROM PROJECT ID
+        getDocumentItem("projects", project_id),
+        // GET ALL STAGES UNDER PROJECT ID
+        getQueriedItems( query(
+          collection(db, "stages"),
+          where("team_id", "==", userData?.team_id),
+          where("project_id", "==", project_id),
+          orderBy("created_at")
+        ))
+      ])
 
       setProjectName(project?.name);
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  // GET ALL THE STAGES DATA FROM BACKEND
-  function getAllStages() {
-    try {
-      setStageLoading(true);
-
-      if (!userData) {
-        return;
-      }
-
-      const stageq = query(
-        collection(db, "stages"),
-        where("team_id", "==", userData?.team_id),
-        orderBy("created_at")
-      );
-
-      const unsub = onSnapshot(stageq, (snap) => {
-        const stages: Stage[] = [];
-
-        snap.forEach((doc) => {
-          stages.push({ ...(doc.data() as Stage), id: doc.id });
-        });
-
-        setAllStages(stages);
-
-        return () => unsub();
-      });
+      setAllStages(stages as Stage[]);
     } catch (err: any) {
       console.log(err.message);
     } finally {
-      setStageLoading(false);
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    getAllStages();
-    getProjectName();
+    getAllData();
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -153,7 +134,7 @@ function MainPage() {
             sort={sort}
             searchValue={searchValue}
             data={allStages}
-            stageLoading={stageLoading}
+            stageLoading={loading}
           />
         </div>
       </ContentContainer>
