@@ -143,8 +143,7 @@ export const CreateContractorSchema = z.object({
     })
     .max(5, {
       message: "Level of importance should be less than or equal to 5.",
-    })
-    .array(),
+    }),
   location: z.string().min(1, { message: "You must select a location." }),
   is_unavailable: z.boolean(),
   additional_info: z.nullable(z.string()),

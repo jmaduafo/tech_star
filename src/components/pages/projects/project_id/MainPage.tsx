@@ -63,7 +63,7 @@ function MainPage() {
         collection(db, "stages"),
         where("project_id", "==", project_id),
         where("team_id", "==", userData?.team_id),
-        orderBy("created_at", "desc")
+        orderBy("created_at", "asc")
       );
 
       const unsub = onSnapshot(stageq, (doc) => {

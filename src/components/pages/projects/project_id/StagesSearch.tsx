@@ -72,7 +72,6 @@ function StagesSearch({
         {user?.is_owner || user?.role === "admin" ? (
           <div>
             <AddButton
-              buttonTitle="stages"
               title="stage"
               desc="Add key stages of your project to track progress effectively"
             >

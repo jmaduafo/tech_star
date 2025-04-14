@@ -433,13 +433,17 @@ export async function createContractor(
   user: UserItem | undefined,
   project_id: string
 ) {
+  const importance = formData.get("importance")
+  
   const values = {
     location: formData.get("location"),
-    importance_level: formData.get("importance"),
-    is_unavailable: formData.get("is_unavailable"),
+    importance_level: +importance!,
+    is_unavailable: formData.get("status") === "on",
     name: formData.get("name"),
     additional_info: formData.get("additional"),
   };
+
+  console.log(values)
 
   const result = CreateContractorSchema.safeParse(values);
 
@@ -462,8 +466,8 @@ export async function createContractor(
       team_id: user?.team_id,
       project_id,
       location,
-      importance_level: importance_level[0],
-      text: additional_info ?? null,
+      importance_level: +importance_level,
+      text: additional_info?.length ? additional_info : null,
       is_unavailable,
       created_at: serverTimestamp(),
       updated_at: null,
@@ -612,7 +616,7 @@ export async function editStage(
   const values = {
     name: formData.get("name"),
     description: formData.get("desc"),
-    is_completed: formData.get("is_complete"),
+    is_completed: formData.get("is_completed") === "on",
   };
 
   const result = EditStageSchema.safeParse(values);

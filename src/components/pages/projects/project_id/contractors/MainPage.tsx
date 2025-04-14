@@ -29,6 +29,8 @@ function MainPage() {
   const [searchValue, setSearchValue] = useState("");
   const [projectName, setProjectName] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   const [allContractors, setAllContractors] = useState<
     Contractor[] | undefined
   >();
@@ -40,6 +42,8 @@ function MainPage() {
   const { userData } = useAuth();
 
   const getAllData = async () => {
+    setLoading(true)
+
     try {
       if (!userData || !project_id) {
         return;
@@ -68,6 +72,8 @@ function MainPage() {
       });
     } catch (err: any) {
       console.log(err.message);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -152,6 +158,7 @@ function MainPage() {
             projectId={project_id}
             sort={sort}
             searchValue={searchValue}
+            loading={loading}
             allContractors={allContractors}
             filterSearch={filterSearch}
           />

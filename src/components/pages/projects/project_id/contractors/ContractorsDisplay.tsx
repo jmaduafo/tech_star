@@ -33,11 +33,13 @@ function ContractorsDisplay({
   allContractors,
   filterSearch,
   projectId,
+  loading
 }: {
   readonly user: User | undefined;
   readonly sort: string;
   readonly searchValue: string;
   readonly projectId: string;
+  readonly loading: boolean;
   readonly allContractors: Contractor[] | undefined;
   readonly filterSearch: Contractor[];
 }) {
@@ -73,7 +75,7 @@ function ContractorsDisplay({
       });
     } else if (state?.success) {
       toast({
-        title: "Stage was successfully updated!",
+        title: "Contractor was successfully updated!",
       });
 
       setOpen(false);
@@ -122,6 +124,7 @@ function ContractorsDisplay({
                 defaultValue={state?.data?.location}
                 label="Countries"
                 className="w-full"
+                name="location"
               >
                 {country_list.map((item) => {
                   return (
@@ -209,7 +212,7 @@ function ContractorsDisplay({
 
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 w-full">
-      {isLoading
+      {loading
         ? [0, 1, 2, 3, 4, 5].map((each, i) => {
             return (
               <Fragment key={`${each}_${i}`}>
