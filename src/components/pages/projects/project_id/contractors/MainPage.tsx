@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthContainer from "@/components/pages/AuthContainer";
 import ContractorsSearch from "./ContractorsSearch";
 import ContractorsDisplay from "./ContractorsDisplay";
@@ -27,25 +27,27 @@ import ContentContainer from "@/components/pages/ContentContainer";
 function MainPage() {
   const [sort, setSort] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [projectName, setProjectName] = useState("");
 
-  const [allContractors, setAllContractors] = React.useState<
+  const [allContractors, setAllContractors] = useState<
     Contractor[] | undefined
   >();
-  const [filterSearch, setFilterSearch] = React.useState<Contractor[]>([]);
-
-  const [projectName, setProjectName] = React.useState("");
+  const [filterSearch, setFilterSearch] = useState<Contractor[]>([]);
 
   const pathname = usePathname();
   const project_id = pathname.split("/")[2];
 
-  const { userData, loading } = useAuth();
+  const { userData } = useAuth();
 
-  // GET ALL CONTRACTORS BY USER'S TEAM
-  async function getContractors() {
+  const getAllData = async () => {
     try {
       if (!userData || !project_id) {
         return;
       }
+
+      const project = await getDocumentItem("projects", project_id);
+
+      setProjectName(project?.name);
 
       const contractorq = query(
         collection(db, "contractors"),
@@ -53,9 +55,7 @@ function MainPage() {
         where("project_id", "==", project_id)
       );
 
-      
       const unsub = onSnapshot(contractorq, (snap) => {
-
         const contractors: Contractor[] = [];
 
         snap.forEach((item) => {
@@ -66,30 +66,13 @@ function MainPage() {
 
         return () => unsub();
       });
-
     } catch (err: any) {
       console.log(err.message);
     }
-  }
+  };
 
-  // GET SELECTED PROJECT NAME TO DISPLAY IN BREADCRUMB DISPLAY
-  async function getProjectName() {
-    try {
-      if (!userData) {
-        return;
-      }
-
-      const project = await getDocumentItem("projects", project_id);
-
-      setProjectName(project?.name);
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  React.useEffect(() => {
-    getProjectName();
-    getContractors();
+  useEffect(() => {
+    getAllData()
   }, [userData?.id ?? "guest"]);
 
   // FILTER CONTRACTOR NAME BY SEARCHED VALUE
@@ -103,7 +86,7 @@ function MainPage() {
       );
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     filterContractors();
   }, [searchValue]);
 
@@ -141,7 +124,9 @@ function MainPage() {
               {projectName.length ? (
                 <>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href={`/projects/${project_id}`}>{projectName}</BreadcrumbLink>
+                    <BreadcrumbLink href={`/projects/${project_id}`}>
+                      {projectName}
+                    </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                 </>
@@ -164,7 +149,6 @@ function MainPage() {
         <div className="mt-10">
           <ContractorsDisplay
             user={userData}
-            loading={loading}
             projectId={project_id}
             sort={sort}
             searchValue={searchValue}

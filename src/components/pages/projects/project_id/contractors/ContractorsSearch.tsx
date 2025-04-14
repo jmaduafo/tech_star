@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import SelectBar from "@/components/ui/input/SelectBar";
 import Searchbar from "@/components/ui/search/Searchbar";
 
@@ -18,7 +19,7 @@ function ContractorsSearch({
   readonly setValue: React.Dispatch<React.SetStateAction<string>>;
   readonly value: string;
 }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);

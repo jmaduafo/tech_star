@@ -8,6 +8,7 @@ import {
   deleteUser,
 } from "firebase/auth";
 import {
+  CreateContractorSchema,
   CreateProjectSchema,
   CreateStagesSchema,
   CreateUserSchema,
@@ -426,6 +427,67 @@ export async function changePassword(prevState: any, formData: FormData) {
   }
 }
 
+export async function createContractor(
+  prevState: any,
+  formData: FormData,
+  user: UserItem | undefined,
+  project_id: string
+) {
+  const values = {
+    location: formData.get("location"),
+    importance_level: formData.get("importance"),
+    is_unavailable: formData.get("is_unavailable"),
+    name: formData.get("name"),
+    additional_info: formData.get("additional"),
+  };
+
+  const result = CreateContractorSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { name, importance_level, location, is_unavailable, additional_info } = result.data;
+
+  try {
+    if (!user) {
+      return;
+    }
+
+    await addItem("contractors", {
+      name: name.trim(),
+      team_id: user?.team_id,
+      project_id,
+      location,
+      importance_level: importance_level[0],
+      text: additional_info ?? null,
+      is_unavailable,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        location: "",
+        importance: [2.5],
+        is_unavailable: false,
+        name: "",
+        additional: "",
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
 export async function createProject(
   prevState: any,
   formData: FormData,
@@ -494,10 +556,9 @@ export async function createStage(
   user: UserItem | undefined,
   project_id: string | undefined
 ) {
-
   const values = {
     name: formData.get("name"),
-    description: formData.get("desc")
+    description: formData.get("desc"),
   };
 
   const result = CreateStagesSchema.safeParse(values);
@@ -512,7 +573,7 @@ export async function createStage(
   const { name, description } = result.data;
 
   if (!project_id) {
-    console.log("Project ID is undefined")
+    console.log("Project ID is undefined");
     return;
   }
 
@@ -530,7 +591,7 @@ export async function createStage(
     return {
       data: {
         name: "",
-        desc: ""
+        desc: "",
       },
       message: "success",
       success: true,
@@ -582,7 +643,7 @@ export async function editStage(
       data: {
         name: "",
         desc: "",
-        is_complete: false
+        is_complete: false,
       },
       message: "success",
       success: true,

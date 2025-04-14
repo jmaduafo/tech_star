@@ -34,7 +34,7 @@ export async function checkUniqueUser(email: string): Promise<boolean> {
   return !snapshot.empty; // true if email exists
 }
 
-export async function getAllItems(collectionName: string) {
+export function getAllItems(collectionName: string) {
   const dataRef = collection(db, collectionName);
 
   try {
@@ -43,7 +43,7 @@ export async function getAllItems(collectionName: string) {
       const allItems: DocumentData[] = [];
 
       snap.forEach((item) => {
-        allItems.push(item.data());
+        allItems.push({...item.data(), id: item.id});
       });
 
       unsub();

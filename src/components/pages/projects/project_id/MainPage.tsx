@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
+import {
+  getDocumentItem,
+} from "@/firebase/actions";
 import Header4 from "@/components/fontsize/Header4";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +28,7 @@ import {
   collection,
   where,
   orderBy,
+  onSnapshot,
 } from "firebase/firestore";
 import { optionalS } from "@/utils/optionalS";
 import ContentContainer from "../../ContentContainer";
@@ -36,7 +39,7 @@ function MainPage() {
   const [searchValue, setSearchValue] = useState("");
 
   const [allStages, setAllStages] = useState<Stage[] | undefined>();
-  
+
   const [loading, setLoading] = useState(false);
 
   const pathname = usePathname();
@@ -44,35 +47,42 @@ function MainPage() {
 
   const { userData } = useAuth();
 
-  // GET SELECTED PROJECT NAME TO DISPLAY IN BREADCRUMB DISPLAY
   const getAllData = async () => {
-    setLoading(true)
+    setLoading(true);
 
     try {
       if (!userData) {
         return;
       }
 
-      const [ project, stages ] = await Promise.all([
-        // GET PROJECT NAME FROM PROJECT ID
-        getDocumentItem("projects", project_id),
-        // GET ALL STAGES UNDER PROJECT ID
-        getQueriedItems( query(
-          collection(db, "stages"),
-          where("team_id", "==", userData?.team_id),
-          where("project_id", "==", project_id),
-          orderBy("created_at")
-        ))
-      ])
+      const project = await getDocumentItem("projects", project_id);
 
       setProjectName(project?.name);
-      setAllStages(stages as Stage[]);
+
+      const stageq = query(
+        collection(db, "stages"),
+        where("project_id", "==", project_id),
+        where("team_id", "==", userData?.team_id),
+        orderBy("created_at", "desc")
+      );
+
+      const unsub = onSnapshot(stageq, (doc) => {
+        const stages: Stage[] = [];
+
+        doc.forEach((item) => {
+          stages.push({ ...(item?.data() as Stage), id: item.id });
+        });
+
+        setAllStages(stages);
+
+        return () => unsub();
+      });
     } catch (err: any) {
       console.log(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     getAllData();

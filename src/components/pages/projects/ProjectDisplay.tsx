@@ -40,7 +40,10 @@ function ProjectDisplay({
 }) {
   const [state, action, isLoading] = useActionState(
     (prevState: any, formData: FormData) =>
-      createProject(prevState, formData, user),
+      createProject(prevState, formData, {
+        id: user?.id as string,
+        team_id: user?.team_id as string,
+      }),
     {
       data: {
         month: "",
@@ -68,7 +71,7 @@ function ProjectDisplay({
         title: "Project was created successfully!",
       });
 
-      setOpen(false)
+      setOpen(false);
     }
   }, [state]);
 
