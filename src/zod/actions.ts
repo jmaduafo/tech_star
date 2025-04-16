@@ -10,6 +10,7 @@ import {
 import {
   CreateContractorSchema,
   CreateContractSchema,
+  CreateMemberSchema,
   CreatePaymentSchema,
   CreateProjectSchema,
   CreateStagesSchema,
@@ -178,7 +179,7 @@ export async function createUser(prevState: any, formData: FormData) {
     };
   }
 
-  const result = CreateUserSchema.safeParse(values);
+  const result = CreateMemberSchema.safeParse(values);
 
   if (!result.success) {
     return {
@@ -187,7 +188,7 @@ export async function createUser(prevState: any, formData: FormData) {
     };
   }
 
-  const { first_name, last_name, email, password } = result.data;
+  const { first_name, last_name, email, password, location, job_title, hire_type, role } = result.data;
 
   try {
     const isEmailTaken = await checkUniqueUser(email);
@@ -198,6 +199,7 @@ export async function createUser(prevState: any, formData: FormData) {
         success: false,
       };
     }
+    
     const authUser = auth.currentUser;
 
     if (!authUser) {
@@ -212,19 +214,19 @@ export async function createUser(prevState: any, formData: FormData) {
     const user = userCredential?.user;
 
     await setDoc(doc(db, "users", user?.uid), {
-      id: authUser.uid,
+      id: user?.uid,
       first_name,
       last_name,
       full_name: `${first_name} ${last_name}`,
       email,
       team_id: getUser?.data()?.team_id,
       is_owner: false,
-      is_online: true,
+      is_online: false,
       bg_image_index: 0,
-      job_title: null,
-      hire_type: "independent",
-      role: "viewer",
-      location: null,
+      job_title,
+      hire_type,
+      role,
+      location,
       created_at: serverTimestamp(),
       updated_at: null,
     });
