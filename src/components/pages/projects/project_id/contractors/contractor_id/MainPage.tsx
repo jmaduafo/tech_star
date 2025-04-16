@@ -14,7 +14,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { getDocumentItem } from "@/firebase/actions";
+import { getDocumentItem, getQueriedItems } from "@/firebase/actions";
 import { useAuth } from "@/context/AuthContext";
 import Separator from "@/components/ui/Separator";
 import { db } from "@/firebase/config";
@@ -23,8 +23,7 @@ import {
   collection,
   where,
   onSnapshot,
-  orderBy,
-  getDocs,
+  orderBy
 } from "firebase/firestore";
 import { Contract, Payment, Stage } from "@/types/types";
 import ContentContainer from "@/components/pages/ContentContainer";
@@ -45,64 +44,36 @@ function MainPage() {
 
   const { userData } = useAuth();
 
-  async function getProjectAndContractorNames() {
-    if (!project_id || !contractor_id) {
-      return;
-    }
-
-    const proj = await getDocumentItem("projects", project_id);
-    const contr = await getDocumentItem("contractors", contractor_id);
-
-    setProjectName(proj?.name);
-    setContractorName(contr?.name);
-  }
-
-  useEffect(() => {
-    getProjectAndContractorNames();
-  }, [projectName, contractorName]);
-
-  // RETRIEVE ALL STAGES
-  async function getStages() {
+  const getAllData = async () => {
     try {
-      if (!userData || !project_id) {
-        return;
+      if (!userData || !project_id || !contractor_id) {
+        return
       }
-  
-      const stageq = query(
-        collection(db, "stages"),
-        where("project_id", "==", project_id),
-        where("team_id", "==", userData?.team_id),
-        orderBy("created_at")
-      );
-  
-      const stageRef = await getDocs(stageq)
-  
-      const stages : Stage[] = []
-      stageRef.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        stages.push({ ... doc.data() as Stage, id: doc.id})
-      })
-  
-      setStagesData(stages)
 
-    } catch (err: any) {
-      console.log(err.message)
-    }
-  }
-
-  // RETRIEVE ALL CONTRACTS
-  function getContracts() {
-    try {
-
-      if (!userData || !contractor_id) {
-        return;
-      }
+      const [project, contractor, stages] = await Promise.all([
+        getDocumentItem("projects", project_id),
+        getDocumentItem("contractors", contractor_id),
+        getQueriedItems(
+          query(
+            collection(db, "stages"),
+            where("project_id", "==", project_id),
+            where("team_id", "==", userData?.team_id),
+            orderBy("created_at")
+          )
+        ),
+      ]);
+  
+      setProjectName(project ? project?.name : undefined);
+      setContractorName(contractor ? contractor?.name : undefined);
+      setStagesData(stages as Stage[]);
+  
+      // GET ALL REALTIME CONTRACTS
       const contractq = query(
         collection(db, "contracts"),
         where("contractor_id", "==", contractor_id)
       );
   
-      const unsub = onSnapshot(contractq, (snap) => {
+      const contractUnsub = onSnapshot(contractq, (snap) => {
         const contracts: Contract[] = [];
   
         snap.forEach((doc) => {
@@ -111,28 +82,17 @@ function MainPage() {
   
         setContractData(contracts);
   
-        return () => unsub();
+        return () => contractUnsub();
       });
-    } catch (err: any) {
-      console.log(err.message)
-    }
-
-  }
-
-  // RETRIEVE ALL NON-CONTRACTS
-  function getNonContracts() {
-    try {
-      if (!userData || !contractor_id) {
-        return;
-      }
   
+      // GET ALL REALTIME NONCONTRACTS
       const noncontractq = query(
         collection(db, "payments"),
         where("contract_id", "==", null),
         where("contractor_id", "==", contractor_id)
       );
   
-      const unsub = onSnapshot(noncontractq, (snap) => {
+      const paymentUnsub = onSnapshot(noncontractq, (snap) => {
         const noncontracts: Payment[] = [];
   
         snap.forEach((doc) => {
@@ -141,18 +101,16 @@ function MainPage() {
   
         setNonContractData(noncontracts);
   
-        return () => unsub();
+        return () => paymentUnsub();
       });
 
     } catch (err: any) {
       console.log(err.message)
     }
-  }
+  };
 
-  React.useEffect(() => {
-    getNonContracts();
-    getContracts();
-    getStages();
+  useEffect(() => {
+    getAllData();
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -211,8 +169,6 @@ function MainPage() {
             user={userData}
             data={contractData}
             stagesData={stagesData}
-            contractorName={contractorName}
-            projectName={projectName}
             contractorId={contractor_id}
             projectId={project_id}
           />
@@ -223,8 +179,6 @@ function MainPage() {
             user={userData}
             data={nonContractData}
             stagesData={stagesData}
-            contractorName={contractorName}
-            projectName={projectName}
             contractorId={contractor_id}
             projectId={project_id}
           />

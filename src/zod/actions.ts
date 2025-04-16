@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import {
   CreateContractorSchema,
+  CreateContractSchema,
   CreatePaymentSchema,
   CreateProjectSchema,
   CreateStagesSchema,
@@ -662,6 +663,85 @@ export async function editStage(
   }
 }
 
+export async function createContract(
+  prevState: any,
+  formData: FormData,
+  user: UserItem | undefined,
+  ids: { project_id: string; contractor_id: string },
+  inputs: {
+    dateInput: Date | undefined;
+    bankNames: string[];
+    currencies: Amount[];
+  },
+  contract: { id: string | null; code: string | null }
+) {
+  const values = {
+    code: formData.get("code"),
+    desc: formData.get("desc"),
+    date: inputs.dateInput,
+    bank_names: inputs.bankNames,
+    stage_id: formData.get("stage_id"),
+    currency: inputs.currencies,
+    comment: formData.get("comment"),
+    is_completed: formData.get("is_completed") === "on",
+  };
+
+  const result = CreateContractSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { date, desc, bank_names, stage_id, comment, currency, code, is_completed } =
+    result.data;
+
+  try {
+    if (!user) {
+      return;
+    }
+
+    await addItem("contracts", {
+      date,
+      project_id: ids.project_id,
+      contractor_id: ids.contractor_id,
+      team_id: user.team_id,
+      stage_id,
+      contract_code: code,
+      bank_name: bank_names[0],
+      currency_amount: currency[0].amount,
+      currency_symbol: currency[0].symbol,
+      currency_code: currency[0].code,
+      currency_name: currency[0].name,
+      is_completed,
+      description: desc.trim(),
+      comment: comment ? comment.trim() : null,
+      is_contract: true,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        code: "",
+        desc: "",
+        stage_id: "",
+        comment: "",
+        is_completed: false,
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
 export async function createPayment(
   prevState: any,
   formData: FormData,
@@ -672,7 +752,7 @@ export async function createPayment(
     bankNames: string[];
     currencies: Amount[];
   },
-  contract: { id: string | null; code: string | null; stage_id: string | null}
+  contract: { id: string | null; code: string | null; stage_id: string | null }
 ) {
   const values = {
     desc: formData.get("desc"),
@@ -725,10 +805,7 @@ export async function createPayment(
     return {
       data: {
         desc: "",
-        date: "",
-        bank_names: [],
         stage_id: "",
-        currency: [],
         comment: "",
         is_completed: false,
       },

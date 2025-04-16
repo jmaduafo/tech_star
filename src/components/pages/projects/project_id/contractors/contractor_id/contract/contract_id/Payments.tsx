@@ -71,10 +71,7 @@ function Payments({
     {
       data: {
         desc: "",
-        date: "",
-        bank_names: [],
         stage_id: "",
-        currency: [],
         comment: "",
         is_completed: false,
       },

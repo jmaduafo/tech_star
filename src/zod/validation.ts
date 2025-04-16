@@ -169,6 +169,7 @@ export const CreateContractSchema = z.object({
   stage_id: z.string().nonempty({
     message: "There must be a stage selected.",
   }),
+  is_completed: z.boolean(),
   currency: z
     .object({
       code: z.string().nonempty({

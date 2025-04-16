@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import Header3 from "@/components/fontsize/Header3";
 import {
   Popover,
@@ -23,20 +23,16 @@ import { SelectItem } from "@/components/ui/select";
 import Separator from "@/components/ui/Separator";
 import { formatCurrency } from "@/utils/currencies";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreateContractSchema } from "@/zod/validation";
-import { useToast } from "@/hooks/use-toast";
-import { addItem } from "@/firebase/actions";
-import { serverTimestamp } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
 import { optionalS } from "@/utils/optionalS";
 import DataTable from "@/components/ui/tables/DataTable";
 import { contractColumns } from "@/components/ui/tables/columns";
 import Loading from "@/components/ui/Loading";
+import { createContract } from "@/zod/actions";
 
 function Contracts({
   user,
   data,
-  contractorName,
-  projectName,
   contractorId,
   projectId,
   stagesData,
@@ -44,26 +40,48 @@ function Contracts({
   readonly user: User | undefined;
   readonly data: Contract[] | undefined;
   readonly stagesData: Stage[] | undefined;
-  readonly contractorName: string;
-  readonly projectName: string;
   readonly projectId: string | undefined;
   readonly contractorId: string | undefined;
 }) {
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      createContract(
+        prevState,
+        formData,
+        { id: user?.id as string, team_id: user?.team_id as string },
+        {
+          project_id: projectId as string,
+          contractor_id: contractorId as string,
+        },
+        {
+          dateInput: contractDate,
+          bankNames: bankInputs,
+          currencies: currencyInputs,
+        },
+        { id: null, code: null }
+      ),
+    {
+      data: {
+        code: "",
+        desc: "",
+        stage_id: "",
+        comment: "",
+        is_completed: false,
+      },
+      message: "",
+      success: false,
+    }
+  );
+
   const [contractDate, setContractDate] = useState<Date>();
   const [bankInputs, setBankInputs] = useState<string[]>([]);
   const [currencyInputs, setCurrencyInputs] = useState<Amount[]>([]);
 
-  const [isComplete, setIsComplete] = useState(false);
   const [isUnlimited, setIsUnlimited] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const [stageId, setStageId] = useState("");
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
-
-  const [loading, setLoading] = useState(false);
-
-  const { toast } = useToast();
 
   function handleAddCurrency() {
     if (
@@ -101,82 +119,21 @@ function Contracts({
     setCurrencyInputs(currencyInputs.filter((inp) => inp.code !== item));
   }
 
-  async function handleSubmit(formData: FormData) {
-    const contractCode = formData.get("code");
-    const contractDesc = formData.get("desc");
-    const contractComment = formData.get("comment");
-
-    const values = {
-      code: contractCode,
-      desc: contractDesc,
-      date: contractDate,
-      bank_names: bankInputs,
-      stage_id: stageId,
-      currency: currencyInputs,
-      comment: contractComment,
-    };
-
-    const result = CreateContractSchema.safeParse(values);
-
-    if (!result.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
+        description: state?.message,
       });
-
-      return;
-    }
-
-    const { code, desc, date, stage_id, bank_names, currency, comment } =
-      result.data;
-
-    if (!user || !projectId || !contractorId || !stagesData) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await addItem("contracts", {
-        date,
-        project_id: projectId,
-        contractor_id: contractorId,
-        team_id: user.team_id,
-        stage_id: stage_id,
-        contract_code: code,
-        bank_name: bank_names[0],
-        currency_amount: currency[0].amount,
-        currency_symbol: currency[0].symbol,
-        currency_code: currency[0].code,
-        currency_name: currency[0].name,
-        is_completed: isComplete,
-        description: desc.trim(),
-        comment: comment ? comment.trim() : null,
-        is_contract: true,
-        created_at: serverTimestamp(),
-        updated_at: null,
-      });
-
+    } else if (state?.success) {
       toast({
-        title: "Contract added successfully!",
+        title: "Contractor was successfully updated!",
       });
-
-      setBankInputs([]);
-      setCurrencyInputs([]);
-      setIsComplete(false);
 
       setOpen(false);
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
-      });
-    } finally {
-      setLoading(false);
     }
-  }
+  }, [state]);
 
   return (
     <section>
@@ -197,14 +154,25 @@ function Contracts({
               setOpen={setOpen}
               open={open}
             >
-              <form action={handleSubmit}>
+              <form action={action}>
                 {/* CONTRACT CODE INPUT */}
                 <Input htmlFor="code" label="Contract code *">
-                  <input className="form" type="text" id="code" name="code" />
+                  <input
+                    className="form"
+                    type="text"
+                    id="code"
+                    name="code"
+                    defaultValue={state?.data?.code}
+                  />
                 </Input>
                 {/* DESCRIPTION INPUT */}
                 <Input htmlFor="desc" label="Description *" className="my-3">
-                  <textarea className="form" id="desc" name="desc"></textarea>
+                  <textarea
+                    className="form"
+                    id="desc"
+                    name="desc"
+                    defaultValue={state?.data?.desc}
+                  ></textarea>
                 </Input>
                 {/* DATE PICKER POPUP */}
                 <Popover>
@@ -249,8 +217,7 @@ function Contracts({
                     ) : null}
                   </ArrayInput>
                   <SelectBar
-                    valueChange={setStageId}
-                    value={stageId}
+                    defaultValue={state?.data?.stage_id}
                     placeholder="Select the project stage *"
                     label="Stages"
                     className="w-full sm:w-full mb-3"
@@ -339,8 +306,7 @@ function Contracts({
                     <Switch
                       id="is_completed"
                       name="is_completed"
-                      checked={isComplete}
-                      onCheckedChange={setIsComplete}
+                      defaultChecked={state?.data?.is_completed}
                     />
                     <label htmlFor="is_completed">
                       Is the contract complete? *
@@ -356,10 +322,11 @@ function Contracts({
                       className="form"
                       id="comment"
                       name="comment"
+                      defaultValue={state?.data?.comment}
                     ></textarea>
                   </Input>
                   <div className="flex justify-center mt-6 scale-75">
-                    <Submit loading={loading} />
+                    <Submit loading={isLoading} />
                   </div>
                 </Popover>
               </form>

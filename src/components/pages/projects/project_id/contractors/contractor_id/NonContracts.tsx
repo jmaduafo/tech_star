@@ -33,8 +33,6 @@ import { createPayment } from "@/zod/actions";
 function NonContracts({
   user,
   data,
-  contractorName,
-  projectName,
   contractorId,
   projectId,
   stagesData,
@@ -42,8 +40,6 @@ function NonContracts({
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
   readonly stagesData: Stage[] | undefined;
-  readonly contractorName: string;
-  readonly projectName: string;
   readonly projectId: string | undefined;
   readonly contractorId: string | undefined;
 }) {
@@ -67,10 +63,7 @@ function NonContracts({
     {
       data: {
         desc: "",
-        date: "",
-        bank_names: [],
         stage_id: "",
-        currency: [],
         comment: "",
         is_completed: false,
       },
