@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import { Amount, Contract, Payment, User } from "@/types/types";
 import DataTable from "@/components/ui/tables/DataTable";
 import { paymentColumns } from "@/components/ui/tables/columns";
@@ -9,11 +9,9 @@ import Submit from "@/components/ui/buttons/Submit";
 import ArrayInput from "@/components/ui/input/ArrayInput";
 import ObjectArray from "@/components/ui/input/ObjectArray";
 import SelectBar from "@/components/ui/input/SelectBar";
-import { addItem } from "@/firebase/actions";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/currencies";
 import { currency_list } from "@/utils/dataTools";
-import { CreatePaymentSchema } from "@/zod/validation";
 import {
   Popover,
   PopoverContent,
@@ -22,22 +20,19 @@ import {
 import { SelectItem } from "@/components/ui/select";
 import Separator from "@/components/ui/Separator";
 import { Switch } from "@/components/ui/switch";
-import { serverTimestamp } from "firebase/firestore";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import Input from "@/components/ui/input/Input";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import Header3 from "@/components/fontsize/Header3";
+import { createPayment } from "@/zod/actions";
 
 type PaymentType = {
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
-  readonly contractorName: string | undefined;
   readonly contract: Contract | undefined;
-  readonly projectName: string | undefined;
   readonly stageId: string | undefined;
-  readonly stageName: string | undefined;
   readonly projectId: string | string[];
   readonly contractorId: string | string[];
   readonly contractId: string | string[];
@@ -46,30 +41,56 @@ type PaymentType = {
 function Payments({
   user,
   data,
-  projectName,
-  contractorName,
   contract,
   stageId,
-  stageName,
   projectId,
   contractorId,
   contractId,
 }: PaymentType) {
-  const [contractDate, setContractDate] = useState<Date>();
-  const [bankInputs, setBankInputs] = useState<string[]>([]
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      createPayment(
+        prevState,
+        formData,
+        { id: user?.id as string, team_id: user?.team_id as string },
+        {
+          project_id: projectId as string,
+          contractor_id: contractorId as string,
+        },
+        {
+          dateInput: paymentDate,
+          bankNames: bankInputs,
+          currencies: currencyInputs,
+        },
+        {
+          id: contract?.id as string,
+          code: contract?.contract_code as string,
+          stage_id: contract?.stage_id as string,
+        }
+      ),
+    {
+      data: {
+        desc: "",
+        date: "",
+        bank_names: [],
+        stage_id: "",
+        currency: [],
+        comment: "",
+        is_completed: false,
+      },
+      message: "",
+      success: false,
+    }
   );
+  const [paymentDate, setPaymentDate] = useState<Date>();
+  const [bankInputs, setBankInputs] = useState<string[]>([]);
   const [currencyInputs, setCurrencyInputs] = useState<Amount[]>([]);
 
-  const [isComplete, setIsComplete] = useState(true);
   const [isUnlimited, setIsUnlimited] = useState(false);
   const [open, setOpen] = useState(false);
 
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
-
-  const [loading, setLoading] = useState(false);
-
-  const { toast } = useToast();
 
   function handleAddCurrency() {
     if (
@@ -94,87 +115,27 @@ function Payments({
     }
   }
 
-  async function handleSubmit(formData: FormData) {
-    const contractDescription = formData.get("desc");
-    const contractComment = formData.get("comment");
-
-    const values = {
-      desc: contractDescription,
-      date: contractDate,
-      bank_names: bankInputs,
-      currency: currencyInputs,
-      comment: contractComment,
-    };
-
-    const result = CreatePaymentSchema.safeParse(values);
-
-    if (!result.success) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
-      });
-
-      return;
-    }
-
-    const { desc, date, bank_names, currency, comment } = result.data;
-
-    
-    if (!user || !projectId || !contractorId || !contractId) {
-      console.log(
-        "Could not find user or project id or contractor id or stages data"
-      );
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await addItem("payments", {
-        date,
-        project_id: projectId,
-        contractor_id: contractorId,
-        contract_id: contractId,
-        team_id: user.team_id,
-        stage_id: stageId,
-        contract_code: contract?.contract_code,
-        bank_name: bank_names[0],
-        currency_amount: currency[0].amount,
-        currency_symbol: currency[0].symbol,
-        currency_code: currency[0].code,
-        currency_name: currency[0].name,
-        is_completed: isComplete,
-        description: desc ? desc.trim() : contract?.description,
-        comment: comment ? comment.trim() : null,
-        is_contract: false,
-        created_at: serverTimestamp(),
-        updated_at: null,
-      });
-
-      toast({
-        title: "Payment added successfully!",
-      });
-
-      setBankInputs([]);
-      setCurrencyInputs([]);
-      setIsComplete(false);
-
-      setOpen(false);
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
+  useEffect(() => {
+    contract?.bank_name
+      ? setBankInputs([contract?.bank_name])
+      : setBankInputs([]);
+  }, [contract, open]);
 
   useEffect(() => {
-    contract?.bank_name ? setBankInputs([contract?.bank_name]) : setBankInputs([])
-  }, [contract, open])
+    if (!state?.success && state?.message.length) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: state?.message,
+      });
+    } else if (state?.success) {
+      toast({
+        title: "Contractor was successfully updated!",
+      });
+
+      setOpen(false);
+    }
+  }, [state]);
 
   return (
     <section>
@@ -183,14 +144,15 @@ function Payments({
           <Header3 text="All Payments" />
         </div>
         <div>
-          {user?.is_owner|| user?.role === "admin" && !contract?.is_completed ? (
+          {user?.is_owner ||
+          (user?.role === "admin" && !contract?.is_completed) ? (
             <AddButton
               title="payment"
               desc={`Create a payment for contract ${contract?.contract_code}`}
               setOpen={setOpen}
               open={open}
             >
-              <form action={handleSubmit}>
+              <form action={action}>
                 {/* DATE PICKER POPUP */}
                 <Popover>
                   <p className="text-[14.5px] text-darkText mb-[5px]">
@@ -204,8 +166,8 @@ function Payments({
                       }
                     >
                       <CalendarIcon />
-                      {contractDate ? (
-                        format(contractDate, "PPP")
+                      {paymentDate ? (
+                        format(paymentDate, "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -214,8 +176,8 @@ function Payments({
                   <PopoverContent className="w-auto p-0 z-[1000]" align="start">
                     <Calendar
                       mode="single"
-                      selected={contractDate}
-                      onSelect={setContractDate}
+                      selected={paymentDate}
+                      onSelect={setPaymentDate}
                       initialFocus
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
@@ -224,7 +186,12 @@ function Payments({
                   </PopoverContent>
                   {/* DESCRIPTION INPUT */}
                   <Input htmlFor="desc" label="Description" className="my-3">
-                    <textarea className="form" id="desc" name="desc"></textarea>
+                    <textarea
+                      className="form"
+                      id="desc"
+                      name="desc"
+                      defaultValue={state?.data?.desc}
+                    ></textarea>
                   </Input>
                   {/* ADD AND DELETE BANK NAMES */}
                   <ArrayInput
@@ -290,8 +257,7 @@ function Payments({
                     <Switch
                       id="is_completed"
                       name="is_completed"
-                      checked={isComplete}
-                      onCheckedChange={setIsComplete}
+                      defaultChecked={state?.data?.is_completed}
                     />
                     <label htmlFor="is_completed">
                       Is this payment complete? *
@@ -307,10 +273,11 @@ function Payments({
                       className="form"
                       id="comment"
                       name="comment"
+                      defaultValue={state?.data?.comment}
                     ></textarea>
                   </Input>
                   <div className="flex justify-center mt-6 scale-75">
-                    <Submit loading={loading} />
+                    <Submit loading={isLoading} />
                   </div>
                 </Popover>
               </form>

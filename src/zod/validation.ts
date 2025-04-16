@@ -194,48 +194,6 @@ export const CreateContractSchema = z.object({
   comment: z.nullable(z.string())
 });
 
-export const CreateNoncontractSchema = z.object({
-  desc: z
-    .string()
-    .min(1, { message: "You must enter a payment description." }),
-  date: z
-    .date({
-      required_error: "Please select a date",
-    })
-    .min(new Date("1960-01-01"), {
-      message: "The date cannot be earlier than 1960",
-    }),
-  bank_names: z.string().array().nonempty({
-    message: "There must be at least one bank entered.",
-  }),
-  stage_id: z.string().nonempty({
-    message: "There must be a stage selected.",
-  }),
-  currency: z
-    .object({
-      code: z.string().nonempty({
-        message: "You must enter a currency code.",
-      }),
-      name: z.string().nonempty({
-        message: "You must enter a currency name.",
-      }),
-      symbol: z.string().nonempty({
-        message: "You must enter a currency symbol.",
-      }),
-      amount: z
-        .number()
-        .min(0.01, {
-          message: "You must enter an amount greater than 0.",
-        })
-        .or(z.string().includes("Unlimited")),
-    })
-    .array()
-    .nonempty({
-      message: "You must enter a currency and amount.",
-    }),
-  comment: z.nullable(z.string())
-});
-
 export const CreatePaymentSchema = z.object({
   desc: z.nullable(z.string()),
   date: z
@@ -247,6 +205,10 @@ export const CreatePaymentSchema = z.object({
     }),
   bank_names: z.string().array().nonempty({
     message: "There must be at least one bank entered.",
+  }),
+  is_completed: z.boolean(),
+  stage_id: z.string().nonempty({
+    message: "There must be a stage selected.",
   }),
   currency: z
     .object({

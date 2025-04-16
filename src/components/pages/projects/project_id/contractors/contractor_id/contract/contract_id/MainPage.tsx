@@ -11,7 +11,7 @@ import {
   where,
   onSnapshot,
   doc,
-  getDoc
+  getDoc,
 } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import Payments from "./Payments";
@@ -30,10 +30,10 @@ import Banner from "@/components/ui/Banner";
 
 function MainPage() {
   const [allPayments, setAllPayments] = useState<Payment[] | undefined>();
+  const [contract, setContract] = useState<Contract | undefined>();
+  
   const [projectName, setProjectName] = useState<string | undefined>();
   const [contractorName, setContractorName] = useState<string | undefined>();
-  const [contract, setContract] = useState<Contract | undefined>();
-  const [stageName, setStageName] = useState<string | undefined>();
   const [stageId, setStageId] = useState<string | undefined>();
 
   const { userData } = useAuth();
@@ -43,99 +43,53 @@ function MainPage() {
   const contractorId = params.contractor_id ?? "";
   const contractId = params.contract_id ?? "";
 
-  function getPayments() {
-    try {
-      if (!userData) {
-        return;
-      }
+  const getAllData = async () => {
+    if (
+      !userData ||
+      !projectId ||
+      typeof projectId !== "string" ||
+      !contractId ||
+      typeof contractId !== "string" ||
+      !contractorId ||
+      typeof contractorId !== "string"
+    ) {
+      return;
+    }
 
-      const paymentq = query(
-        collection(db, "payments"),
-        where("team_id", "==", userData?.team_id),
-        where("project_id", "==", projectId),
-        where("contractor_id", "==", contractorId),
-        where("contract_id", "==", contractId)
-      );
+    const [project, contractor, contract] = await Promise.all([
+      getDoc(doc(db, "contractors", projectId)),
+      getDoc(doc(db, "contractors", contractorId)),
+      getDoc(doc(db, "contracts", contractId)),
+    ]);
 
-      const unsub = onSnapshot(paymentq, (snap) => {
-        const payments: Payment[] = [];
+    project && setProjectName(project?.data()?.name);
+    contractor && setContractorName(contractor?.data()?.name);
+    contract && setContract(contract?.data() as Contract);
+    setStageId(contract?.data()?.stage_id);
 
-        snap.docs.forEach((doc) => {
-          payments.push({ ...(doc.data() as Payment), id: doc.id });
-        });
+    const paymentq = query(
+      collection(db, "payments"),
+      where("team_id", "==", userData?.team_id),
+      where("project_id", "==", projectId),
+      where("contractor_id", "==", contractorId),
+      where("contract_id", "==", contractId)
+    );
 
-        setAllPayments(payments);
+    const unsub = onSnapshot(paymentq, (snap) => {
+      const payments: Payment[] = [];
 
-        return () => unsub();
+      snap.docs.forEach((doc) => {
+        payments.push({ ...(doc.data() as Payment), id: doc.id });
       });
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
 
-  async function getProjectName() {
-    try {
-      if (!userData || typeof projectId !== "string") {
-        return;
-      }
+      setAllPayments(payments);
 
-      const projectq = doc(db, "projects", projectId);
-
-      const docSnap = await getDoc(projectq);
-
-      docSnap?.exists()
-        ? setProjectName(docSnap?.data()?.name)
-        : setProjectName(undefined);
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  async function getContractorName() {
-    try {
-      if (!userData || typeof contractorId !== "string") {
-        return;
-      }
-
-      const contractorq = doc(db, "contractors", contractorId);
-
-      const docSnap = await getDoc(contractorq);
-
-      docSnap?.exists()
-        ? setContractorName(docSnap?.data()?.name)
-        : setContractorName(undefined);
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
-  async function getContractInfo() {
-    try {
-      if (!userData || typeof contractId !== "string") {
-        return;
-      }
-
-      const contractq = doc(db, "contracts", contractId);
-
-      const docSnap = await getDoc(contractq);
-
-      if (docSnap?.exists()) {
-        setContract(docSnap?.data() as Contract);
-        setStageId(docSnap?.data()?.stage_id)
-        setStageName(docSnap?.data()?.stage_name)
-      } else {
-        setContract(undefined);
-      }
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
+      return () => unsub();
+    });
+  };
 
   useEffect(() => {
-    getPayments();
-    getProjectName();
-    getContractorName();
-    getContractInfo();
+    getAllData();
   }, [userData?.id ?? "guest"]);
 
   return (
@@ -153,7 +107,9 @@ function MainPage() {
             ) : null}
           </div>
           <div className="mb-3">
-            {contract ? <Banner text={contract.is_completed ? "completed" : "ongoing"}/> : null}
+            {contract ? (
+              <Banner text={contract.is_completed ? "completed" : "ongoing"} />
+            ) : null}
           </div>
         </div>
         {/* BREADCRUMB DISPLAY */}
@@ -202,12 +158,9 @@ function MainPage() {
           user={userData}
           data={allPayments}
           stageId={stageId}
-          stageName={stageName}
-          projectName={projectName}
           projectId={projectId}
           contractorId={contractorId}
           contractId={contractId}
-          contractorName={contractorName}
           contract={contract}
         />
       </ContentContainer>

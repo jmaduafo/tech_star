@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import Header3 from "@/components/fontsize/Header3";
 import {
   Popover,
@@ -23,14 +23,12 @@ import { SelectItem } from "@/components/ui/select";
 import Separator from "@/components/ui/Separator";
 import { formatCurrency } from "@/utils/currencies";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreateNoncontractSchema } from "@/zod/validation";
-import { useToast } from "@/hooks/use-toast";
-import { addItem } from "@/firebase/actions";
-import { serverTimestamp } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
 import { optionalS } from "@/utils/optionalS";
 import DataTable from "@/components/ui/tables/DataTable";
 import { paymentColumns } from "@/components/ui/tables/columns";
 import Loading from "@/components/ui/Loading";
+import { createPayment } from "@/zod/actions";
 
 function NonContracts({
   user,
@@ -49,21 +47,46 @@ function NonContracts({
   readonly projectId: string | undefined;
   readonly contractorId: string | undefined;
 }) {
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      createPayment(
+        prevState,
+        formData,
+        { id: user?.id as string, team_id: user?.team_id as string },
+        {
+          project_id: projectId as string,
+          contractor_id: contractorId as string,
+        },
+        {
+          dateInput: contractDate,
+          bankNames: bankInputs,
+          currencies: currencyInputs,
+        },
+        { id: null, code: null, stage_id: null }
+      ),
+    {
+      data: {
+        desc: "",
+        date: "",
+        bank_names: [],
+        stage_id: "",
+        currency: [],
+        comment: "",
+        is_completed: false,
+      },
+      message: "",
+      success: false,
+    }
+  );
   const [contractDate, setContractDate] = useState<Date>();
   const [bankInputs, setBankInputs] = useState<string[]>([]);
   const [currencyInputs, setCurrencyInputs] = useState<Amount[]>([]);
 
-  const [isComplete, setIsComplete] = useState(false);
   const [isUnlimited, setIsUnlimited] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const [stageId, setStageId] = useState("");
   const [currencyCode, setCurrencyCode] = useState("");
   const [currencyAmount, setCurrencyAmount] = useState("");
-
-  const [loading, setLoading] = useState(false);
-
-  const { toast } = useToast();
 
   function handleAddCurrency() {
     if (
@@ -88,89 +111,21 @@ function NonContracts({
     }
   }
 
-  async function handleSubmit(formData: FormData) {
-    const contractDesc = formData.get("desc");
-    const contractComment = formData.get("comment");
-
-    const values = {
-      desc: contractDesc,
-      date: contractDate,
-      bank_names: bankInputs,
-      stage_id: stageId,
-      currency: currencyInputs,
-      comment: contractComment,
-    };
-
-    const result = CreateNoncontractSchema.safeParse(values);
-
-    if (!result.success) {
+  useEffect(() => {
+    if (!state?.success && state?.message.length) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
+        description: state?.message,
       });
-
-      return;
-    }
-
-    const { desc, date, stage_id, bank_names, currency, comment } = result.data;
-
-    try {
-      setLoading(true);
-      
-      if (!user || !projectId || !contractorId || !stagesData) {
-        console.log(
-          "Could not find user or project id or contractor id or stages data"
-        );
-        return;
-      }
-
-      const stageIndex = stagesData?.findIndex((item) => item.id === stage_id);
-
-
-      await addItem("payments", {
-        date,
-        project_id: projectId,
-        contractor_id: contractorId,
-        team_id: user.team_id,
-        stage_id: stage_id,
-        project_name: projectName,
-        contractor_name: contractorName,
-        stage_name: stageIndex ? stagesData[stageIndex]?.name : null,
-        contract_code: null,
-        contract_id: null,
-        bank_name: bank_names[0],
-        currency_amount: currency[0].amount,
-        currency_symbol: currency[0].symbol,
-        currency_code: currency[0].code,
-        currency_name: currency[0].name,
-        is_completed: isComplete,
-        description: desc.trim(),
-        comment: comment ? comment.trim() : null,
-        is_contract: false,
-        created_at: serverTimestamp(),
-        updated_at: null,
-      });
-
+    } else if (state?.success) {
       toast({
-        title: "Payment added successfully!",
+        title: "Contractor was successfully updated!",
       });
-
-      setBankInputs([]);
-      setCurrencyInputs([]);
-      setIsComplete(false);
 
       setOpen(false);
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
-      });
-    } finally {
-      setLoading(false);
     }
-  }
+  }, [state]);
 
   return (
     <section>
@@ -184,14 +139,14 @@ function NonContracts({
           ) : null}
         </div>
         <div>
-          {user?.is_owner || user?.role === "admin"? (
+          {user?.is_owner || user?.role === "admin" ? (
             <AddButton
               title="non-contract"
               desc="Create a stand-alone payment"
               setOpen={setOpen}
               open={open}
             >
-              <form action={handleSubmit}>
+              <form action={action}>
                 {/* DATE PICKER POPUP */}
                 <Popover>
                   <p className="text-[14.5px] text-darkText mb-[5px]">
@@ -222,7 +177,12 @@ function NonContracts({
                   </PopoverContent>
                   {/* DESCRIPTION INPUT */}
                   <Input htmlFor="desc" label="Description *" className="my-3">
-                    <textarea className="form" id="desc" name="desc"></textarea>
+                    <textarea
+                      className="form"
+                      id="desc"
+                      name="desc"
+                      defaultValue={state?.data?.desc}
+                    ></textarea>
                   </Input>
                   {/* ADD AND DELETE BANK NAMES */}
                   <ArrayInput
@@ -234,8 +194,8 @@ function NonContracts({
                   />
                   {stagesData ? (
                     <SelectBar
-                      valueChange={setStageId}
-                      value={stageId}
+                      name="stage_id"
+                      defaultValue={state?.data?.stage_id}
                       placeholder="Select the project stage *"
                       label="Stages"
                       className="w-full sm:w-full mb-3"
@@ -314,8 +274,7 @@ function NonContracts({
                     <Switch
                       id="is_completed"
                       name="is_completed"
-                      checked={isComplete}
-                      onCheckedChange={setIsComplete}
+                      defaultChecked={state?.data?.is_completed}
                     />
                     <label htmlFor="is_completed">
                       Is this payment complete? *
@@ -331,10 +290,11 @@ function NonContracts({
                       className="form"
                       id="comment"
                       name="comment"
+                      defaultValue={state?.data?.comment}
                     ></textarea>
                   </Input>
                   <div className="flex justify-center mt-6 scale-75">
-                    <Submit loading={loading} />
+                    <Submit loading={isLoading} />
                   </div>
                 </Popover>
               </form>

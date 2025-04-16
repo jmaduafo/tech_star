@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import {
   CreateContractorSchema,
+  CreatePaymentSchema,
   CreateProjectSchema,
   CreateStagesSchema,
   CreateUserSchema,
@@ -33,7 +34,7 @@ import {
   serverTimestamp,
   getDoc,
 } from "firebase/firestore";
-import { Item, UserItem } from "@/types/types";
+import { Amount, Item, UserItem } from "@/types/types";
 
 export async function signInUser(prevState: any, formData: FormData) {
   const values = {
@@ -433,8 +434,8 @@ export async function createContractor(
   user: UserItem | undefined,
   project_id: string
 ) {
-  const importance = formData.get("importance")
-  
+  const importance = formData.get("importance");
+
   const values = {
     location: formData.get("location"),
     importance_level: +importance!,
@@ -443,7 +444,7 @@ export async function createContractor(
     additional_info: formData.get("additional"),
   };
 
-  console.log(values)
+  console.log(values);
 
   const result = CreateContractorSchema.safeParse(values);
 
@@ -454,7 +455,8 @@ export async function createContractor(
     };
   }
 
-  const { name, importance_level, location, is_unavailable, additional_info } = result.data;
+  const { name, importance_level, location, is_unavailable, additional_info } =
+    result.data;
 
   try {
     if (!user) {
@@ -648,6 +650,87 @@ export async function editStage(
         name: "",
         desc: "",
         is_complete: false,
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
+export async function createPayment(
+  prevState: any,
+  formData: FormData,
+  user: UserItem | undefined,
+  ids: { project_id: string; contractor_id: string },
+  inputs: {
+    dateInput: Date | undefined;
+    bankNames: string[];
+    currencies: Amount[];
+  },
+  contract: { id: string | null; code: string | null; stage_id: string | null}
+) {
+  const values = {
+    desc: formData.get("desc"),
+    date: inputs.dateInput,
+    bank_names: inputs.bankNames,
+    stage_id: formData.get("stage_id") ?? "payment",
+    currency: inputs.currencies,
+    comment: formData.get("comment"),
+    is_completed: formData.get("is_completed") === "on",
+  };
+
+  const result = CreatePaymentSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { date, desc, bank_names, stage_id, comment, currency, is_completed } =
+    result.data;
+
+  try {
+    if (!user) {
+      return;
+    }
+
+    await addItem("payments", {
+      date,
+      project_id: ids.project_id,
+      contractor_id: ids.contractor_id,
+      team_id: user.team_id,
+      stage_id: stage_id === "payment" ? contract.stage_id : stage_id,
+      contract_code: contract.code,
+      contract_id: contract.id,
+      bank_name: bank_names[0],
+      currency_amount: currency[0].amount,
+      currency_symbol: currency[0].symbol,
+      currency_code: currency[0].code,
+      currency_name: currency[0].name,
+      is_completed,
+      description: desc?.trim(),
+      comment: comment ? comment.trim() : null,
+      is_contract: false,
+      created_at: serverTimestamp(),
+      updated_at: null,
+    });
+
+    return {
+      data: {
+        desc: "",
+        date: "",
+        bank_names: [],
+        stage_id: "",
+        currency: [],
+        comment: "",
+        is_completed: false,
       },
       message: "success",
       success: true,

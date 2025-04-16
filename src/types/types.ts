@@ -88,7 +88,6 @@ export type Amount = {
   code: string;
   name: string;
   amount: number | "Unlimited";
-  created_at?: number;
 };
 
 export type Contract = {
