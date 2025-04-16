@@ -32,20 +32,16 @@ type PaymentType = {
   readonly user: User | undefined;
   readonly data: Payment[] | undefined;
   readonly contract: Contract | undefined;
-  readonly stageId: string | undefined;
   readonly projectId: string | string[];
   readonly contractorId: string | string[];
-  readonly contractId: string | string[];
 };
 
 function Payments({
   user,
   data,
   contract,
-  stageId,
   projectId,
-  contractorId,
-  contractId,
+  contractorId
 }: PaymentType) {
   const [state, action, isLoading] = useActionState(
     (prevState: any, formData: FormData) =>
@@ -293,7 +289,7 @@ function Payments({
             data={data}
             is_payment
             is_export
-            team_name={""}
+            team_name={user?.first_name ?? "My "}
           />
         )}
       </div>

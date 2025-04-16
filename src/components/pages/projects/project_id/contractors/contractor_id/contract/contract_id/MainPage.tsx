@@ -9,9 +9,7 @@ import {
   query,
   collection,
   where,
-  onSnapshot,
-  doc,
-  getDoc,
+  onSnapshot
 } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import Payments from "./Payments";
@@ -27,14 +25,14 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import Banner from "@/components/ui/Banner";
+import { getDocumentItem } from "@/firebase/actions";
 
 function MainPage() {
   const [allPayments, setAllPayments] = useState<Payment[] | undefined>();
   const [contract, setContract] = useState<Contract | undefined>();
-  
+
   const [projectName, setProjectName] = useState<string | undefined>();
   const [contractorName, setContractorName] = useState<string | undefined>();
-  const [stageId, setStageId] = useState<string | undefined>();
 
   const { userData } = useAuth();
   const params = useParams();
@@ -57,15 +55,14 @@ function MainPage() {
     }
 
     const [project, contractor, contract] = await Promise.all([
-      getDoc(doc(db, "contractors", projectId)),
-      getDoc(doc(db, "contractors", contractorId)),
-      getDoc(doc(db, "contracts", contractId)),
+      getDocumentItem("projects", projectId),
+      getDocumentItem("contractors", contractorId),
+      getDocumentItem("contracts", contractId),
     ]);
 
-    project && setProjectName(project?.data()?.name);
-    contractor && setContractorName(contractor?.data()?.name);
-    contract && setContract(contract?.data() as Contract);
-    setStageId(contract?.data()?.stage_id);
+    setProjectName(project ? project?.name : undefined);
+    setContractorName(contractor ? contractor?.name : undefined);
+    setContract(contract as Contract);
 
     const paymentq = query(
       collection(db, "payments"),
@@ -157,10 +154,8 @@ function MainPage() {
         <Payments
           user={userData}
           data={allPayments}
-          stageId={stageId}
           projectId={projectId}
           contractorId={contractorId}
-          contractId={contractId}
           contract={contract}
         />
       </ContentContainer>
