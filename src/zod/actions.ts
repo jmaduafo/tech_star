@@ -163,7 +163,20 @@ export async function createUser(prevState: any, formData: FormData) {
     last_name: formData.get("last_name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    confirm: formData.get("confirm"),
+    location: formData.get("location"),
+    job_title: formData.get("job_title"),
+    role: formData.get("role"),
+    hire_type: formData.get("hire_type"),
   };
+
+  if (values.confirm !== values.password) {
+    return {
+      message:
+        "The password does not match the confirm password field. Please try again.",
+      success: false,
+    };
+  }
 
   const result = CreateUserSchema.safeParse(values);
 
@@ -176,16 +189,15 @@ export async function createUser(prevState: any, formData: FormData) {
 
   const { first_name, last_name, email, password } = result.data;
 
-  const isEmailTaken = await checkUniqueUser(email);
-
-  if (isEmailTaken) {
-    return {
-      message: "Email has already been used. Please choose another email.",
-      success: false,
-    };
-  }
-
   try {
+    const isEmailTaken = await checkUniqueUser(email);
+
+    if (isEmailTaken) {
+      return {
+        message: "Email has already been used. Please choose another email.",
+        success: false,
+      };
+    }
     const authUser = auth.currentUser;
 
     if (!authUser) {
@@ -223,6 +235,11 @@ export async function createUser(prevState: any, formData: FormData) {
         last_name: "",
         email: "",
         password: "",
+        confirm: "",
+        location: "",
+        job_title: "",
+        role: "",
+        hire_type: "",
       },
       message: "success",
       success: true,
@@ -695,8 +712,16 @@ export async function createContract(
     };
   }
 
-  const { date, desc, bank_names, stage_id, comment, currency, code, is_completed } =
-    result.data;
+  const {
+    date,
+    desc,
+    bank_names,
+    stage_id,
+    comment,
+    currency,
+    code,
+    is_completed,
+  } = result.data;
 
   try {
     if (!user) {

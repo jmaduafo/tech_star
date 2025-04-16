@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useActionState } from "react";
 import AuthContainer from "../AuthContainer";
 import ContentContainer from "../ContentContainer";
 import Header1 from "@/components/fontsize/Header1";
@@ -13,35 +13,40 @@ import { useAuth } from "@/context/AuthContext";
 import Loading from "@/components/ui/Loading";
 import {
   collection,
-  doc,
-  getDoc,
   onSnapshot,
   orderBy,
   query,
-  serverTimestamp,
-  setDoc,
   where,
 } from "firebase/firestore";
-import { auth, db } from "@/firebase/config";
+import { db } from "@/firebase/config";
 import Input from "@/components/ui/input/Input";
 import SelectBar from "@/components/ui/input/SelectBar";
 import { country_list, job_titles } from "@/utils/dataTools";
 import { SelectItem } from "@/components/ui/select";
 import Submit from "@/components/ui/buttons/Submit";
-import { CreateMemberSchema } from "@/zod/validation";
 import { toast } from "@/hooks/use-toast";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUser } from "@/zod/actions";
+import { getDocumentItem } from "@/firebase/actions";
 
 function MainPage() {
+  const [state, action, isLoading] = useActionState(createUser, {
+    data: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      confirm: "",
+      location: "",
+      job_title: "",
+      role: "",
+      hire_type: "",
+    },
+    message: "",
+    success: false,
+  });
   const [teamData, setTeamData] = useState<User[] | undefined>();
   const [teamName, setTeamName] = useState<string | undefined>();
 
-  const [userLocation, setUserLocation] = useState("");
-  const [userHireType, setUserHireType] = useState("");
-  const [userRole, setUserRole] = useState("");
-  const [userJobTitle, setUserJobTitle] = useState("");
-
-  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
   const { userData } = useAuth();
@@ -53,11 +58,9 @@ function MainPage() {
         return;
       }
 
-      const teamSnap = await getDoc(doc(db, "teams", userData?.team_id));
+      const teamSnap = await getDocumentItem("teams", userData?.team_id);
 
-      teamSnap?.exists()
-        ? setTeamName(teamSnap?.data()?.name)
-        : setTeamName(undefined);
+      setTeamName(teamSnap ? teamSnap?.name : "");
 
       const membersq = query(
         collection(db, "users"),
@@ -81,130 +84,25 @@ function MainPage() {
     }
   }
 
-  async function addMember(formData: FormData) {
-    const firstName = formData.get("first_name");
-    const lastName = formData.get("last_name");
-    const userEmail = formData.get("email");
-    const userPassword = formData.get("password");
-    const userConfirm = formData.get("confirm_password");
-
-    const values = {
-      first_name: firstName,
-      last_name: lastName,
-      email: userEmail,
-      password: userPassword,
-      confirm: userConfirm,
-      location: userLocation,
-      job_title: userJobTitle,
-      role: userRole,
-      hire_type: userHireType,
-    };
-
-    if (values.confirm !== values.password) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description:
-          "The password does not match the confirm password field. Please try again.",
-      });
-
-      return;
-    }
-
-    const result = CreateMemberSchema.safeParse(values);
-
-    if (!result.success) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: result.error.issues[0].message,
-      });
-
-      return;
-    }
-
-    const {
-      first_name,
-      last_name,
-      email,
-      password,
-      job_title,
-      role,
-      hire_type,
-      location,
-    } = result.data;
-
-    try {
-      setLoading(true);
-
-      createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          // Signed up
-          const user = userCredential.user;
-
-          async function create() {
-            try {
-              await setDoc(doc(db, "users", user?.uid), {
-                first_name,
-                last_name,
-                full_name: first_name + " " + last_name,
-                email,
-                team_id: userData?.team_id,
-                job_title,
-                role: role.toLowerCase(),
-                hire_type: hire_type.toLowerCase(),
-                id: user?.uid,
-                location,
-                is_owner: false,
-                bg_image_index: 0,
-                created_at: serverTimestamp(),
-                updated_at: null,
-                is_online: false,
-              });
-
-              setOpen(false);
-
-              toast({
-                title: "Member was successfully added!",
-                description:
-                  "The new member can now log in on their device and are allowed access to the team's data",
-              });
-
-            } catch (err: any) {
-              toast({
-                variant: "destructive",
-                title: "Uh oh! Something went wrong",
-                description: err.message,
-              });
-            }
-          }
-
-          create();
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-
-          toast({
-            variant: "destructive",
-            title: `Error code: ${errorCode}`,
-            description: errorMessage,
-          });
-        });
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong",
-        description: err.message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     getAllMembers();
   }, [userData?.team_id]);
+
+  useEffect(() => {
+    if (!state?.success && state?.message.length) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: state?.message,
+      });
+    } else if (state?.success) {
+      toast({
+        title: "Team member was added successfully! New user can now sign in to view team dashboard.",
+      });
+
+      setOpen(false);
+    }
+  }, [state]);
 
   return (
     <AuthContainer>
@@ -229,7 +127,7 @@ function MainPage() {
               setOpen={setOpen}
               open={open}
             >
-              <form action={addMember}>
+              <form action={action}>
                 {/* FIRST NAME */}
                 <Input htmlFor={"first_name"} label={"First name *"}>
                   <input
@@ -237,6 +135,7 @@ function MainPage() {
                     className="form"
                     name="first_name"
                     id="first_name"
+                    defaultValue={state?.data?.first_name}
                   />
                 </Input>
                 {/* LAST NAME */}
@@ -250,11 +149,18 @@ function MainPage() {
                     className="form"
                     name="last_name"
                     id="last_name"
+                    defaultValue={state?.data?.last_name}
                   />
                 </Input>
                 {/* EMAIL */}
                 <Input htmlFor={"email"} label={"Email *"} className="mt-3">
-                  <input type="text" className="form" name="email" id="email" />
+                  <input
+                    type="text"
+                    className="form"
+                    name="email"
+                    id="email"
+                    defaultValue={state?.data?.email}
+                  />
                 </Input>
                 <div className="flex gap-4 items-start">
                   {/* PASSWORD */}
@@ -268,6 +174,7 @@ function MainPage() {
                       className="form"
                       name="password"
                       id="password"
+                      defaultValue={state?.data?.password}
                     />
                   </Input>
                   {/* CONFIRM PASSWORD */}
@@ -279,15 +186,16 @@ function MainPage() {
                     <input
                       type="password"
                       className="form"
-                      name="confirm_password"
+                      name="confirm"
                       id="confirm_password"
+                      defaultValue={state?.data?.confirm}
                     />
                   </Input>
                 </div>
                 {/* LOCATION */}
                 <SelectBar
-                  value={userLocation}
-                  valueChange={setUserLocation}
+                  defaultValue={state?.data?.location}
+                  name="location"
                   placeholder={"Select member's location *"}
                   label={"Countries"}
                   className="mt-5"
@@ -302,8 +210,8 @@ function MainPage() {
                 </SelectBar>
                 {/* JOB TITLE */}
                 <SelectBar
-                  value={userJobTitle}
-                  valueChange={setUserJobTitle}
+                  defaultValue={state?.data?.job_title}
+                  name="job_title"
                   placeholder={"Select a job title *"}
                   label={"Job title"}
                   className="mt-5"
@@ -318,8 +226,8 @@ function MainPage() {
                 </SelectBar>
                 {/* ROLES */}
                 <SelectBar
-                  value={userRole}
-                  valueChange={setUserRole}
+                  defaultValue={state?.data?.role}
+                  name="role"
                   placeholder={"Select a role *"}
                   label={"Roles"}
                   className="mt-5"
@@ -338,8 +246,8 @@ function MainPage() {
                 </SelectBar>
                 {/* HIRE TYPE */}
                 <SelectBar
-                  value={userHireType}
-                  valueChange={setUserHireType}
+                  defaultValue={state?.data?.hire_type}
+                  name="hire_type"
                   placeholder={"Select a hire type *"}
                   label={"Hire type"}
                   className="mt-5"
@@ -358,7 +266,7 @@ function MainPage() {
                 </SelectBar>
                 {/* SUBMIT BUTTON */}
                 <div className="flex justify-center mt-6 scale-75">
-                  <Submit loading={loading} />
+                  <Submit loading={isLoading} />
                 </div>
               </form>
             </AddButton>

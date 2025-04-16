@@ -125,7 +125,7 @@ function StageCard({
                   <EllipsisVertical strokeWidth={1} />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-44">
+              <DropdownMenuContent>
                 <DropdownMenuGroup>
                   <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
