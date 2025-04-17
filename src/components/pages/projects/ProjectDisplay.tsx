@@ -1,7 +1,7 @@
 "use client";
 import React, { Fragment, useActionState, useEffect } from "react";
 import { Project, User } from "@/types/types";
-import Card from "@/components/ui/MyCard";
+import Card from "@/components/ui/cards/MyCard";
 import { Plus } from "lucide-react";
 import Header5 from "@/components/fontsize/Header5";
 import Banner from "@/components/ui/Banner";

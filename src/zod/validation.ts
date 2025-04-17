@@ -62,6 +62,21 @@ export const CreateMemberSchema = z.object({
   }),
 });
 
+export const EditUserSchema = z.object({
+  first_name: z.string().min(1, {
+    message: "First name must be filled in",
+  }),
+  last_name: z.string().min(1, {
+    message: "Last name must be filled in",
+  }),
+  location: z.string().min(1, {
+    message: "You must select a location",
+  }),
+  job_title: z.string().min(1, {
+    message: "You must select a job title",
+  })
+});
+
 export const LoginUserSchema = z.object({
   email: z
     .string()

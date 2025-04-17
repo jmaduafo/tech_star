@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { HiUser, HiMiniCog8Tooth } from "react-icons/hi2";
 import {
   Dialog,
@@ -13,16 +13,20 @@ import { useAuth } from "@/context/AuthContext";
 import AppearanceSettings from "./settings/appearance/AppearanceSettings";
 import ProfileSettings from "./settings/profile/ProfileSettings";
 import SecuritySettings from "./settings/security/SecuritySettings";
+import { User } from "@/types/types";
+import ProfileCard from "../cards/ProfileCard";
 
 function TopBar() {
+  const { userData } = useAuth();
+
   return (
     <div className="flex justify-between items-center">
       <div>
         <p>LOGO</p>
       </div>
       <div className="flex gap-3">
-        <ProfileButton />
-        <SettingButton />
+        <ProfileButton user={userData} />
+        <SettingButton user={userData} />
       </div>
     </div>
   );
@@ -30,31 +34,31 @@ function TopBar() {
 
 export default TopBar;
 
-function ProfileButton() {
+function ProfileButton({ user }: { readonly user: User | undefined }) {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          className="bg-darkText rounded-full p-2 hover:opacity-70 duration-300"
-          title="Profile"
-        >
-          <HiUser className="w-4 h-4" />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Profile</DialogTitle>
-        </DialogHeader>
-        <div className=""></div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <button
+        onClick={() => setProfileOpen(true)}
+        className="bg-darkText rounded-full p-2 hover:opacity-70 duration-300"
+        title="Profile"
+      >
+        <HiUser className="w-4 h-4" />
+      </button>
+      <ProfileCard
+        user={user}
+        setProfileOpen={setProfileOpen}
+        profileOpen={profileOpen}
+        editProfileOpen={editProfileOpen}
+        setEditProfileOpen={setEditProfileOpen}
+      />
+    </>
   );
 }
 
-function SettingButton() {
-
-  const { userData } = useAuth();
-
+function SettingButton({ user }: { readonly user: User | undefined }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -73,9 +77,9 @@ function SettingButton() {
           </DialogDescription>
         </DialogHeader>
         <div className="w-full">
-          <ProfileSettings user={userData}/>
-          <AppearanceSettings user={userData} />
-          <SecuritySettings user={userData}/>
+          <ProfileSettings user={user} />
+          <AppearanceSettings user={user} />
+          <SecuritySettings user={user} />
         </div>
       </DialogContent>
     </Dialog>

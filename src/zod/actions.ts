@@ -16,6 +16,7 @@ import {
   CreateStagesSchema,
   CreateUserSchema,
   EditStageSchema,
+  EditUserSchema,
   EmailValidation,
   LoginUserSchema,
   NamesValidation,
@@ -136,7 +137,7 @@ export async function createAdmin(prevState: any, formData: FormData) {
       hire_type: "independent",
       role: "admin",
       location: null,
-      // created_at: serverTimestamp(),
+      created_at: serverTimestamp(),
       updated_at: null,
     });
 
@@ -254,6 +255,60 @@ export async function createUser(prevState: any, formData: FormData) {
   }
 }
 
+export async function editUser(prevState: any, formData: FormData) {
+  const values = {
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+    location: formData.get("location"),
+    job_title: formData.get("job_title"),
+  };
+
+  const result = EditUserSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { first_name, last_name, location, job_title} = result.data;
+
+  try {
+    
+    const authUser = auth.currentUser;
+
+    if (!authUser) {
+      return;
+    }
+
+    await updateItem("users", authUser?.uid, {
+      first_name,
+      last_name,
+      full_name: `${first_name} ${last_name}`,
+      job_title,
+      location,
+      updated_at: serverTimestamp(),
+    });
+
+    return {
+      data: {
+        first_name: "",
+        last_name: "",
+        location: "",
+        job_title: ""
+      },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
 export async function deleteThisUser(prevState: any, formData: FormData) {
   const values = {
     email: formData.get("email"),
@@ -280,11 +335,11 @@ export async function deleteThisUser(prevState: any, formData: FormData) {
     );
     const user = userCredential.user;
 
-    // ONCE USER IS SIGNED IN, THEN DELETE USER FROM THE AUTH DATABASE
     if (!user) {
       return;
     }
-
+    
+    // ONCE USER IS SIGNED IN, THEN DELETE USER FROM THE AUTH DATABASE
     deleteUser(user)
       .then(() => {
         const del = async () => {

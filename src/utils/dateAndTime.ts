@@ -38,12 +38,13 @@ export function fullDate() {
   return date;
 }
 
-export function formatDate(timestamp: TimeStamp) {
+export function formatDate(timestamp: TimeStamp, formatOption?: number) {
   const date = new Date(timestamp.seconds*1000)
 
   const format = date.getDate() + " " + months[date.getMonth()].substring(0, 3) + " " + date.getFullYear().toString().slice(2)
+  const format2 =  months[date.getMonth()].substring(0, 3) + " " + date.getDate() + ", " + date.getFullYear()
 
-  return format
+  return formatOption === 2 ? format2 : format
 }
 
 export function formatChartDate(timestamp: TimeStamp) {

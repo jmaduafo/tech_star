@@ -31,8 +31,6 @@ import { MoreHorizontal, CalendarIcon } from "lucide-react";
 import ArrayInput from "@/components/ui/input/ArrayInput";
 import ObjectArray from "@/components/ui/input/ObjectArray";
 import SelectBar from "@/components/ui/input/SelectBar";
-import Header6 from "@/components/fontsize/Header6";
-import Paragraph from "@/components/fontsize/Paragraph";
 import { useAuth } from "@/context/AuthContext";
 import { formatDate } from "@/utils/dateAndTime";
 import Banner from "../Banner";
@@ -74,6 +72,7 @@ import {
 import Submit from "../buttons/Submit";
 import { db } from "@/firebase/config";
 import { CreateContractSchema, CreatePaymentSchema } from "@/zod/validation";
+import Detail from "../cards/Detail";
 
 type Dialog = {
   readonly data: Contract | Payment | undefined;
@@ -819,28 +818,3 @@ function ActionDialog({ data, is_payment }: Dialog) {
 }
 
 export default ActionDialog;
-
-function Detail({
-  children,
-  title,
-  item,
-  custom,
-  className,
-}: {
-  readonly children?: React.ReactNode;
-  readonly title: string;
-  readonly item?: string;
-  readonly custom?: boolean;
-  readonly className?: string;
-}) {
-  const render = item ? <Paragraph text={item} /> : null;
-
-  return (
-    <div className="mb-4">
-      <Header6 text={title} className="capitalize text-darkText font-medium" />
-      <div className={`mt-1 text-dark75 text-[14.5px] ${className}`}>
-        {custom ? children : render}
-      </div>
-    </div>
-  );
-}

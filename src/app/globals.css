@@ -75,6 +75,14 @@ label {
   line-height: 1;
 }
 
+input::file-selector-button {
+  border: none;
+  padding: 5px 8px;
+  background-color: rgb(236, 236, 236);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 .dashGrid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 1fr;

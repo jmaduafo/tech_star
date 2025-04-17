@@ -22,6 +22,7 @@ function Submit({
     <button
       type="submit"
       onClick={buttonClick}
+      aria-label="submit button"
       className={`rounded-full bg-dark35 group ${width_height ?? "w-[160px] h-[60px]"} ${disabledLogic ? "opacity-60" : "opacity-100"}`}
       disabled={!!(loading || disabledLogic)}
     >

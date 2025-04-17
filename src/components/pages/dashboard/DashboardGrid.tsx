@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import Card from "@/components/ui/MyCard";
+import Card from "@/components/ui/cards/MyCard";
 import AmountDisplay from "./AmountDisplay";
 import Greeting from "./Greeting";
 import ContractorCount from "./ContractorCount";

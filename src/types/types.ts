@@ -7,7 +7,6 @@ export type User = {
   full_name: string;
   email: string;
   password?: string;
-  occupation?: string;
   is_owner: boolean;
   bg_image_index: number;
   team_id: string;
@@ -15,8 +14,9 @@ export type User = {
   job_title: string | null,
   hire_type: "employee" | "contractor" | "independent";
   is_online: boolean;
-  created_at: number;
-  updated_at: number | null;
+  location: string | null;
+  created_at: TimeStamp;
+  updated_at: TimeStamp | null;
 };
 
 export type UserItem = {
@@ -54,7 +54,7 @@ export type Currencies = {
   contractor_id: string;
   contractor_name: string;
   team_id: string;
-  created_at: number;
+  created_at: TimeStamp;
 };
 
 export type Project = {
@@ -66,8 +66,8 @@ export type Project = {
   start_month: string;
   start_year: number;
   is_ongoing: boolean;
-  created_at: number;
-  updated_at: number | null;
+  created_at: TimeStamp;
+  updated_at: TimeStamp | null;
 };
 
 export type Contractor = {
@@ -79,8 +79,8 @@ export type Contractor = {
   importance_level: number;
   text?: string | null;
   is_unavailable: boolean;
-  created_at: number;
-  updated_at: number | null;
+  created_at: TimeStamp;
+  updated_at: TimeStamp | null;
 };
 
 export type Amount = {
