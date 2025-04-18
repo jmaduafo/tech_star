@@ -1,4 +1,5 @@
-import { db } from "./config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "./config";
 import {
   collection,
   deleteDoc,
@@ -16,6 +17,13 @@ import {
   query,
   where,
 } from "firebase/firestore";
+
+export async function uploadImage(file: File, path: string) {
+  const storageRef = ref(storage, `${path}/${file.name}`);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+  return url;
+}
 
 export async function getUserData(id: string) {
   const userRef = doc(db, "users", id);

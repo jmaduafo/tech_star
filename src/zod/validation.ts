@@ -74,7 +74,8 @@ export const EditUserSchema = z.object({
   }),
   job_title: z.string().min(1, {
     message: "You must select a job title",
-  })
+  }),
+  image_url: z.string().url().optional(),
 });
 
 export const LoginUserSchema = z.object({

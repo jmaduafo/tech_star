@@ -261,6 +261,7 @@ export async function editUser(prevState: any, formData: FormData) {
     last_name: formData.get("last_name"),
     location: formData.get("location"),
     job_title: formData.get("job_title"),
+    image_url: formData.get("image_url")
   };
 
   const result = EditUserSchema.safeParse(values);
@@ -272,7 +273,7 @@ export async function editUser(prevState: any, formData: FormData) {
     };
   }
 
-  const { first_name, last_name, location, job_title} = result.data;
+  const { first_name, last_name, location, job_title, image_url } = result.data;
 
   try {
     
@@ -288,16 +289,13 @@ export async function editUser(prevState: any, formData: FormData) {
       full_name: `${first_name} ${last_name}`,
       job_title,
       location,
+      image_url,
       updated_at: serverTimestamp(),
+    
     });
 
     return {
-      data: {
-        first_name: "",
-        last_name: "",
-        location: "",
-        job_title: ""
-      },
+      data: result.data,
       message: "success",
       success: true,
     };

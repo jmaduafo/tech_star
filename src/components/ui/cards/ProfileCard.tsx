@@ -1,6 +1,12 @@
-import React, { useEffect, useActionState } from "react";
+import React, { useEffect, useActionState, useState, useRef } from "react";
 import { User } from "@/types/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../dialog";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +29,9 @@ import { country_list, job_titles } from "@/utils/dataTools";
 import { SelectItem } from "../select";
 import Submit from "../buttons/Submit";
 import { editUser } from "@/zod/actions";
+import { toast } from "@/hooks/use-toast";
+import { uploadImage } from "@/firebase/actions";
+import FilePicker from "../buttons/FilePicker";
 
 type Card = {
   readonly user: User | undefined;
@@ -41,17 +50,24 @@ function ProfileCard({
   setEditProfileOpen,
   hideProfile,
 }: Card) {
-  const [ state, action, isLoading ] = useActionState(editUser, {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [newImage, setNewImage] = useState<File | null>(null);
+
+  const [state, action, isLoading] = useActionState(editUser, {
     data: {
       first_name: user?.first_name ?? "",
       last_name: user?.last_name ?? "",
       location: user?.location ?? "",
-      job_title: user?.job_title ?? ""
+      job_title: user?.job_title ?? "",
     },
     message: "",
-    success: false
-  })
+    success: false,
+  });
+
   const currentUser = auth.currentUser;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!editProfileOpen) {
@@ -59,10 +75,40 @@ function ProfileCard({
     }
   }, [editProfileOpen]);
 
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // INITIALIZE WITH THE CURRENT IMAGE IN CASE THE USER MADE NO CHANGES TO THEIR PROFILE PIC
+    let imageUrl = currentImage;
+
+    // IF USER HAS CHOSEN A NEW IMAGE, THEN REPLACE PREVIOUS IMAGE WITH THE NEW IMAGE
+    if (newImage) {
+      // Upload the new image to Firebase Storage
+      imageUrl = await uploadImage(newImage, `users/${user?.id}`);
+    }
+
+    const formData = new FormData(e.currentTarget);
+    // CREATE A NEW KEY UNDER FORM DATA AND SET THE CHOSEN IMAGE
+    formData.append("image_url", imageUrl as string);
+
+    action(formData); // call useActionState's action function
+  };
+
   return (
     <>
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent
+          className="sm:max-w-md"
+          aria-describedby="user profile display"
+        >
           <DialogHeader>
             <DialogTitle className="capitalize">
               {currentUser?.uid === user?.id ? "My" : user?.first_name + "'s"}{" "}
@@ -80,7 +126,7 @@ function ProfileCard({
                   <Avatar className="w-[140px] h-[140px]">
                     <AvatarImage src="https://github.com" alt="@shadcn" />
                     <AvatarFallback className="text-5xl">
-                      {getInitials(user?.full_name)}
+                      {getInitials(user.full_name)}
                     </AvatarFallback>
                   </Avatar>
                   <button
@@ -210,10 +256,28 @@ function ProfileCard({
               Make changes to your profile here. Click save when you're done.
             </SheetDescription>
           </SheetHeader>
-          <form action={action} className="mt-5">
-            <Input label="Change image" htmlFor="first_name">
-              <input className="form" type="file" id="image" name="image" />
-            </Input>
+          <form onSubmit={handleSubmit} className="mt-5">
+            <div className="flex justify-center">
+              <Avatar className="w-[110px] h-[110px]">
+                {imagePreview && (
+                  <AvatarImage src={imagePreview} alt="new image preview" />
+                )}
+                {!imagePreview && currentImage && (
+                  <AvatarImage src={currentImage} alt="current image preview" />
+                )}
+                <AvatarFallback className="text-5xl">
+                  {getInitials(user ? user?.full_name : "")}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="mt-6">
+              <FilePicker
+                title="Change profile image"
+                setNewImage={setNewImage}
+                setImagePreview={setImagePreview}
+                inputRef={fileInputRef}
+              />
+            </div>
             <Input label="First name" htmlFor="first_name" className="mt-4">
               <input
                 className="form"
@@ -232,7 +296,7 @@ function ProfileCard({
                 defaultValue={state?.data?.last_name}
               />
             </Input>
-            <Input label="Location" htmlFor="location" className="mt-5">
+            <Input label="Location" htmlFor="location" className="mt-4">
               <SelectBar
                 placeholder={"Select your location"}
                 label={"Location"}
@@ -249,7 +313,7 @@ function ProfileCard({
                 })}
               </SelectBar>
             </Input>
-            <Input label="Job title" htmlFor="job_title" className="mt-5">
+            <Input label="Job title" htmlFor="job_title" className="mt-4">
               <SelectBar
                 placeholder={"Select a job title"}
                 label={"Job title"}

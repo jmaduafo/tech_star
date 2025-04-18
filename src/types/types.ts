@@ -7,6 +7,7 @@ export type User = {
   full_name: string;
   email: string;
   password?: string;
+  image_url: string | null;
   is_owner: boolean;
   bg_image_index: number;
   team_id: string;
