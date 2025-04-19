@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiUser, HiMiniCog8Tooth } from "react-icons/hi2";
 import {
   Dialog,
@@ -15,9 +15,37 @@ import ProfileSettings from "./settings/profile/ProfileSettings";
 import SecuritySettings from "./settings/security/SecuritySettings";
 import { User } from "@/types/types";
 import ProfileCard from "../cards/ProfileCard";
+import { db } from "@/firebase/config";
+import { doc, onSnapshot } from "firebase/firestore";
 
 function TopBar() {
   const { userData } = useAuth();
+
+  const [userInfo, setUserInfo] = useState<User | undefined>();
+
+  const getData = () => {
+    try {
+      if (!userData) {
+        return;
+      }
+
+      const userq = doc(db, "users", userData?.id);
+
+      const unsub = onSnapshot(userq, (snap) => {
+        if (snap?.exists()) {
+          setUserInfo({ ...(snap.data() as User), id: snap?.id });
+        }
+
+        return () => unsub();
+      });
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, [userData?.id ?? "guest"]);
 
   return (
     <div className="flex justify-between items-center">
@@ -25,8 +53,8 @@ function TopBar() {
         <p>LOGO</p>
       </div>
       <div className="flex gap-3">
-        <ProfileButton user={userData} />
-        <SettingButton user={userData} />
+        <ProfileButton user={userInfo} />
+        <SettingButton user={userInfo} />
       </div>
     </div>
   );

@@ -19,10 +19,21 @@ import {
 } from "firebase/firestore";
 
 export async function uploadImage(file: File, path: string) {
-  const storageRef = ref(storage, `${path}/${file.name}`);
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
-  return url;
+  try {
+    const storageRef = ref(storage, `${path}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    return {
+      response: url,
+      success: true
+    }
+  } catch (err: any) {
+    return {
+      response: err.message,
+      success: false
+    }
+  }
 }
 
 export async function getUserData(id: string) {

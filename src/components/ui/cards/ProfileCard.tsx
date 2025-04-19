@@ -1,12 +1,13 @@
-import React, { useEffect, useActionState, useState, useRef } from "react";
+"use client";
+import React, {
+  useEffect,
+  useActionState,
+  useState,
+  useRef,
+  startTransition,
+} from "react";
 import { User } from "@/types/types";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../dialog";
 import {
   Sheet,
   SheetContent,
@@ -54,34 +55,76 @@ function ProfileCard({
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
 
-  const [state, action, isLoading] = useActionState(editUser, {
-    data: {
-      first_name: user?.first_name ?? "",
-      last_name: user?.last_name ?? "",
-      location: user?.location ?? "",
-      job_title: user?.job_title ?? "",
-    },
-    message: "",
-    success: false,
+  const [formValues, setFormValues] = useState({
+    first_name: "",
+    last_name: "",
+    location: "",
+    job_title: "",
   });
+
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, values: object) =>
+      editUser(prevState, values, {
+        id: user?.id as string,
+        team_id: user?.team_id as string,
+      }),
+    {
+      message: "",
+      success: false,
+    }
+  );
 
   const currentUser = auth.currentUser;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevEditOpenRef = useRef<boolean | null>(null);
 
   useEffect(() => {
-    if (!editProfileOpen) {
+    // If previous was true and now it's false, then open profile
+    if (prevEditOpenRef.current && !editProfileOpen) {
       setProfileOpen(true);
     }
+
+    prevEditOpenRef.current = editProfileOpen ?? null;
   }, [editProfileOpen]);
 
   useEffect(() => {
+    // REVOKE URL WHEN IT'S NO LONGER NEEDED TO SAVE MEMORY
     return () => {
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview);
       }
     };
   }, [imagePreview]);
+
+  useEffect(() => {
+    // SET FORM VALUES TO USER INFO
+    if (user) {
+      setFormValues({
+        first_name: user?.first_name ?? "",
+        last_name: user?.last_name ?? "",
+        location: user?.location ?? "",
+        job_title: user?.job_title ?? "",
+      });
+      setCurrentImage(user?.image_url ?? null);
+    }
+  }, [user?.id ?? "guest"]);
+
+  useEffect(() => {
+    if (!state?.success && state?.message) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: state?.message,
+      });
+    } else if (state?.success) {
+      toast({
+        title: "Your profile was updated successfully!",
+      });
+
+      setEditProfileOpen && setEditProfileOpen(false)
+    }
+  }, [state]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -92,14 +135,33 @@ function ProfileCard({
     // IF USER HAS CHOSEN A NEW IMAGE, THEN REPLACE PREVIOUS IMAGE WITH THE NEW IMAGE
     if (newImage) {
       // Upload the new image to Firebase Storage
-      imageUrl = await uploadImage(newImage, `users/${user?.id}`);
+      const result = await uploadImage(newImage, `users/${user?.id}`);
+
+      // IF AN ERROR OCCURS, DISPLAY A TOAST MESSAGE WITH THE ERROR MESSAGE
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong",
+          description: result.response,
+        });
+
+        return;
+      }
+
+      // IF NO ERRORS, REPLACE CURRENT IMAGE WITH NEW IMAGE
+      imageUrl = result.response;
     }
 
-    const formData = new FormData(e.currentTarget);
-    // CREATE A NEW KEY UNDER FORM DATA AND SET THE CHOSEN IMAGE
-    formData.append("image_url", imageUrl as string);
+    const values = {
+      first_name: formValues.first_name,
+      last_name: formValues.last_name,
+      location: formValues.location.length ? formValues.location : null,
+      job_title: formValues.job_title.length ? formValues.job_title : null,
+      image_url: imageUrl ?? null,
+    };
 
-    action(formData); // call useActionState's action function
+    // USE START TRANSITION TO RUN "ACTION" FUNCTION
+    startTransition(() => action(values)); // call useActionState's action function
   };
 
   return (
@@ -124,7 +186,10 @@ function ProfileCard({
               ) : (
                 <div className="relative">
                   <Avatar className="w-[140px] h-[140px]">
-                    <AvatarImage src="https://github.com" alt="@shadcn" />
+                    <AvatarImage
+                      src={user?.image_url ?? ""}
+                      alt="user profile url"
+                    />
                     <AvatarFallback className="text-5xl">
                       {getInitials(user.full_name)}
                     </AvatarFallback>
@@ -155,19 +220,36 @@ function ProfileCard({
                 />
               )}
             </div>
-            <div className="mt-2">
-              {!user ? (
-                <div className="flex justify-center">
-                  <Skeleton className="h-4 w-[30%]" />
-                </div>
-              ) : user?.location ? (
-                <div className="flex justify-center items-end gap-1">
-                  <MapPin strokeWidth={1} className="w-4 h-4" />
-                  <Header6 text={user.location} />
-                </div>
-              ) : null}
+            <div className="mt-2 flex justify-center items-end gap-2">
+              <div>
+                {!user ? (
+                  <div className="">
+                    <Skeleton className="h-4 w-[30%]" />
+                  </div>
+                ) : user?.location ? (
+                  <div className="flex items-end gap-1">
+                    <MapPin strokeWidth={1} className="w-4 h-4" />
+                    <Header6 text={user.location} />
+                  </div>
+                ) : null}
+              </div>
+              <Header6 text="|"/>
+              <div>
+                {!user ? (
+                  <div className="">
+                    <Skeleton className="h-4 w-[30%]" />
+                  </div>
+                ) : (
+                  <div className="">
+                    <Header6
+                      text={user?.role}
+                      className="text-center capitalize"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="mt-2">
+            {/* <div className="mt-2">
               {!user ? (
                 <div className="flex justify-center">
                   <Skeleton className="h-4 w-[30%]" />
@@ -180,32 +262,32 @@ function ProfileCard({
                   />
                 </div>
               )}
-            </div>
+            </div> */}
             <div className="mt-5">
               {/* FIRST NAME & LAST NAME */}
-              <div className="flex items-start">
+              <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>
                 <div className="flex-1">
                   {user ? (
                     <Detail title="First name" item={user?.first_name} />
                   ) : (
-                    <Skeleton className="w-[55%] h-5" />
+                    <Skeleton className="w-[65%] h-5" />
                   )}
                 </div>
                 <div className="flex-1">
                   {user ? (
                     <Detail title="Last name" item={user?.last_name} />
                   ) : (
-                    <Skeleton className="w-[55%] h-5" />
+                    <Skeleton className="w-[65%] h-5" />
                   )}
                 </div>
               </div>
               {/* EMAIL & HIRE TYPE */}
-              <div className="flex items-start">
+              <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>
                 <div className="flex-1">
                   {user ? (
                     <Detail title="Email" item={user?.email} />
                   ) : (
-                    <Skeleton className="w-[55%] h-5" />
+                    <Skeleton className="w-[65%] h-5" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -216,12 +298,12 @@ function ProfileCard({
                       item={user?.hire_type}
                     />
                   ) : (
-                    <Skeleton className="w-[55%] h-5" />
+                    <Skeleton className="w-[65%] h-5" />
                   )}
                 </div>
               </div>
               {/* JOB TITLE & CREATED AT */}
-              <div className="flex items-start">
+              <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>
                 <div className="flex-1">
                   {user ? (
                     <Detail
@@ -230,7 +312,7 @@ function ProfileCard({
                       item={user?.job_title ?? "N/A"}
                     />
                   ) : (
-                    <Skeleton className="w-[55%] h-5" />
+                    <Skeleton className="w-[65%] h-6" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -240,7 +322,7 @@ function ProfileCard({
                       item={formatDate(user?.created_at, 2)}
                     />
                   ) : (
-                    <Skeleton className="w-[55%] h-5" />
+                    <Skeleton className="w-[65%] h-6" />
                   )}
                 </div>
               </div>
@@ -284,7 +366,13 @@ function ProfileCard({
                 type="text"
                 id="first_name"
                 name="first_name"
-                defaultValue={state?.data?.first_name}
+                value={formValues.first_name}
+                onChange={(e) =>
+                  setFormValues((prev) => ({
+                    ...prev,
+                    first_name: e.target.value,
+                  }))
+                }
               />
             </Input>
             <Input label="Last name" htmlFor="last_name" className="mt-4">
@@ -293,7 +381,13 @@ function ProfileCard({
                 type="text"
                 id="last_name"
                 name="last_name"
-                defaultValue={state?.data?.last_name}
+                value={formValues.last_name}
+                onChange={(e) =>
+                  setFormValues((prev) => ({
+                    ...prev,
+                    last_name: e.target.value,
+                  }))
+                }
               />
             </Input>
             <Input label="Location" htmlFor="location" className="mt-4">
@@ -301,12 +395,18 @@ function ProfileCard({
                 placeholder={"Select your location"}
                 label={"Location"}
                 name="location"
-                defaultValue={state?.data?.location}
+                value={formValues.location}
+                valueChange={(text) =>
+                  setFormValues((prev) => ({
+                    ...prev,
+                    location: text,
+                  }))
+                }
                 className="mt-1 w-full"
               >
                 {country_list.map((item) => {
                   return (
-                    <SelectItem value={item.code} key={item.name}>
+                    <SelectItem value={item.name} key={item.code}>
                       {item.name}
                     </SelectItem>
                   );
@@ -317,8 +417,13 @@ function ProfileCard({
               <SelectBar
                 placeholder={"Select a job title"}
                 label={"Job title"}
-                name="job_title"
-                defaultValue={state?.data?.job_title}
+                value={formValues.job_title}
+                valueChange={(text) =>
+                  setFormValues((prev) => ({
+                    ...prev,
+                    job_title: text,
+                  }))
+                }
                 className="mt-1 w-full"
               >
                 {job_titles.map((item) => {

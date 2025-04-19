@@ -255,14 +255,7 @@ export async function createUser(prevState: any, formData: FormData) {
   }
 }
 
-export async function editUser(prevState: any, formData: FormData) {
-  const values = {
-    first_name: formData.get("first_name"),
-    last_name: formData.get("last_name"),
-    location: formData.get("location"),
-    job_title: formData.get("job_title"),
-    image_url: formData.get("image_url")
-  };
+export async function editUser(prevState: any, values: object, user: UserItem | undefined) {
 
   const result = EditUserSchema.safeParse(values);
 
@@ -276,14 +269,14 @@ export async function editUser(prevState: any, formData: FormData) {
   const { first_name, last_name, location, job_title, image_url } = result.data;
 
   try {
-    
-    const authUser = auth.currentUser;
-
-    if (!authUser) {
-      return;
+    if (!user) {
+      return {
+        message: "Not an authorized user",
+        success: false,
+      };
     }
 
-    await updateItem("users", authUser?.uid, {
+    await updateItem("users", user?.id, {
       first_name,
       last_name,
       full_name: `${first_name} ${last_name}`,
@@ -295,7 +288,6 @@ export async function editUser(prevState: any, formData: FormData) {
     });
 
     return {
-      data: result.data,
       message: "success",
       success: true,
     };

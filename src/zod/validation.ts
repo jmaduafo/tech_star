@@ -69,12 +69,8 @@ export const EditUserSchema = z.object({
   last_name: z.string().min(1, {
     message: "Last name must be filled in",
   }),
-  location: z.string().min(1, {
-    message: "You must select a location",
-  }),
-  job_title: z.string().min(1, {
-    message: "You must select a job title",
-  }),
+  location: z.nullable(z.string()),
+  job_title: z.nullable(z.string()),
   image_url: z.string().url().optional(),
 });
 
