@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import { Plus } from "lucide-react";
 import {
@@ -9,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/context/AuthContext";
 
 function AddButton({
   children,
@@ -29,10 +31,13 @@ function AddButton({
   readonly setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   readonly open?: boolean;
 }) {
+
+  const { userData } = useAuth()
+
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <button className={`font-light flex items-center gap-1 py-2.5 sm:py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300 ${className}`}>
+        <button className={`${userData?.role === "admin" ? "flex" : "hidden"} items-center gap-1 font-light py-2.5 sm:py-1.5 px-4 bg-darkText rounded-lg hover:opacity-80 duration-300 ${className}`}>
           <Plus className="w-4 h-4" />
           <span className="hidden sm:block">Add {buttonTitle}</span>
         </button>

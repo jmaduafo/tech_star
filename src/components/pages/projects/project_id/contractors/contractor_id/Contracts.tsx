@@ -146,193 +146,189 @@ function Contracts({
             </p>
           ) : null}
         </div>
-        <div>
-          {user?.is_owner || user?.role === "admin" ? (
-            <AddButton
-              title="contract"
-              desc="Create a contract and add payments"
-              setOpen={setOpen}
-              open={open}
-            >
-              <form action={action}>
-                {/* CONTRACT CODE INPUT */}
-                <Input htmlFor="code" label="Contract code *">
+        <AddButton
+          title="contract"
+          desc="Create a contract and add payments"
+          setOpen={setOpen}
+          open={open}
+        >
+          <form action={action}>
+            {/* CONTRACT CODE INPUT */}
+            <Input htmlFor="code" label="Contract code *">
+              <input
+                className="form"
+                type="text"
+                id="code"
+                name="code"
+                defaultValue={state?.data?.code}
+              />
+            </Input>
+            {/* DESCRIPTION INPUT */}
+            <Input htmlFor="desc" label="Description *" className="my-3">
+              <textarea
+                className="form"
+                id="desc"
+                name="desc"
+                defaultValue={state?.data?.desc}
+              ></textarea>
+            </Input>
+            {/* DATE PICKER POPUP */}
+            <Popover>
+              <p className="text-[14.5px] text-darkText mb-[5px]">
+                Contract date *
+              </p>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={
+                    "text-dark90 w-full justify-start text-left font-normal"
+                  }
+                >
+                  <CalendarIcon />
+                  {contractDate ? (
+                    format(contractDate, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-[1000]" align="start">
+                <Calendar
+                  mode="single"
+                  selected={contractDate}
+                  onSelect={setContractDate}
+                  initialFocus
+                />
+              </PopoverContent>
+              {/* ADD AND DELETE BANK NAMES */}
+              <ArrayInput
+                label="Bank names *"
+                htmlFor="banks"
+                setInputs={setBankInputs}
+                inputs={bankInputs}
+                disabledLogic={bankInputs.length === 4}
+              >
+                {bankInputs.length === 4 ? (
+                  <p className="text-[14px] text-red-700">
+                    You have reached the max
+                  </p>
+                ) : null}
+              </ArrayInput>
+              <SelectBar
+                defaultValue={state?.data?.stage_id}
+                placeholder="Select the project stage *"
+                label="Stages"
+                className="w-full sm:w-full mb-3"
+              >
+                {stagesData
+                  ? stagesData.map((item) => {
+                      return (
+                        <SelectItem key={item.name} value={item.id}>
+                          {item.name}
+                        </SelectItem>
+                      );
+                    })
+                  : null}
+              </SelectBar>
+              <Separator />
+              <ObjectArray
+                handleAdd={handleAddCurrency}
+                disabledLogic={currencyInputs.length >= 1}
+              >
+                <div className="mb-2">
+                  {currencyInputs.map((item) => {
+                    return (
+                      <div
+                        key={item.name}
+                        className="flex justify-between items-center text-[14px] mb-1"
+                      >
+                        <p>{item.code}</p>
+                        <div className="flex items-center gap-1">
+                          <p className="capitalize">
+                            {item.amount !== "Unlimited"
+                              ? formatCurrency(+item.amount, item.code)
+                              : `${item.symbol} Unlimited`}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => deleteCurrency(item.code)}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <SelectBar
+                  valueChange={setCurrencyCode}
+                  value={currencyCode}
+                  placeholder="Select a currency"
+                  label="Currency"
+                  className="w-full sm:w-full"
+                >
+                  {currency_list.map((item) => {
+                    return (
+                      <SelectItem key={item.name} value={item.code}>
+                        {item.name}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+                <Input
+                  htmlFor="amount"
+                  label="Contract amount"
+                  className="mt-3"
+                >
                   <input
                     className="form"
-                    type="text"
-                    id="code"
-                    name="code"
-                    defaultValue={state?.data?.code}
+                    type="number"
+                    onChange={(e) => setCurrencyAmount(e.target.value)}
+                    value={currencyAmount}
+                    id="amount"
                   />
                 </Input>
-                {/* DESCRIPTION INPUT */}
-                <Input htmlFor="desc" label="Description *" className="my-3">
-                  <textarea
-                    className="form"
-                    id="desc"
-                    name="desc"
-                    defaultValue={state?.data?.desc}
-                  ></textarea>
-                </Input>
-                {/* DATE PICKER POPUP */}
-                <Popover>
-                  <p className="text-[14.5px] text-darkText mb-[5px]">
-                    Contract date *
-                  </p>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={
-                        "text-dark90 w-full justify-start text-left font-normal"
-                      }
-                    >
-                      <CalendarIcon />
-                      {contractDate ? (
-                        format(contractDate, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[1000]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={contractDate}
-                      onSelect={setContractDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                  {/* ADD AND DELETE BANK NAMES */}
-                  <ArrayInput
-                    label="Bank names *"
-                    htmlFor="banks"
-                    setInputs={setBankInputs}
-                    inputs={bankInputs}
-                    disabledLogic={bankInputs.length === 4}
-                  >
-                    {bankInputs.length === 4 ? (
-                      <p className="text-[14px] text-red-700">
-                        You have reached the max
-                      </p>
-                    ) : null}
-                  </ArrayInput>
-                  <SelectBar
-                    defaultValue={state?.data?.stage_id}
-                    placeholder="Select the project stage *"
-                    label="Stages"
-                    className="w-full sm:w-full mb-3"
-                  >
-                    {stagesData
-                      ? stagesData.map((item) => {
-                          return (
-                            <SelectItem key={item.name} value={item.id}>
-                              {item.name}
-                            </SelectItem>
-                          );
-                        })
-                      : null}
-                  </SelectBar>
-                  <Separator />
-                  <ObjectArray
-                    handleAdd={handleAddCurrency}
-                    disabledLogic={currencyInputs.length >= 1}
-                  >
-                    <div className="mb-2">
-                      {currencyInputs.map((item) => {
-                        return (
-                          <div
-                            key={item.name}
-                            className="flex justify-between items-center text-[14px] mb-1"
-                          >
-                            <p>{item.code}</p>
-                            <div className="flex items-center gap-1">
-                              <p className="capitalize">
-                                {item.amount !== "Unlimited"
-                                  ? formatCurrency(+item.amount, item.code)
-                                  : `${item.symbol} Unlimited`}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() => deleteCurrency(item.code)}
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <SelectBar
-                      valueChange={setCurrencyCode}
-                      value={currencyCode}
-                      placeholder="Select a currency"
-                      label="Currency"
-                      className="w-full sm:w-full"
-                    >
-                      {currency_list.map((item) => {
-                        return (
-                          <SelectItem key={item.name} value={item.code}>
-                            {item.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectBar>
-                    <Input
-                      htmlFor="amount"
-                      label="Contract amount"
-                      className="mt-3"
-                    >
-                      <input
-                        className="form"
-                        type="number"
-                        onChange={(e) => setCurrencyAmount(e.target.value)}
-                        value={currencyAmount}
-                        id="amount"
-                      />
-                    </Input>
-                    <div className="flex items-center gap-2 mt-3">
-                      <Switch
-                        id="is_unlimited"
-                        name="is_unlimited"
-                        checked={isUnlimited}
-                        onCheckedChange={setIsUnlimited}
-                      />
-                      <label htmlFor="is_unlimited">Unlimited amount?</label>
-                    </div>
-                  </ObjectArray>
-                  <Separator />
-                  {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}
-                  <div className="flex items-center gap-2 mt-3">
-                    <Switch
-                      id="is_completed"
-                      name="is_completed"
-                      defaultChecked={state?.data?.is_completed}
-                    />
-                    <label htmlFor="is_completed">
-                      Is the contract complete? *
-                    </label>
-                  </div>
-                  {/* OPTIONAL COMMENT INPUT */}
-                  <Input
-                    htmlFor="comment"
-                    label="Optional comment"
-                    className="mt-3"
-                  >
-                    <textarea
-                      className="form"
-                      id="comment"
-                      name="comment"
-                      defaultValue={state?.data?.comment}
-                    ></textarea>
-                  </Input>
-                  <div className="flex justify-center mt-6 scale-75">
-                    <Submit loading={isLoading} />
-                  </div>
-                </Popover>
-              </form>
-            </AddButton>
-          ) : null}
-        </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <Switch
+                    id="is_unlimited"
+                    name="is_unlimited"
+                    checked={isUnlimited}
+                    onCheckedChange={setIsUnlimited}
+                  />
+                  <label htmlFor="is_unlimited">Unlimited amount?</label>
+                </div>
+              </ObjectArray>
+              <Separator />
+              {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}
+              <div className="flex items-center gap-2 mt-3">
+                <Switch
+                  id="is_completed"
+                  name="is_completed"
+                  defaultChecked={state?.data?.is_completed}
+                />
+                <label htmlFor="is_completed">
+                  Is the contract complete? *
+                </label>
+              </div>
+              {/* OPTIONAL COMMENT INPUT */}
+              <Input
+                htmlFor="comment"
+                label="Optional comment"
+                className="mt-3"
+              >
+                <textarea
+                  className="form"
+                  id="comment"
+                  name="comment"
+                  defaultValue={state?.data?.comment}
+                ></textarea>
+              </Input>
+              <div className="flex justify-center mt-6 scale-75">
+                <Submit loading={isLoading} />
+              </div>
+            </Popover>
+          </form>
+        </AddButton>
       </div>
       <div className="mt-4">
         {/* DISPLAY OF DATA TABLE WITH RENDERED DATA FROM BACKEND */}

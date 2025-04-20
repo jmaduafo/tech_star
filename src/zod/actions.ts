@@ -15,6 +15,7 @@ import {
   CreateProjectSchema,
   CreateStagesSchema,
   CreateUserSchema,
+  EditMemberSchema,
   EditStageSchema,
   EditUserSchema,
   EmailValidation,
@@ -283,6 +284,50 @@ export async function editUser(prevState: any, values: object, user: UserItem | 
       job_title,
       location,
       image_url,
+      updated_at: serverTimestamp(),
+    
+    });
+
+    return {
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
+export async function editMember(prevState: any, formData:FormData, user: UserItem | undefined) {
+  const values = {
+    role: formData.get("role"),
+    hire_type: formData.get("hire_type")
+  }
+
+  const result = EditMemberSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { role, hire_type } = result.data;
+
+  try {
+    if (!user) {
+      return {
+        message: "Not an authorized user",
+        success: false,
+      };
+    }
+
+    await updateItem("users", user?.id, {
+      role,
+      hire_type,
       updated_at: serverTimestamp(),
     
     });

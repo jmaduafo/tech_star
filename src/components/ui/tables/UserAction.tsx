@@ -1,13 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
   DialogHeader,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -16,41 +14,22 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { User } from "@/types/types";
 import { MoreHorizontal } from "lucide-react";
-import Header6 from "@/components/fontsize/Header6";
-import Paragraph from "@/components/fontsize/Paragraph";
 import { useAuth } from "@/context/AuthContext";
-import { formatDate } from "@/utils/dateAndTime";
-import Banner from "../Banner";
-import { format as formatAgo } from "timeago.js";
-import { deleteItem, getQueriedItems } from "@/firebase/actions";
-import { useToast } from "@/hooks/use-toast";
-import Link from "next/link";
+import { toast } from "@/hooks/use-toast";
 import Loading from "../Loading";
-import Separator from "@/components/ui/Separator";
 import {
   collection,
   doc,
-  getDoc,
-  getDocs,
-  orderBy,
   query,
   serverTimestamp,
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import ProfileCard from "../cards/ProfileCard";
+import { editMember } from "@/zod/actions";
+import Input from "../input/Input";
 
 type Dialog = {
   readonly data: User | undefined;
@@ -60,9 +39,21 @@ function UserAction({ data }: Dialog) {
   const { userData } = useAuth();
 
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewEditSheetOpen, setViewEditSheetOpen] = useState(false);
 
-  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      editMember(prevState, formData, {
+        id: data?.id as string,
+        team_id: data?.team_id as string,
+      }),
+    {
+      message: "",
+      success: false,
+    }
+  );
 
   return (
     <div>
@@ -71,60 +62,66 @@ function UserAction({ data }: Dialog) {
           <MoreHorizontal />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+          {/* VIEW DETAILS DROPDOWN DIALOG */}
           <DropdownMenuItem
             onClick={() => {
               setViewDialogOpen(true);
-              setDeleteDialogOpen(false);
+              setEditDialogOpen(false);
             }}
           >
             View profile
           </DropdownMenuItem>
-          {userData?.is_owner || userData?.role === "admin" || userData?.id !== data?.id ? (
+          {userData?.role === "admin" || userData?.role === "editor" ? (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  setDeleteDialogOpen(true);
+                  setEditDialogOpen(true);
                   setViewDialogOpen(false);
                 }}
               >
-                Delete member
+                Edit member
               </DropdownMenuItem>{" "}
             </>
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      {/* VIEW DETAILS DROPDOWN DIALOG */}
       {/* DISPLAY TEAM MEMBER'S INFORMATION */}
       <ProfileCard
         user={data}
         profileOpen={viewDialogOpen}
         setProfileOpen={setViewDialogOpen}
+        editProfileOpen={viewEditSheetOpen}
+        setEditProfileOpen={setViewEditSheetOpen}
         // ONLY HIDE EDIT BUTTON IF THE PROFILE IS NOT THE USER'S
         hideEdit={userData?.id !== data?.id}
       />
       {/* DELETE CONTRACT/PAYMENT ITEM */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Edit member</DialogTitle>
+            <DialogDescription>
               This action cannot be undone. This will permanently delete this
               user from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="text-darkText">
-              Cancel
-            </AlertDialogCancel>
-            {data ? (
-              <AlertDialogAction onClick={() => {}}>
-                {loadingDelete ? <Loading className="w-4 h-4" /> : "Continue"}
-              </AlertDialogAction>
-            ) : null}
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </DialogDescription>
+          </DialogHeader>
+          <form>
+            <Input htmlFor={"full_name"} label={"Full name"}>
+              <input className="disabledForm" type="text" id="full_name" name="full_name" disabled/>
+            </Input>
+            <Input htmlFor={"email"} label={"Email"} className="mt-4">
+              <input className="disabledForm" type="text" id="email" name="email" disabled/>
+            </Input>
+            <Input htmlFor={"role"} label={"Role"} className="mt-4">
+              <input className="form" type="text" id="role" name="role"/>
+            </Input>
+            <Input htmlFor={"hire_type"} label={"Hire type"} className="mt-4">
+              <input className="form" type="text" id="hire_type" name="hire_type"/>
+            </Input>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

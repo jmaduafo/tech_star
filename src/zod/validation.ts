@@ -54,8 +54,8 @@ export const CreateMemberSchema = z.object({
   job_title: z.string().min(1, {
     message: "You must select a job title",
   }),
-  role: z.string().min(1, {
-    message: "You must select a role",
+  role: z.enum(["viewer", "admin", "editor"], {
+    message: "Role must either be 'viewer', 'editor', or 'admin'"
   }),
   hire_type: z.string().min(1, {
     message: "You must select a hire type",
@@ -72,6 +72,13 @@ export const EditUserSchema = z.object({
   location: z.nullable(z.string()),
   job_title: z.nullable(z.string()),
   image_url: z.string().url().optional(),
+});
+
+export const EditMemberSchema = z.object({
+  role: z.enum(["viewer", "admin", "editor"]),
+  hire_type: z.string().min(1, {
+    message: "A hire type must be selected",
+  })
 });
 
 export const LoginUserSchema = z.object({

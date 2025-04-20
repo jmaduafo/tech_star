@@ -179,7 +179,7 @@ function ProfileCard({
           </DialogHeader>
           <div className="text-dark75">
             <div className="flex justify-center mt-2">
-              {!user ? (
+              {!user?.image_url ? (
                 <div>
                   <Skeleton className="w-[140px] h-[140px] rounded-full" />
                 </div>
@@ -191,7 +191,7 @@ function ProfileCard({
                       alt="user profile url"
                     />
                     <AvatarFallback className="text-5xl">
-                      {getInitials(user.full_name)}
+                      {getInitials(user?.full_name)}
                     </AvatarFallback>
                   </Avatar>
                   <button
@@ -209,7 +209,7 @@ function ProfileCard({
               )}
             </div>
             <div className="mt-4">
-              {!user ? (
+              {!user?.full_name ? (
                 <div className="flex justify-center">
                   <Skeleton className="h-6 w-[60%]" />
                 </div>
@@ -222,7 +222,7 @@ function ProfileCard({
             </div>
             <div className="mt-2 flex justify-center items-end gap-2">
               <div>
-                {!user ? (
+                {!user?.location ? (
                   <div className="">
                     <Skeleton className="h-4 w-[30%]" />
                   </div>
@@ -235,7 +235,7 @@ function ProfileCard({
               </div>
               {user?.location ? <Header6 text="|"/> : null}
               <div>
-                {!user ? (
+                {!user?.role ? (
                   <div className="">
                     <Skeleton className="h-4 w-[30%]" />
                   </div>
@@ -253,14 +253,14 @@ function ProfileCard({
               {/* FIRST NAME & LAST NAME */}
               <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>
                 <div className="flex-1">
-                  {user ? (
+                  {user?.first_name ? (
                     <Detail title="First name" item={user?.first_name} />
                   ) : (
                     <Skeleton className="w-[65%] h-5" />
                   )}
                 </div>
                 <div className="flex-1">
-                  {user ? (
+                  {user?.last_name ? (
                     <Detail title="Last name" item={user?.last_name} />
                   ) : (
                     <Skeleton className="w-[65%] h-5" />
@@ -270,14 +270,14 @@ function ProfileCard({
               {/* EMAIL & HIRE TYPE */}
               <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>
                 <div className="flex-1">
-                  {user ? (
+                  {user?.email ? (
                     <Detail title="Email" item={user?.email} />
                   ) : (
                     <Skeleton className="w-[65%] h-5" />
                   )}
                 </div>
                 <div className="flex-1">
-                  {user ? (
+                  {user?.hire_type ? (
                     <Detail
                       title="Hire type"
                       className="capitalize"
@@ -291,7 +291,7 @@ function ProfileCard({
               {/* JOB TITLE & CREATED AT */}
               <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>
                 <div className="flex-1">
-                  {user ? (
+                  {user?.job_title ? (
                     <Detail
                       title="Job title"
                       className="capitalize"
@@ -302,7 +302,7 @@ function ProfileCard({
                   )}
                 </div>
                 <div className="flex-1">
-                  {user ? (
+                  {user?.created_at ? (
                     <Detail
                       title="Joined at"
                       item={formatDate(user?.created_at, 2)}

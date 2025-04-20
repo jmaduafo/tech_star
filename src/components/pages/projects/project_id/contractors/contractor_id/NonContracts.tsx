@@ -132,167 +132,165 @@ function NonContracts({
           ) : null}
         </div>
         <div>
-          {user?.is_owner || user?.role === "admin" ? (
-            <AddButton
-              title="non-contract"
-              desc="Create a stand-alone payment"
-              setOpen={setOpen}
-              open={open}
-            >
-              <form action={action}>
-                {/* DATE PICKER POPUP */}
-                <Popover>
-                  <p className="text-[14.5px] text-darkText mb-[5px]">
-                    Payment date *
-                  </p>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={
-                        "text-dark90 w-full justify-start text-left font-normal"
-                      }
-                    >
-                      <CalendarIcon />
-                      {contractDate ? (
-                        format(contractDate, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[1000]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={contractDate}
-                      onSelect={setContractDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                  {/* DESCRIPTION INPUT */}
-                  <Input htmlFor="desc" label="Description *" className="my-3">
-                    <textarea
-                      className="form"
-                      id="desc"
-                      name="desc"
-                      defaultValue={state?.data?.desc}
-                    ></textarea>
-                  </Input>
-                  {/* ADD AND DELETE BANK NAMES */}
-                  <ArrayInput
-                    label="Bank name *"
-                    htmlFor="banks"
-                    setInputs={setBankInputs}
-                    inputs={bankInputs}
-                    disabledLogic={bankInputs.length >= 1}
+          <AddButton
+            title="non-contract"
+            desc="Create a stand-alone payment"
+            setOpen={setOpen}
+            open={open}
+          >
+            <form action={action}>
+              {/* DATE PICKER POPUP */}
+              <Popover>
+                <p className="text-[14.5px] text-darkText mb-[5px]">
+                  Payment date *
+                </p>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={
+                      "text-dark90 w-full justify-start text-left font-normal"
+                    }
+                  >
+                    <CalendarIcon />
+                    {contractDate ? (
+                      format(contractDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[1000]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={contractDate}
+                    onSelect={setContractDate}
+                    initialFocus
                   />
-                  {stagesData ? (
-                    <SelectBar
-                      name="stage_id"
-                      defaultValue={state?.data?.stage_id}
-                      placeholder="Select the project stage *"
-                      label="Stages"
-                      className="w-full sm:w-full mb-3"
-                    >
-                      {stagesData.map((item) => {
-                        return (
-                          <SelectItem key={item.name} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectBar>
-                  ) : null}
-                  <Separator />
-                  <ObjectArray handleAdd={handleAddCurrency}>
-                    <div className="mb-2">
-                      {currencyInputs.map((item) => {
-                        return (
-                          <div
-                            key={item.name}
-                            className="flex justify-between items-center text-[14px] mb-1"
-                          >
-                            <p>{item.code}</p>
-                            <div className="flex items-center gap-1">
-                              <p className="capitalize">
-                                {item.amount !== "Unlimited"
-                                  ? formatCurrency(+item.amount, item.code)
-                                  : `${item.symbol} Unlimited`}
-                              </p>
-                            </div>
+                </PopoverContent>
+                {/* DESCRIPTION INPUT */}
+                <Input htmlFor="desc" label="Description *" className="my-3">
+                  <textarea
+                    className="form"
+                    id="desc"
+                    name="desc"
+                    defaultValue={state?.data?.desc}
+                  ></textarea>
+                </Input>
+                {/* ADD AND DELETE BANK NAMES */}
+                <ArrayInput
+                  label="Bank name *"
+                  htmlFor="banks"
+                  setInputs={setBankInputs}
+                  inputs={bankInputs}
+                  disabledLogic={bankInputs.length >= 1}
+                />
+                {stagesData ? (
+                  <SelectBar
+                    name="stage_id"
+                    defaultValue={state?.data?.stage_id}
+                    placeholder="Select the project stage *"
+                    label="Stages"
+                    className="w-full sm:w-full mb-3"
+                  >
+                    {stagesData.map((item) => {
+                      return (
+                        <SelectItem key={item.name} value={item.id}>
+                          {item.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectBar>
+                ) : null}
+                <Separator />
+                <ObjectArray handleAdd={handleAddCurrency}>
+                  <div className="mb-2">
+                    {currencyInputs.map((item) => {
+                      return (
+                        <div
+                          key={item.name}
+                          className="flex justify-between items-center text-[14px] mb-1"
+                        >
+                          <p>{item.code}</p>
+                          <div className="flex items-center gap-1">
+                            <p className="capitalize">
+                              {item.amount !== "Unlimited"
+                                ? formatCurrency(+item.amount, item.code)
+                                : `${item.symbol} Unlimited`}
+                            </p>
                           </div>
-                        );
-                      })}
-                    </div>
-                    <SelectBar
-                      valueChange={setCurrencyCode}
-                      value={currencyCode}
-                      placeholder="Select a currency"
-                      label="Currency"
-                      className="w-full"
-                    >
-                      {currency_list.map((item) => {
-                        return (
-                          <SelectItem key={item.name} value={item.code}>
-                            {item.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectBar>
-                    <Input
-                      htmlFor="amount"
-                      label="Payment amount"
-                      className="mt-3"
-                    >
-                      <input
-                        className="form"
-                        type="number"
-                        onChange={(e) => setCurrencyAmount(e.target.value)}
-                        value={currencyAmount}
-                        id="amount"
-                      />
-                    </Input>
-                    <div className="flex items-center gap-2 mt-3">
-                      <Switch
-                        id="is_unlimited"
-                        name="is_unlimited"
-                        checked={isUnlimited}
-                        onCheckedChange={setIsUnlimited}
-                      />
-                      <label htmlFor="is_unlimited">Unlimited amount?</label>
-                    </div>
-                  </ObjectArray>
-                  <Separator />
-                  {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}
-                  <div className="flex items-center gap-2 mt-3">
-                    <Switch
-                      id="is_completed"
-                      name="is_completed"
-                      defaultChecked={state?.data?.is_completed}
-                    />
-                    <label htmlFor="is_completed">
-                      Is this payment complete? *
-                    </label>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {/* OPTIONAL COMMENT INPUT */}
+                  <SelectBar
+                    valueChange={setCurrencyCode}
+                    value={currencyCode}
+                    placeholder="Select a currency"
+                    label="Currency"
+                    className="w-full"
+                  >
+                    {currency_list.map((item) => {
+                      return (
+                        <SelectItem key={item.name} value={item.code}>
+                          {item.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectBar>
                   <Input
-                    htmlFor="comment"
-                    label="Optional comment"
+                    htmlFor="amount"
+                    label="Payment amount"
                     className="mt-3"
                   >
-                    <textarea
+                    <input
                       className="form"
-                      id="comment"
-                      name="comment"
-                      defaultValue={state?.data?.comment}
-                    ></textarea>
+                      type="number"
+                      onChange={(e) => setCurrencyAmount(e.target.value)}
+                      value={currencyAmount}
+                      id="amount"
+                    />
                   </Input>
-                  <div className="flex justify-center mt-6 scale-75">
-                    <Submit loading={isLoading} />
+                  <div className="flex items-center gap-2 mt-3">
+                    <Switch
+                      id="is_unlimited"
+                      name="is_unlimited"
+                      checked={isUnlimited}
+                      onCheckedChange={setIsUnlimited}
+                    />
+                    <label htmlFor="is_unlimited">Unlimited amount?</label>
                   </div>
-                </Popover>
-              </form>
-            </AddButton>
-          ) : null}
+                </ObjectArray>
+                <Separator />
+                {/* CHECK IF CONTRACT IS COMPLETE OR NOT */}
+                <div className="flex items-center gap-2 mt-3">
+                  <Switch
+                    id="is_completed"
+                    name="is_completed"
+                    defaultChecked={state?.data?.is_completed}
+                  />
+                  <label htmlFor="is_completed">
+                    Is this payment complete? *
+                  </label>
+                </div>
+                {/* OPTIONAL COMMENT INPUT */}
+                <Input
+                  htmlFor="comment"
+                  label="Optional comment"
+                  className="mt-3"
+                >
+                  <textarea
+                    className="form"
+                    id="comment"
+                    name="comment"
+                    defaultValue={state?.data?.comment}
+                  ></textarea>
+                </Input>
+                <div className="flex justify-center mt-6 scale-75">
+                  <Submit loading={isLoading} />
+                </div>
+              </Popover>
+            </form>
+          </AddButton>
         </div>
       </div>
       <div className="mt-4">

@@ -23,7 +23,12 @@ function StagesSearch({
 }) {
   const [state, action, isLoading] = useActionState(
     (prevState: any, formData: FormData) =>
-      createStage(prevState, formData, { id: user?.id as string, team_id: user?.team_id }, projectId),
+      createStage(
+        prevState,
+        formData,
+        { id: user?.id as string, team_id: user?.team_id },
+        projectId
+      ),
     {
       data: {
         name: "",
@@ -69,39 +74,33 @@ function StagesSearch({
           />
         </div>
         {/* ONLY ADMIN CAN CREATE A STAGE */}
-        {user?.is_owner || user?.role === "admin" ? (
-          <div>
-            <AddButton
-              title="stage"
-              desc="Add key stages of your project to track progress effectively"
-            >
-              <form action={action}>
-                <Input htmlFor="name" label="Stage name">
-                  <input
-                    name="name"
-                    id="name"
-                    className="form"
-                    type="text"
-                    defaultValue={state?.data?.name}
-                  />
-                </Input>
-                <Input htmlFor="desc" label="Description" className="mt-3">
-                  <textarea
-                    name="desc"
-                    id="desc"
-                    className="form"
-                    defaultValue={state?.data?.desc}
-                  ></textarea>
-                </Input>
-                <div className="flex justify-center mt-6 scale-75">
-                  <Submit
-                    loading={isLoading}
-                  />
-                </div>
-              </form>
-            </AddButton>
-          </div>
-        ) : null}
+        <AddButton
+          title="stage"
+          desc="Add key stages of your project to track progress effectively"
+        >
+          <form action={action}>
+            <Input htmlFor="name" label="Stage name">
+              <input
+                name="name"
+                id="name"
+                className="form"
+                type="text"
+                defaultValue={state?.data?.name}
+              />
+            </Input>
+            <Input htmlFor="desc" label="Description" className="mt-3">
+              <textarea
+                name="desc"
+                id="desc"
+                className="form"
+                defaultValue={state?.data?.desc}
+              ></textarea>
+            </Input>
+            <div className="flex justify-center mt-6 scale-75">
+              <Submit loading={isLoading} />
+            </div>
+          </form>
+        </AddButton>
       </div>
     </section>
   );

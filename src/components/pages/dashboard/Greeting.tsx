@@ -51,11 +51,10 @@ function Greeting({ user }: { readonly user: User | undefined }) {
             <Skeleton className="w-[85%] h-[26px]" />
           </div>
         )}
-
         <div className="mt-3">
-          {user?.is_owner ? (
-            <p className="px-3 py-[1px] text-[13.5px] rounded-full border-[1.5px] border-lightText w-fit">
-              Admin
+          {user?.role === "admin" || user?.role === "editor" ? (
+            <p className="capitalize px-3 py-[1px] text-[13.5px] rounded-full border-[1.5px] border-lightText w-fit">
+              {user.role}
             </p>
           ) : null}
         </div>
