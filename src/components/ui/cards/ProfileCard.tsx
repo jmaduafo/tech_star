@@ -40,7 +40,7 @@ type Card = {
   readonly setProfileOpen: React.Dispatch<React.SetStateAction<boolean>>;
   readonly editProfileOpen?: boolean;
   readonly setEditProfileOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  readonly hideProfile?: boolean;
+  readonly hideEdit?: boolean;
 };
 
 function ProfileCard({
@@ -49,7 +49,7 @@ function ProfileCard({
   setProfileOpen,
   editProfileOpen,
   setEditProfileOpen,
-  hideProfile,
+  hideEdit,
 }: Card) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -200,7 +200,7 @@ function ProfileCard({
                       setEditProfileOpen && setEditProfileOpen(true);
                     }}
                     className={`${
-                      hideProfile ? "hidden" : "flex"
+                      hideEdit ? "hidden" : "flex"
                     } absolute transform translate-x-[-50%] translate-y-[-50%] top-[90%] right-0 justify-center items-center w-7 h-7 rounded-full bg-darkText text-lightText hover:bg-dark85`}
                   >
                     <Pencil className="w-4 h-4" strokeWidth={1} />
@@ -233,7 +233,7 @@ function ProfileCard({
                   </div>
                 ) : null}
               </div>
-              <Header6 text="|"/>
+              {user?.location ? <Header6 text="|"/> : null}
               <div>
                 {!user ? (
                   <div className="">
@@ -249,20 +249,6 @@ function ProfileCard({
                 )}
               </div>
             </div>
-            {/* <div className="mt-2">
-              {!user ? (
-                <div className="flex justify-center">
-                  <Skeleton className="h-4 w-[30%]" />
-                </div>
-              ) : (
-                <div className="flex justify-center">
-                  <Header6
-                    text={user?.role}
-                    className="text-center capitalize w-fit rounded-full px-4 py-1 border border-darkText"
-                  />
-                </div>
-              )}
-            </div> */}
             <div className="mt-5">
               {/* FIRST NAME & LAST NAME */}
               <div className={`${user ? "mt-0" : "mt-4"} flex items-start`}>

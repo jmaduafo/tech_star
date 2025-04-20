@@ -34,10 +34,7 @@ import { useAuth } from "@/context/AuthContext";
 import { formatDate } from "@/utils/dateAndTime";
 import Banner from "../Banner";
 import { format as formatAgo } from "timeago.js";
-import {
-  deleteItem,
-  getQueriedItems,
-} from "@/firebase/actions";
+import { deleteItem, getQueriedItems } from "@/firebase/actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import Loading from "../Loading";
@@ -53,6 +50,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import ProfileCard from "../cards/ProfileCard";
 
 type Dialog = {
   readonly data: User | undefined;
@@ -60,7 +58,6 @@ type Dialog = {
 
 function UserAction({ data }: Dialog) {
   const { userData } = useAuth();
-  const { toast } = useToast();
 
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -76,13 +73,13 @@ function UserAction({ data }: Dialog) {
         <DropdownMenuContent>
           <DropdownMenuItem
             onClick={() => {
-              setViewDialogOpen(true);;
+              setViewDialogOpen(true);
               setDeleteDialogOpen(false);
             }}
           >
             View profile
           </DropdownMenuItem>
-          {userData?.is_owner || userData?.role === "admin"  ? (
+          {userData?.is_owner || userData?.role === "admin" || userData?.id !== data?.id ? (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -98,18 +95,14 @@ function UserAction({ data }: Dialog) {
         </DropdownMenuContent>
       </DropdownMenu>
       {/* VIEW DETAILS DROPDOWN DIALOG */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Member overview</DialogTitle>
-            <DialogDescription></DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <DialogClose className="text-dark90">Close</DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* DISPLAY TEAM MEMBER'S INFORMATION */}
+      <ProfileCard
+        user={data}
+        profileOpen={viewDialogOpen}
+        setProfileOpen={setViewDialogOpen}
+        // ONLY HIDE EDIT BUTTON IF THE PROFILE IS NOT THE USER'S
+        hideEdit={userData?.id !== data?.id}
+      />
       {/* DELETE CONTRACT/PAYMENT ITEM */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -137,28 +130,3 @@ function UserAction({ data }: Dialog) {
 }
 
 export default UserAction;
-
-function Detail({
-  children,
-  title,
-  item,
-  custom,
-  className,
-}: {
-  readonly children?: React.ReactNode;
-  readonly title: string;
-  readonly item?: string;
-  readonly custom?: boolean;
-  readonly className?: string;
-}) {
-  const render = item ? <Paragraph text={item} /> : null;
-
-  return (
-    <div className="mb-4">
-      <Header6 text={title} className="capitalize text-darkText font-medium" />
-      <div className={`mt-1 text-dark75 text-[14.5px] ${className}`}>
-        {custom ? children : render}
-      </div>
-    </div>
-  );
-}

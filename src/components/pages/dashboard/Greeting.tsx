@@ -6,11 +6,13 @@ import Header2 from "@/components/fontsize/Header2";
 import { Skeleton } from "@/components/ui/skeleton";
 import TimeDate from "../login_signup/TimeDate";
 import { User } from "@/types/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/utils/initials";
 
-function Greeting({ user }: { readonly user: User | undefined}) {
+function Greeting({ user }: { readonly user: User | undefined }) {
   const [greet, setGreet] = useState("");
 
-  useEffect(() => {    
+  useEffect(() => {
     const userGreet = setInterval(() => {
       setGreet(greeting());
     }, 1000);
@@ -21,13 +23,24 @@ function Greeting({ user }: { readonly user: User | undefined}) {
   return (
     <div className="h-full flex flex-col">
       <div className="">
-        {
-          greet.length ? 
+        <div className="mb-3">
+          {user?.image_url ? (
+            <Avatar className="w-14 h-14">
+              <AvatarImage
+                src={user?.image_url ?? ""}
+                alt={`${user.full_name}'s avatar`}
+              />
+              <AvatarFallback>{getInitials(user?.full_name)}</AvatarFallback>
+            </Avatar>
+          ) : (
+            <Skeleton className="w-14 h-14 rounded-full" />
+          )}
+        </div>
+        {greet.length ? (
           <Header4 text={`Good ${greet},`} />
-          :
-          <Skeleton className="w-[65%] h-[18px]"/>
-
-        }
+        ) : (
+          <Skeleton className="w-[65%] h-[18px]" />
+        )}
         {user?.first_name ? (
           <Header2
             text={user?.first_name}
@@ -37,7 +50,7 @@ function Greeting({ user }: { readonly user: User | undefined}) {
           <div className="mt-3">
             <Skeleton className="w-[85%] h-[26px]" />
           </div>
-        ) }
+        )}
 
         <div className="mt-3">
           {user?.is_owner ? (
@@ -48,7 +61,7 @@ function Greeting({ user }: { readonly user: User | undefined}) {
         </div>
       </div>
       <div className="mt-auto max-w-fit">
-        <TimeDate timeFontSize="dashboard" dateFontSize="dashboard"/>
+        <TimeDate timeFontSize="dashboard" dateFontSize="dashboard" />
       </div>
     </div>
   );

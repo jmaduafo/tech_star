@@ -11,6 +11,8 @@ import ActionDialog from "./ActionDialog";
 import { ArrowUpDown } from "lucide-react";
 import OnlineStatus from "../OnlineStatus";
 import UserAction from "./UserAction";
+import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { getInitials } from "@/utils/initials";
 
 export const contractColumns: ColumnDef<Contract>[] = [
   {
@@ -448,6 +450,25 @@ export const teamColumns: ColumnDef<User>[] = [
       );
     },
     accessorKey: "full_name",
+    cell: ({ row }) => {
+      const user: User = row.original;
+
+      return (
+        <div className="flex items-center gap-3">
+          <Avatar className="w-8 h-8">
+            <AvatarImage
+              src={user?.image_url ?? ""}
+              alt={`${user?.first_name}'s avatar`}
+            />
+            <AvatarFallback>{getInitials(user?.full_name)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div>{user?.full_name}</div>
+            <div className="-mt-1 text-[13px] text-light70">{user?.job_title ?? "Unemployed"}</div>
+          </div>
+        </div>
+      );
+    },
   },
   {
     header: ({ column }) => {
@@ -506,8 +527,12 @@ export const teamColumns: ColumnDef<User>[] = [
 
       return user?.is_owner ? (
         <div className="flex items-center gap-1 text-[14px]">
-          <div className="py-1 px-3 border border-lightText bg-darkText rounded-full capitalize">owner</div>
-          <div className="py-1 px-3 border border-lightText rounded-full capitalize">{user.role}</div>
+          <div className="py-1 px-3 border border-lightText bg-darkText rounded-full capitalize">
+            owner
+          </div>
+          <div className="py-1 px-3 border border-lightText rounded-full capitalize">
+            {user.role}
+          </div>
         </div>
       ) : (
         <div className="text-[14px] py-1 px-3 border border-lightText rounded-full">
@@ -542,7 +567,7 @@ export const teamColumns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const team = row.original;
 
-      return team?.is_owner ? <UserAction data={team} /> : null
+      return team?.is_owner ? <UserAction data={team} /> : null;
     },
   },
 ];
