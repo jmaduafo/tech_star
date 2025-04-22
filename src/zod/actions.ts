@@ -561,8 +561,6 @@ export async function createContractor(
     additional_info: formData.get("additional"),
   };
 
-  console.log(values);
-
   const result = CreateContractorSchema.safeParse(values);
 
   if (!result.success) {
@@ -586,7 +584,7 @@ export async function createContractor(
       project_id,
       location,
       importance_level: +importance_level,
-      text: additional_info?.length ? additional_info : null,
+      text: additional_info?.length ? additional_info.trim() : null,
       is_unavailable,
       created_at: serverTimestamp(),
       updated_at: null,
@@ -600,6 +598,59 @@ export async function createContractor(
         name: "",
         additional: "",
       },
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
+export async function editContractor(
+  prevState: any,
+  formData: FormData,
+  item: Item | undefined
+) {
+  const importance = formData.get("importance");
+
+  const values = {
+    location: formData.get("location"),
+    importance_level: +importance!,
+    is_unavailable: formData.get("status") === "on",
+    name: formData.get("name"),
+    additional_info: formData.get("additional"),
+  };
+
+  const result = CreateContractorSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { name, importance_level, location, is_unavailable, additional_info } =
+    result.data;
+
+  try {
+    if (!item) {
+      return;
+    }
+
+    await updateItem("contractors", item.id, {
+      name: name.trim(),
+      location,
+      importance_level: +importance_level,
+      text: additional_info?.length ? additional_info.trim() : null,
+      is_unavailable,
+      updated_at: serverTimestamp(),
+    });
+
+    return {
       message: "success",
       success: true,
     };

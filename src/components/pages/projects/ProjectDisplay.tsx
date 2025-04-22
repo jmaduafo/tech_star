@@ -329,28 +329,28 @@ function EditProject({ project }: { readonly project: Project | undefined }) {
   }, [state]);
 
   const deleteProject = async () => {
-    setLoading(true)
+    setLoading(true);
 
     try {
       if (!project) {
-        return
+        return;
       }
 
-      await deleteItem("projects", project.id)
+      await deleteItem("projects", project.id);
 
       toast({
-        title: "Project was deleted successfully!"
-      })
+        title: "Project was deleted successfully!",
+      });
     } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: err.message
-      })
+        description: err.message,
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -384,7 +384,7 @@ function EditProject({ project }: { readonly project: Project | undefined }) {
       </DropdownMenu>
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent
-          aria-describedby="edit project project"
+          aria-describedby="edit project popup"
           className="sm:max-w-sm"
         >
           <DialogHeader>
@@ -480,6 +480,9 @@ function EditProject({ project }: { readonly project: Project | undefined }) {
                 id="is_completed"
                 name="is_completed"
                 checked={projectInfo.is_completed}
+                onCheckedChange={(val) =>
+                  setProjectInfo({ ...projectInfo, is_completed: val })
+                }
               />
               <label htmlFor="is_completed">Completed?</label>
             </div>
@@ -501,13 +504,15 @@ function EditProject({ project }: { readonly project: Project | undefined }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this
+              This action cannot be undone. This will permanently delete the selected
               project from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteProject}>{loading ? <Loading/> : "Continue" }</AlertDialogAction>
+            <AlertDialogAction onClick={deleteProject}>
+              {loading ? <Loading className="w-5 h-5" /> : "Continue"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
