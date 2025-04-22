@@ -300,10 +300,16 @@ export async function editUser(prevState: any, values: object, user: UserItem | 
   }
 }
 
-export async function editMember(prevState: any, formData:FormData, user: UserItem | undefined) {
+type Member = {
+  id: string;
+  role: string;
+  hire_type: string;
+}
+
+export async function editMember(prevState: any, formData:FormData, user: Member | undefined) {
   const values = {
-    role: formData.get("role"),
-    hire_type: formData.get("hire_type")
+    role: user?.role,
+    hire_type: user?.hire_type
   }
 
   const result = EditMemberSchema.safeParse(values);

@@ -193,12 +193,13 @@ function MainPage() {
                 </Input>
               </div>
               {/* LOCATION */}
+              <Input htmlFor={""} label={"Location"} className="mt-5">
               <SelectBar
                 defaultValue={state?.data?.location}
                 name="location"
                 placeholder={"Select member's location *"}
                 label={"Countries"}
-                className="mt-5"
+                className="mt-1.5"
               >
                 {country_list.map((item) => {
                   return (
@@ -208,54 +209,69 @@ function MainPage() {
                   );
                 })}
               </SelectBar>
+                </Input>
               {/* JOB TITLE */}
-              <SelectBar
-                defaultValue={state?.data?.job_title}
-                name="job_title"
-                placeholder={"Select a job title *"}
-                label={"Job title"}
-                className="mt-5"
-              >
-                {job_titles.map((item) => {
-                  return (
-                    <SelectItem value={item} key={item}>
-                      {item}
-                    </SelectItem>
-                  );
-                })}
-              </SelectBar>
+              <Input label="Occupation" htmlFor="" className="mt-5">
+                <SelectBar
+                  defaultValue={state?.data?.job_title}
+                  name="job_title"
+                  placeholder={"Select a job title *"}
+                  label={"Job title"}
+                  className="mt-1.5"
+                >
+                  {job_titles.map((item) => {
+                    return (
+                      <SelectItem value={item} key={item}>
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+              </Input>
               {/* ROLES */}
-              <SelectBar
-                defaultValue={state?.data?.role}
-                name="role"
-                placeholder={"Select a role *"}
-                label={"Roles"}
-                className="mt-5"
-              >
-                {["Viewer", "Editor", "Admin"].map((item) => {
-                  return (
-                    <SelectItem value={item} key={item} className="capitalize">
-                      {item}
-                    </SelectItem>
-                  );
-                })}
-              </SelectBar>
+              <Input label="Role" htmlFor="" className="mt-5">
+                <SelectBar
+                  defaultValue={state?.data?.role}
+                  name="role"
+                  placeholder={"Select a role *"}
+                  label={"Roles"}
+                  className="mt-1.5"
+                >
+                  {["Viewer", "Editor", "Admin"].map((item) => {
+                    return (
+                      <SelectItem
+                        value={item}
+                        key={item}
+                        className="capitalize"
+                      >
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+              </Input>
               {/* HIRE TYPE */}
-              <SelectBar
-                defaultValue={state?.data?.hire_type}
-                name="hire_type"
-                placeholder={"Select a hire type *"}
-                label={"Hire type"}
-                className="mt-5"
-              >
-                {["Employee", "Contractor", "Independent"].map((item) => {
-                  return (
-                    <SelectItem value={item} key={item} className="capitalize">
-                      {item}
-                    </SelectItem>
-                  );
-                })}
-              </SelectBar>
+              <Input htmlFor={""} label={"Hire type"} className="mt-5">
+                <SelectBar
+                  defaultValue={state?.data?.hire_type}
+                  name="hire_type"
+                  placeholder={"Select a hire type *"}
+                  label={"Hire type"}
+                  className="mt-1.5"
+                >
+                  {["Employee", "Contractor", "Independent"].map((item) => {
+                    return (
+                      <SelectItem
+                        value={item}
+                        key={item}
+                        className="capitalize"
+                      >
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+              </Input>
               {/* SUBMIT BUTTON */}
               <div className="flex justify-center mt-6 scale-75">
                 <Submit loading={isLoading} />
