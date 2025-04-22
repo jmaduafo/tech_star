@@ -122,7 +122,7 @@ function StageCard({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button>
-                  <EllipsisVertical strokeWidth={1} />
+                  <EllipsisVertical className="w-5 h-5" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>

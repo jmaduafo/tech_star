@@ -672,6 +672,69 @@ export async function createProject(
   }
 }
 
+type ProjectItem = {
+  name: string;
+  year: string;
+  city: string;
+  month: string;
+  country: string;
+}
+
+export async function editProject(
+  prevState: any,
+  formData: FormData,
+  user: UserItem | undefined,
+) {
+
+  const project_year = formData.get("year");
+
+  const values = {
+    name: formData.get("name"),
+    year: project_year && +project_year,
+    city: formData.get("city"),
+    month: formData.get("month"),
+    country: formData.get("country"),
+    is_ongoing: formData.get("is_ongoing"),
+  };
+
+  const result = CreateProjectSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      success: false,
+    };
+  }
+
+  const { name, country, year, city, month } = result.data;
+
+  try {
+    if (!user) {
+      return;
+    }
+
+    await updateItem("projects", user.id, {
+      name: name.trim(),
+      country,
+      city: city ?? null,
+      start_month: month,
+      start_year: year,
+      is_ongoing: true,
+      updated_at: serverTimestamp()
+    });
+
+    return {
+      message: "success",
+      success: true,
+    };
+  } catch (err: any) {
+    return {
+      message: err.message,
+      success: false,
+    };
+  }
+}
+
 export async function createStage(
   prevState: any,
   formData: FormData,

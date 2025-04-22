@@ -1,8 +1,8 @@
 "use client";
-import React, { Fragment, useActionState, useEffect } from "react";
+import React, { Fragment, useActionState, useEffect, useState } from "react";
 import { Project, User } from "@/types/types";
 import Card from "@/components/ui/cards/MyCard";
-import { Plus } from "lucide-react";
+import { EllipsisVertical, Plus } from "lucide-react";
 import Header5 from "@/components/fontsize/Header5";
 import Banner from "@/components/ui/Banner";
 import Header4 from "@/components/fontsize/Header4";
@@ -23,7 +23,8 @@ import { SelectItem } from "@/components/ui/select";
 import Submit from "@/components/ui/buttons/Submit";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { createProject } from "@/zod/actions";
+import { createProject, editMember, editProject } from "@/zod/actions";
+import { Switch } from "@/components/ui/switch";
 
 function ProjectDisplay({
   user,
@@ -216,18 +217,27 @@ function ProjectDisplay({
       {allProjects?.length && !filterSearch.length && !searchValue.length
         ? allProjects?.map((item) => {
             return (
-              <Link href={`/projects/${item?.id}`} key={item.id}>
-                <Card className="h-[200px] text-lightText z-0 cursor-pointer hover:opacity-90 duration-300 hover:shadow-md">
+              <Fragment key={item.id}>
+                <Card className="h-[200px] text-lightText z-0 hover:opacity-90 duration-300 hover:shadow-md">
                   <div className="flex flex-col h-full">
-                    <Header4 text={item.name} className="capitalize" />
-                    <p className="text-[14px] text-light50">
-                      Since {item?.start_month?.substring(0, 3)}.{" "}
-                      {item.start_year} -{" "}
-                      {item?.city ? (
-                        <span className="italic">`${item.city}, `</span>
-                      ) : null}
-                      <span className="italic">{item.country}</span>
-                    </p>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <Link href={`/projects/${item?.id}`}>
+                          <Header4 text={item.name} className="capitalize" />
+                        </Link>
+                        <p className="text-[14px] text-light50">
+                          Since {item?.start_month?.substring(0, 3)}.{" "}
+                          {item.start_year} -{" "}
+                          {item?.city ? (
+                            <span className="italic">`${item.city}, `</span>
+                          ) : null}
+                          <span className="italic">{item.country}</span>
+                        </p>
+                      </div>
+                      <button onClick={() => {}}>
+                        <EllipsisVertical className="w-5 h-5" />
+                      </button>
+                    </div>
                     <div className="mt-auto">
                       <Banner
                         text={item.is_ongoing ? "ongoing" : "completed"}
@@ -235,7 +245,7 @@ function ProjectDisplay({
                     </div>
                   </div>
                 </Card>
-              </Link>
+              </Fragment>
             );
           })
         : filtered}
@@ -244,3 +254,141 @@ function ProjectDisplay({
 }
 
 export default ProjectDisplay;
+
+function EditProject({
+  project,
+  user,
+}: {
+  readonly project: Project | undefined;
+  readonly user: User | undefined;
+  readonly open: boolean;
+  readonly setOpen: React.Dispatch<React.SetStateAction<boolean>>
+}) {
+  const [projectInfo, setProjectInfo] = useState({
+    name: "",
+    city: "",
+    country: "",
+    month: "",
+    year: 0,
+    is_ongoing: false,
+  });
+
+  const [state, action, isLoading] = useActionState(
+    (prevState: any, formData: FormData) =>
+      editProject(prevState, formData, {
+        id: user?.id as string,
+        team_id: user?.team_id as string,
+      }),
+    {
+      message: "",
+      success: false,
+    }
+  );
+
+  useEffect(() => {
+    if (project) {
+      setProjectInfo({
+        name: project?.name,
+        city: project?.city ?? "",
+        country: project?.country,
+        month: project?.start_month,
+        year: project?.start_year,
+        is_ongoing: project?.is_ongoing,
+      });
+    }
+  }, [project]);
+
+  useEffect(() => {
+    if (!state?.success && state?.message) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: state?.message,
+      });
+    } else if (state?.success) {
+      toast({
+        title: "Your profile was updated successfully!",
+      });
+
+    }
+  }, [state]);
+
+  return (
+    <form action={action}>
+      {/* PROJECT NAME */}
+      <Input label="Project name *" htmlFor="name">
+        <input
+          name="name"
+          className="form"
+          type="text"
+          value={projectInfo.name}
+        />
+      </Input>
+      <Input label="City" htmlFor="city" className="mt-3">
+        <input
+          name="city"
+          className="form"
+          type="text"
+          value={projectInfo.city}
+        />
+      </Input>
+      <div className="flex items-center gap-4 mt-5">
+        {/* COUNTRY LOCATION */}
+        <SelectBar
+          placeholder="Select country *"
+          value={projectInfo.country}
+          label="Countries"
+          className="flex-1"
+        >
+          {country_list.map((item) => {
+            return (
+              <SelectItem key={item.name} value={item.name}>
+                {item.name}
+              </SelectItem>
+            );
+          })}
+        </SelectBar>
+        <SelectBar
+          placeholder="Starting month *"
+          value={projectInfo.month}
+          label="Months"
+          className="flex-1"
+        >
+          {months.map((item) => {
+            return (
+              <SelectItem key={item} value={item}>
+                {item}
+              </SelectItem>
+            );
+          })}
+        </SelectBar>
+      </div>
+      <Input label="Starting year *" htmlFor="year" className="flex-1 mt-3">
+        <input
+          name="year"
+          className="form"
+          type="number"
+          value={projectInfo.year}
+        />
+      </Input>
+      <div className="flex items-center gap-2 mt-3">
+        <Switch
+          id="is_ongoing"
+          name="is_ongoing"
+          defaultChecked={projectInfo.is_ongoing}
+        />
+        <label htmlFor="is_completed">Completed?</label>
+      </div>
+      {/* SUBMIT BUTTON */}
+      <div className="flex justify-end mt-6">
+        <Submit
+          loading={isLoading}
+          width_height="w-[85px] h-[40px]"
+          width="w-[40px]"
+          arrow_width_height="w-6 h-6"
+          disabledLogic={isLoading}
+        />
+      </div>
+    </form>
+  );
+}
