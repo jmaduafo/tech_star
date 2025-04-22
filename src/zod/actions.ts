@@ -16,6 +16,7 @@ import {
   CreateStagesSchema,
   CreateUserSchema,
   EditMemberSchema,
+  EditProjectSchema,
   EditStageSchema,
   EditUserSchema,
   EmailValidation,
@@ -648,7 +649,7 @@ export async function createProject(
       city: city ?? null,
       start_month: month,
       start_year: year,
-      is_ongoing: true,
+      is_completed: false,
       created_at: serverTimestamp(),
       updated_at: null,
     });
@@ -672,18 +673,10 @@ export async function createProject(
   }
 }
 
-type ProjectItem = {
-  name: string;
-  year: string;
-  city: string;
-  month: string;
-  country: string;
-}
-
 export async function editProject(
   prevState: any,
   formData: FormData,
-  user: UserItem | undefined,
+  item: Item | undefined
 ) {
 
   const project_year = formData.get("year");
@@ -694,10 +687,10 @@ export async function editProject(
     city: formData.get("city"),
     month: formData.get("month"),
     country: formData.get("country"),
-    is_ongoing: formData.get("is_ongoing"),
+    is_completed: formData.get("is_completed"),
   };
 
-  const result = CreateProjectSchema.safeParse(values);
+  const result = EditProjectSchema.safeParse(values);
 
   if (!result.success) {
     return {
@@ -706,20 +699,20 @@ export async function editProject(
     };
   }
 
-  const { name, country, year, city, month } = result.data;
+  const { name, country, year, city, month, is_completed } = result.data;
 
   try {
-    if (!user) {
+    if (!item) {
       return;
     }
 
-    await updateItem("projects", user.id, {
+    await updateItem("projects", item.id, {
       name: name.trim(),
       country,
       city: city ?? null,
       start_month: month,
       start_year: year,
-      is_ongoing: true,
+      is_completed,
       updated_at: serverTimestamp()
     });
 
@@ -820,16 +813,10 @@ export async function editStage(
       name: name.trim(),
       description: description.trim(),
       is_completed,
-      created_at: serverTimestamp(),
-      updated_at: null,
+      updated_at: serverTimestamp(),
     });
 
     return {
-      data: {
-        name: "",
-        desc: "",
-        is_complete: false,
-      },
       message: "success",
       success: true,
     };

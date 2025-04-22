@@ -66,7 +66,7 @@ export type Project = {
   country: string;
   start_month: string;
   start_year: number;
-  is_ongoing: boolean;
+  is_completed: boolean;
   created_at: TimeStamp;
   updated_at: TimeStamp | null;
 };

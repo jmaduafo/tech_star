@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -23,8 +22,27 @@ import { SelectItem } from "@/components/ui/select";
 import Submit from "@/components/ui/buttons/Submit";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { createProject, editMember, editProject } from "@/zod/actions";
+import { createProject, editProject } from "@/zod/actions";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { deleteItem } from "@/firebase/actions";
+import Loading from "@/components/ui/Loading";
 
 function ProjectDisplay({
   user,
@@ -172,7 +190,6 @@ function ProjectDisplay({
               />
             </div>
           </form>
-          <DialogFooter className=""></DialogFooter>
         </DialogContent>
       </Dialog>
     ) : null;
@@ -194,7 +211,9 @@ function ProjectDisplay({
                     <span className="italic">{item.country}</span>
                   </p>
                   <div className="mt-auto">
-                    <Banner text={item.is_ongoing ? "ongoing" : "completed"} />
+                    <Banner
+                      text={item.is_completed ? "completed" : "ongoing"}
+                    />
                   </div>
                 </div>
               </Card>
@@ -234,13 +253,11 @@ function ProjectDisplay({
                           <span className="italic">{item.country}</span>
                         </p>
                       </div>
-                      <button onClick={() => {}}>
-                        <EllipsisVertical className="w-5 h-5" />
-                      </button>
+                      <EditProject project={item} />
                     </div>
                     <div className="mt-auto">
                       <Banner
-                        text={item.is_ongoing ? "ongoing" : "completed"}
+                        text={item.is_completed ? "completed" : "ongoing"}
                       />
                     </div>
                   </div>
@@ -255,35 +272,34 @@ function ProjectDisplay({
 
 export default ProjectDisplay;
 
-function EditProject({
-  project,
-  user,
-}: {
-  readonly project: Project | undefined;
-  readonly user: User | undefined;
-  readonly open: boolean;
-  readonly setOpen: React.Dispatch<React.SetStateAction<boolean>>
-}) {
+function EditProject({ project }: { readonly project: Project | undefined }) {
   const [projectInfo, setProjectInfo] = useState({
     name: "",
     city: "",
     country: "",
     month: "",
     year: 0,
-    is_ongoing: false,
+    is_completed: false,
   });
 
   const [state, action, isLoading] = useActionState(
     (prevState: any, formData: FormData) =>
       editProject(prevState, formData, {
-        id: user?.id as string,
-        team_id: user?.team_id as string,
+        id: project?.id as string,
+        team_id: project?.team_id as string,
       }),
     {
       message: "",
       success: false,
     }
   );
+
+  const [dropDownOpen, setDropDownOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  // FOR DELETE PROJECT FUNCTIONALITY
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -293,7 +309,7 @@ function EditProject({
         country: project?.country,
         month: project?.start_month,
         year: project?.start_year,
-        is_ongoing: project?.is_ongoing,
+        is_completed: project?.is_completed,
       });
     }
   }, [project]);
@@ -309,86 +325,192 @@ function EditProject({
       toast({
         title: "Your profile was updated successfully!",
       });
-
     }
   }, [state]);
 
+  const deleteProject = async () => {
+    setLoading(true)
+
+    try {
+      if (!project) {
+        return
+      }
+
+      await deleteItem("projects", project.id)
+
+      toast({
+        title: "Project was deleted successfully!"
+      })
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: err.message
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <form action={action}>
-      {/* PROJECT NAME */}
-      <Input label="Project name *" htmlFor="name">
-        <input
-          name="name"
-          className="form"
-          type="text"
-          value={projectInfo.name}
-        />
-      </Input>
-      <Input label="City" htmlFor="city" className="mt-3">
-        <input
-          name="city"
-          className="form"
-          type="text"
-          value={projectInfo.city}
-        />
-      </Input>
-      <div className="flex items-center gap-4 mt-5">
-        {/* COUNTRY LOCATION */}
-        <SelectBar
-          placeholder="Select country *"
-          value={projectInfo.country}
-          label="Countries"
-          className="flex-1"
+    <>
+      <DropdownMenu open={dropDownOpen} onOpenChange={setDropDownOpen}>
+        <DropdownMenuTrigger asChild>
+          <button>
+            <EllipsisVertical className="w-5 h-5" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={() => {
+                setEditOpen(true);
+                setDropDownOpen(false);
+              }}
+            >
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setDeleteOpen(true);
+                setEditOpen(false);
+                setDropDownOpen(false);
+              }}
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent
+          aria-describedby="edit project project"
+          className="sm:max-w-sm"
         >
-          {country_list.map((item) => {
-            return (
-              <SelectItem key={item.name} value={item.name}>
-                {item.name}
-              </SelectItem>
-            );
-          })}
-        </SelectBar>
-        <SelectBar
-          placeholder="Starting month *"
-          value={projectInfo.month}
-          label="Months"
-          className="flex-1"
-        >
-          {months.map((item) => {
-            return (
-              <SelectItem key={item} value={item}>
-                {item}
-              </SelectItem>
-            );
-          })}
-        </SelectBar>
-      </div>
-      <Input label="Starting year *" htmlFor="year" className="flex-1 mt-3">
-        <input
-          name="year"
-          className="form"
-          type="number"
-          value={projectInfo.year}
-        />
-      </Input>
-      <div className="flex items-center gap-2 mt-3">
-        <Switch
-          id="is_ongoing"
-          name="is_ongoing"
-          defaultChecked={projectInfo.is_ongoing}
-        />
-        <label htmlFor="is_completed">Completed?</label>
-      </div>
-      {/* SUBMIT BUTTON */}
-      <div className="flex justify-end mt-6">
-        <Submit
-          loading={isLoading}
-          width_height="w-[85px] h-[40px]"
-          width="w-[40px]"
-          arrow_width_height="w-6 h-6"
-          disabledLogic={isLoading}
-        />
-      </div>
-    </form>
+          <DialogHeader>
+            <DialogTitle>Edit project</DialogTitle>
+          </DialogHeader>
+          <form action={action}>
+            {/* PROJECT NAME */}
+            <Input label="Project name *" htmlFor="name">
+              <input
+                name="name"
+                className="form"
+                type="text"
+                value={projectInfo.name}
+                onChange={(e) =>
+                  setProjectInfo({ ...projectInfo, name: e.target.value })
+                }
+              />
+            </Input>
+            <Input label="City" htmlFor="city" className="mt-3">
+              <input
+                name="city"
+                className="form"
+                type="text"
+                value={projectInfo.city}
+                onChange={(e) =>
+                  setProjectInfo({ ...projectInfo, city: e.target.value })
+                }
+              />
+            </Input>
+            {/* COUNTRY LOCATION */}
+            <Input label="Country *" htmlFor="year" className="mt-5">
+              <SelectBar
+                placeholder="Select country *"
+                value={projectInfo.country}
+                label="Countries"
+                className="mt-1"
+                valueChange={(text) => {
+                  setProjectInfo({ ...projectInfo, country: text });
+                }}
+              >
+                {country_list.map((item) => {
+                  return (
+                    <SelectItem key={item.name} value={item.name}>
+                      {item.name}
+                    </SelectItem>
+                  );
+                })}
+              </SelectBar>
+            </Input>
+            <div className="flex items-end gap-4 mt-5">
+              {/* STARTING MONTH */}
+              <Input
+                label="Starting month *"
+                htmlFor="month"
+                className="flex-1"
+              >
+                <SelectBar
+                  placeholder="Starting month *"
+                  value={projectInfo.month}
+                  label="Months"
+                  className="mt-1"
+                  valueChange={(text) => {
+                    setProjectInfo({ ...projectInfo, month: text });
+                  }}
+                >
+                  {months.map((item) => {
+                    return (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectBar>
+              </Input>
+              {/* STARTING YEAR */}
+              <Input label="Starting year *" htmlFor="year" className="flex-1">
+                <input
+                  name="year"
+                  className="form"
+                  type="number"
+                  value={projectInfo.year}
+                  onChange={(e) =>
+                    setProjectInfo({
+                      ...projectInfo,
+                      year: e.target.valueAsNumber,
+                    })
+                  }
+                />
+              </Input>
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <Switch
+                id="is_completed"
+                name="is_completed"
+                checked={projectInfo.is_completed}
+              />
+              <label htmlFor="is_completed">Completed?</label>
+            </div>
+            {/* SUBMIT BUTTON */}
+            <div className="flex justify-end mt-6">
+              <Submit
+                loading={isLoading}
+                width_height="w-[85px] h-[40px]"
+                width="w-[40px]"
+                arrow_width_height="w-6 h-6"
+                disabledLogic={isLoading}
+              />
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              project from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteProject}>{loading ? <Loading/> : "Continue" }</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

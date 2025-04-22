@@ -136,6 +136,22 @@ export const CreateProjectSchema = z.object({
     }),
 });
 
+export const EditProjectSchema = z.object({
+  name: z.string().min(1, { message: "You must enter a name." }),
+  country: z.string().min(1, { message: "You must select a country." }),
+  city:  z.nullable(z.string()),
+  month: z.string().min(1, { message: "You must select a month." }),
+  is_completed: z.boolean(),
+  year: z
+    .number()
+    .min(1900, {
+      message: "The year cannot be less than the year 1900",
+    })
+    .max(new Date().getFullYear(), {
+      message: "The year must be equal to or less than the current year.",
+    }),
+});
+
 export const CreateStagesSchema = z.object({
   name: z.string().min(1, { message: "You must enter a name for this stage." }),
   description: z.string().min(1, {
@@ -164,8 +180,6 @@ export const CreateContractorSchema = z.object({
   location: z.string().min(1, { message: "You must select a location." }),
   is_unavailable: z.boolean(),
   additional_info: z.nullable(z.string()),
-
-
 });
 
 export const CreateContractSchema = z.object({

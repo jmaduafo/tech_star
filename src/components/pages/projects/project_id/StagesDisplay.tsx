@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -16,7 +17,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { EllipsisVertical } from "lucide-react";
 import Submit from "@/components/ui/buttons/Submit";
@@ -84,17 +84,17 @@ function StageCard({
     (prevState: any, formData: FormData) =>
       editStage(prevState, formData, { id: item?.id }),
     {
-      data: {
-        name: item?.name,
-        desc: item?.description,
-        is_complete: item?.is_completed,
-      },
       message: "",
       success: false,
     }
   );
 
   const [open, setOpen] = useState(false);
+  const [stageInfo, setStageInfo] = useState({
+    name: "",
+    desc: "",
+    is_completed: false,
+  });
 
   useEffect(() => {
     if (!state?.success && state?.message.length) {
@@ -112,6 +112,16 @@ function StageCard({
     }
   }, [state]);
 
+  useEffect(() => {
+    if (item) {
+      setStageInfo({
+        name: item?.name ?? "",
+        desc: item?.description ?? "",
+        is_completed: item?.is_completed ?? false,
+      });
+    }
+  }, [item]);
+
   return (
     <div className="rounded-3xl bg-light10 backdrop-blur-3xl mb-5">
       <div className="flex justify-between items-center rounded-tr-3xl rounded-tl-3xl py-4 px-5 bg-light25">
@@ -127,66 +137,70 @@ function StageCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuGroup>
-                  <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogTrigger asChild>
-                      <p className="text-sm px-2 py-1 border-r-[1.5px] hover:border-r-darkText">
-                        Edit
-                      </p>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Edit stage</DialogTitle>
-                        <DialogDescription>
-                          Make changes to your stage here. Save when you are
-                          done.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <form action={action}>
-                        <Input htmlFor="name" label="Stage name">
-                          <input
-                            name="name"
-                            id="name"
-                            className="form"
-                            type="text"
-                            defaultValue={state?.data?.name}
-                          />
-                        </Input>
-                        <Input
-                          htmlFor="desc"
-                          label="Description"
-                          className="mt-3"
-                        >
-                          <textarea
-                            name="desc"
-                            id="desc"
-                            className="form"
-                            defaultValue={state?.data?.desc}
-                          ></textarea>
-                        </Input>
-                        <div className="flex items-center gap-2 mt-3">
-                          <Switch
-                            id="is_completed"
-                            name="is_completed"
-                            defaultChecked={state?.data?.is_complete}
-                          />
-                          <label htmlFor="is_completed">Completed?</label>
-                        </div>
-                        {/* SUBMIT BUTTON */}
-                        <div className="flex justify-end mt-6">
-                          <Submit
-                            loading={isLoading}
-                            width_height="w-[85px] h-[40px]"
-                            width="w-[40px]"
-                            arrow_width_height="w-6 h-6"
-                            disabledLogic={isLoading}
-                          />
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <DropdownMenuItem onClick={() => setOpen(true)}>
+                    Edit
+                  </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit stage</DialogTitle>
+                  <DialogDescription>
+                    Make changes to your stage here. Save when you are done.
+                  </DialogDescription>
+                </DialogHeader>
+                <form action={action}>
+                  <Input htmlFor="name" label="Stage name">
+                    <input
+                      name="name"
+                      id="name"
+                      className="form"
+                      type="text"
+                      value={stageInfo.name}
+                      onChange={(e) =>
+                        setStageInfo({ ...stageInfo, name: e.target.value })
+                      }
+                    />
+                  </Input>
+                  <Input htmlFor="desc" label="Description" className="mt-3">
+                    <textarea
+                      name="desc"
+                      id="desc"
+                      className="form"
+                      value={stageInfo.desc}
+                      onChange={(e) =>
+                        setStageInfo({ ...stageInfo, desc: e.target.value })
+                      }
+                      maxLength={160}
+                    ></textarea>
+                  </Input>
+                  <Paragraph className="text-right text-dark75" text={`${stageInfo.desc.length}/160`}/>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Switch
+                      id="is_completed"
+                      name="is_completed"
+                      checked={stageInfo.is_completed}
+                      onCheckedChange={(text) => {
+                        setStageInfo({ ...stageInfo, is_completed: text });
+                      }}
+                    />
+                    <label htmlFor="is_completed">Completed?</label>
+                  </div>
+                  {/* SUBMIT BUTTON */}
+                  <div className="flex justify-end mt-6">
+                    <Submit
+                      loading={isLoading}
+                      width_height="w-[85px] h-[40px]"
+                      width="w-[40px]"
+                      arrow_width_height="w-6 h-6"
+                      disabledLogic={isLoading}
+                    />
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         ) : null}
       </div>
