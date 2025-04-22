@@ -323,8 +323,15 @@ function Contracts({
                   defaultValue={state?.data?.comment}
                 ></textarea>
               </Input>
-              <div className="flex justify-center mt-6 scale-75">
-                <Submit loading={isLoading} />
+              {/* SUBMIT BUTTON */}
+              <div className="flex justify-end mt-6">
+                <Submit
+                  loading={isLoading}
+                  width_height="w-[85px] h-[40px]"
+                  width="w-[40px]"
+                  arrow_width_height="w-6 h-6"
+                  disabledLogic={isLoading}
+                />
               </div>
             </Popover>
           </form>

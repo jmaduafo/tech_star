@@ -75,10 +75,10 @@ export default StagesDisplay;
 
 function StageCard({
   item,
-  user
+  user,
 }: {
   readonly item: Stage;
-  readonly user: User | undefined
+  readonly user: User | undefined;
 }) {
   const [state, action, isLoading] = useActionState(
     (prevState: any, formData: FormData) =>
@@ -101,16 +101,16 @@ function StageCard({
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong",
-        description: state?.message
-      })
+        description: state?.message,
+      });
     } else if (state?.success) {
       toast({
-        title: "Stage was successfully updated!"
-      })
+        title: "Stage was successfully updated!",
+      });
 
-      setOpen(false)
+      setOpen(false);
     }
-  }, [state])
+  }, [state]);
 
   return (
     <div className="rounded-3xl bg-light10 backdrop-blur-3xl mb-5">
@@ -163,7 +163,7 @@ function StageCard({
                             defaultValue={state?.data?.desc}
                           ></textarea>
                         </Input>
-                        <div className="flex items-center justify-end gap-2 mt-3">
+                        <div className="flex items-center gap-2 mt-3">
                           <Switch
                             id="is_completed"
                             name="is_completed"
@@ -171,8 +171,15 @@ function StageCard({
                           />
                           <label htmlFor="is_completed">Completed?</label>
                         </div>
-                        <div className="flex justify-center mt-6 scale-75">
-                          <Submit loading={isLoading} />
+                        {/* SUBMIT BUTTON */}
+                        <div className="flex justify-end mt-6">
+                          <Submit
+                            loading={isLoading}
+                            width_height="w-[85px] h-[40px]"
+                            width="w-[40px]"
+                            arrow_width_height="w-6 h-6"
+                            disabledLogic={isLoading}
+                          />
                         </div>
                       </form>
                     </DialogContent>

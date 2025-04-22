@@ -33,7 +33,7 @@ function ContractorsDisplay({
   allContractors,
   filterSearch,
   projectId,
-  loading
+  loading,
 }: {
   readonly user: User | undefined;
   readonly sort: string;
@@ -175,9 +175,15 @@ function ContractorsDisplay({
                 defaultChecked={state?.data?.is_unavailable}
               />
             </Input>
-
-            <div className="flex justify-center mt-6 scale-75">
-              <Submit loading={isLoading} />
+            {/* SUBMIT BUTTON */}
+            <div className="flex justify-end mt-6">
+              <Submit
+                loading={isLoading}
+                width_height="w-[85px] h-[40px]"
+                width="w-[40px]"
+                arrow_width_height="w-6 h-6"
+                disabledLogic={isLoading}
+              />
             </div>
           </form>
         </DialogContent>
