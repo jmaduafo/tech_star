@@ -76,9 +76,7 @@ export const EditUserSchema = z.object({
 
 export const EditMemberSchema = z.object({
   role: z.enum(["viewer", "admin", "editor"]),
-  hire_type: z.string().min(1, {
-    message: "A hire type must be selected",
-  })
+  hire_type: z.enum(["employee", "contractor", "independent"])
 });
 
 export const LoginUserSchema = z.object({

@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
   DialogHeader,
 } from "@/components/ui/dialog";
 import {
@@ -38,8 +37,8 @@ function UserAction({ data }: Dialog) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const [state, action, isLoading] = useActionState(
-    (prevState: any, formData: FormData) =>
-      editMember(prevState, formData, {
+    (prevState: any) =>
+      editMember(prevState, {
         id: data?.id as string,
         role: user.role,
         hire_type: user.hire_type,
@@ -74,10 +73,14 @@ function UserAction({ data }: Dialog) {
     } else if (state?.success) {
       toast({
         title:
-          "Team member was added successfully! New user can now sign in to view team dashboard.",
+          "Team member was updated successfully!",
       });
+
+      setEditDialogOpen(false)
     }
   }, [state]);
+
+  console.log(user);
 
   return (
     <div>
@@ -122,13 +125,12 @@ function UserAction({ data }: Dialog) {
       />
       {/* EDIT MEMBER INFORMATION ITEM */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent
+          className="sm:max-w-sm"
+          aria-describedby="update member credentials"
+        >
           <DialogHeader>
             <DialogTitle>Edit member</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. This will permanently delete this
-              user from our servers.
-            </DialogDescription>
           </DialogHeader>
           <form action={action}>
             <Input htmlFor={"full_name"} label={"Full name"}>
@@ -158,7 +160,7 @@ function UserAction({ data }: Dialog) {
                 placeholder={"Select a role *"}
                 label={"Roles *"}
                 className="mt-1.5"
-                value={user.role}
+                value={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                 valueChange={(text) =>
                   setUser((prev) => ({
                     ...prev,
@@ -182,7 +184,10 @@ function UserAction({ data }: Dialog) {
                 placeholder={"Select a hire type *"}
                 label={"Hire type *"}
                 className="mt-1.5"
-                value={user.hire_type}
+                value={
+                  user.hire_type.charAt(0).toUpperCase() +
+                  user.hire_type.slice(1)
+                }
                 valueChange={(text) =>
                   setUser((prev) => ({
                     ...prev,
@@ -205,7 +210,13 @@ function UserAction({ data }: Dialog) {
                 width_height="w-[85px] h-[40px]"
                 width="w-[40px]"
                 arrow_width_height="w-6 h-6"
-                disabledLogic={isLoading}
+                disabledLogic={
+                  isLoading ||
+                  !user.hire_type.length ||
+                  !user.role.length ||
+                  (user.hire_type === data?.hire_type &&
+                  user.role === data?.role)
+                }
               />
             </div>
           </form>

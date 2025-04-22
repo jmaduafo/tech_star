@@ -306,10 +306,10 @@ type Member = {
   hire_type: string;
 }
 
-export async function editMember(prevState: any, formData:FormData, user: Member | undefined) {
+export async function editMember(prevState: any, user: Member | undefined) {
   const values = {
-    role: user?.role,
-    hire_type: user?.hire_type
+    role: user?.role?.toLowerCase(),
+    hire_type: user?.hire_type?.toLowerCase()
   }
 
   const result = EditMemberSchema.safeParse(values);
