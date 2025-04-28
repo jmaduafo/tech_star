@@ -14,9 +14,13 @@ import ContractorExpenses from "./expense_overview/ContractorExpenses";
 import ContractorChart from "./breakdown/ContractorChart";
 import PaymentChart from "./breakdown/PaymentChart";
 import StageChart from "./breakdown/StageChart";
+import { useAuth } from "@/context/AuthContext";
+import Header2 from "@/components/fontsize/Header2";
 
 function MainPage() {
   const reportRef = useRef<HTMLDivElement>(null);
+
+  const { userData } = useAuth();
 
   const downloadPDF = async () => {
     const input = reportRef.current;
@@ -45,32 +49,33 @@ function MainPage() {
       <ContentContainer>
         {/* MONTHLY SUMMARY */}
         <section>
-          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
-            <ActiveContractors />
-            <ActiveProjects />
-            <PaymentTotal />
-            <TopContractor />
+          <Header2 text="Monthly Summary" />
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+            <ActiveContractors user={userData} />
+            <ActiveProjects user={userData} />
+            <PaymentTotal user={userData} />
+            <TopContractor user={userData} />
           </div>
         </section>
         {/* CHARTS BREAKDOWN */}
         <section className="mt-4">
           <div>
             <div className="">
-              <ContractorChart />
+              <ContractorChart user={userData} />
             </div>
             <div className="">
-              <PaymentChart />
+              <PaymentChart user={userData} />
             </div>
             <div className="">
-              <StageChart />
+              <StageChart user={userData} />
             </div>
           </div>
         </section>
         {/* EXPENSES OVERVIEW */}
         <section className="mt-4">
           <div>
-            <ProjectExpenses />
-            <ContractorExpenses />
+            <ProjectExpenses user={userData} />
+            <ContractorExpenses user={userData} />
           </div>
         </section>
         <Button onClick={downloadPDF} disabled>

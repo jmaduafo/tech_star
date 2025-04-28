@@ -1,21 +1,22 @@
 import { TimeStamp } from "@/types/types";
+import { Timestamp } from "firebase/firestore";
 import { months, days } from "./dataTools";
 
 export function fullTime() {
   const now = new Date();
-  let hour = ""
+  let hour = "";
   let minutes = "";
 
   if (now.getHours().toString().length === 1) {
-    hour += "0" + now.getHours() 
+    hour += "0" + now.getHours();
   } else {
-    hour += now.getHours()
+    hour += now.getHours();
   }
 
   if (now.getMinutes().toString().length === 1) {
-    minutes += "0" + now.getMinutes() 
+    minutes += "0" + now.getMinutes();
   } else {
-    minutes += now.getMinutes()
+    minutes += now.getMinutes();
   }
 
   return { hour, minutes };
@@ -39,33 +40,61 @@ export function fullDate() {
 }
 
 export function formatDate(timestamp: TimeStamp, formatOption?: number) {
-  const date = new Date(timestamp.seconds*1000)
+  const date = new Date(timestamp.seconds * 1000);
 
-  const format = date.getDate() + " " + months[date.getMonth()].substring(0, 3) + " " + date.getFullYear().toString().slice(2)
-  const format2 =  months[date.getMonth()].substring(0, 3) + " " + date.getDate() + ", " + date.getFullYear()
+  const format =
+    date.getDate() +
+    " " +
+    months[date.getMonth()].substring(0, 3) +
+    " " +
+    date.getFullYear().toString().slice(2);
+  const format2 =
+    months[date.getMonth()].substring(0, 3) +
+    " " +
+    date.getDate() +
+    ", " +
+    date.getFullYear();
 
-  return formatOption === 2 ? format2 : format
+  return formatOption === 2 ? format2 : format;
 }
 
 export function formatChartDate(timestamp: TimeStamp) {
-  const date = new Date(timestamp.seconds*1000)
+  const date = new Date(timestamp.seconds * 1000);
 
-  let month = ""
-  let day = ""
+  let month = "";
+  let day = "";
 
   if (date.getMonth().toString().length === 1) {
-    month += "0" + (date.getMonth() + 1)
+    month += "0" + (date.getMonth() + 1);
   } else {
-    month += (date.getMonth() + 1)
+    month += date.getMonth() + 1;
   }
 
   if (date.getDate().toString().length === 1) {
-    day += "0" + date.getDate()
+    day += "0" + date.getDate();
   } else {
-    day += date.getDate()
+    day += date.getDate();
   }
 
-  const format = date.getFullYear() + "-" + month + "-" + day
+  const format = date.getFullYear() + "-" + month + "-" + day;
 
-  return format
+  return format;
+}
+
+export function pastMonth() {
+  // GET CURRENT 
+  const now = new Date();
+  const lastMonth = new Date();
+
+  // Ex: now.getMonth() -> 3, lastMonth -> 3 - 1 = 2
+  lastMonth.setMonth(now.getMonth() - 1);
+
+  // CONVERT START TIME AND END TIME TO FIREBASE TIMESTAMP FORMAT
+  const startTimestamp = Timestamp.fromDate(lastMonth);
+  const endTimestamp = Timestamp.fromDate(now);
+
+  return {
+    startTime: startTimestamp,
+    endTime: endTimestamp
+  }
 }

@@ -97,7 +97,7 @@ export type Contract = {
   project_id: string;
   contractor_id: string;
   team_id: string;
-  stage_id: string;
+  stage_id: string | null;
   project_name: string;
   contractor_name: string;
   stage_name: string;
@@ -122,7 +122,7 @@ export type Payment = {
   project_id: string;
   contractor_id: string;
   contract_id: string | null;
-  stage_id: string;
+  stage_id: string | null;
   team_id: string;
   project_name: string;
   contractor_name: string;
