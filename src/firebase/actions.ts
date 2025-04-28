@@ -207,3 +207,101 @@ export async function deleteContractAndPayments(contractId: string, projectId: s
     return error.message
   }
 }
+
+export async function deleteProject(projectId: string) {
+  try {
+    // Start a batch operation
+    const batch = writeBatch(db);
+
+    // Query all payments linked to the contract
+    const contractorsQuery = query(
+      collection(db, "contractors"),
+      where("project_id", "==", projectId)
+    );
+
+    const stagesQuery = query(
+      collection(db, "stages"),
+      where("project_id", "==", projectId)
+    );
+
+    const contractQuery = query(
+      collection(db, "contracts"),
+      where("project_id", "==", projectId)
+    );
+
+    const paymentsQuery = query(
+      collection(db, "payments"),
+      where("project_id", "==", projectId)
+    );
+
+    const [contractors, stages, contracts, payments] = await Promise.all([
+      getDocs(contractorsQuery),
+      getDocs(stagesQuery),
+      getDocs(contractQuery),
+      getDocs(paymentsQuery),
+      
+    ]) 
+
+    // Add each payment delete operation to the batch
+    contractors.forEach((snap) => {
+      batch.delete(doc(db, "contractors", snap.id));
+    });
+    stages.forEach((snap) => {
+      batch.delete(doc(db, "stages", snap.id));
+    });
+    contracts.forEach((snap) => {
+      batch.delete(doc(db, "contracts", snap.id));
+    });
+    payments.forEach((snap) => {
+      batch.delete(doc(db, "payments", snap.id));
+    });
+
+
+    batch.delete(doc(db, "projects", projectId));
+
+    // Commit the batch operation
+    await batch.commit();
+
+    return "success"
+  } catch (error: any) {
+    return error.message
+  }
+}
+export async function deleteContractor(contractorId: string) {
+  try {
+    // Start a batch operation
+    const batch = writeBatch(db);
+
+    const contractQuery = query(
+      collection(db, "contracts"),
+      where("contractor_id", "==", contractorId)
+    );
+
+    const paymentsQuery = query(
+      collection(db, "payments"),
+      where("contractor_id", "==", contractorId)
+    );
+
+    const [contracts, payments] = await Promise.all([
+      getDocs(contractQuery),
+      getDocs(paymentsQuery),
+      
+    ]) 
+
+    contracts.forEach((snap) => {
+      batch.delete(doc(db, "contracts", snap.id));
+    });
+    payments.forEach((snap) => {
+      batch.delete(doc(db, "payments", snap.id));
+    });
+
+    batch.delete(doc(db, "contractors", contractorId));
+
+    // Commit the batch operation
+    await batch.commit();
+
+    return "success"
+  } catch (error: any) {
+    return error.message
+  }
+}
