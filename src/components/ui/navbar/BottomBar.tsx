@@ -31,7 +31,7 @@ function BottomBar() {
       icon: <BsCashStack className="w-4 h-4" />,
     },
     {
-      text: "Charts",
+      text: "Reports",
       icon: <BsBarChartFill className="w-4 h-4" />,
     },
     {
