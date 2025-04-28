@@ -15,7 +15,7 @@ import ContractorChart from "./breakdown/ContractorChart";
 import PaymentChart from "./breakdown/PaymentChart";
 import StageChart from "./breakdown/StageChart";
 import { useAuth } from "@/context/AuthContext";
-import Header2 from "@/components/fontsize/Header2";
+import Header3 from "@/components/fontsize/Header3";
 
 function MainPage() {
   const reportRef = useRef<HTMLDivElement>(null);
@@ -49,7 +49,7 @@ function MainPage() {
       <ContentContainer>
         {/* MONTHLY SUMMARY */}
         <section>
-          <Header2 text="Monthly Summary" />
+          <Header3 text="Monthly Summary" />
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
             <ActiveContractors user={userData} />
             <ActiveProjects user={userData} />
@@ -59,14 +59,14 @@ function MainPage() {
         </section>
         {/* CHARTS BREAKDOWN */}
         <section className="mt-4">
-          <div>
-            <div className="">
+          <div className="summaryGrid h-[60vh] gap-4">
+            <div className="contractor">
               <ContractorChart user={userData} />
             </div>
-            <div className="">
+            <div className="payment">
               <PaymentChart user={userData} />
             </div>
-            <div className="">
+            <div className="stage">
               <StageChart user={userData} />
             </div>
           </div>

@@ -103,7 +103,7 @@ function DataTable<TData, TValue>({
         {table.getAllColumns().find(x => x.id === 'description') ? (
           <input
             placeholder="Filter by description"
-            className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-2xl"
+            className="searchTable flex-shrink-1 placeholder:text-light70 max-w-sm backdrop-blur-[100px]"
             value={
               (table.getColumn("description")?.getFilterValue() as string) || ""
             }

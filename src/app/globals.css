@@ -107,11 +107,33 @@ input::file-selector-button {
   cursor: pointer;
 }
 
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas: 
+    "contractor contractor payment"
+    "contractor contractor stage"
+}
+
+.payment {
+  grid-area: payment;
+}
+
+.contractor {
+  grid-area: contractor;
+}
+
+.stage {
+  grid-area: stage;
+}
+
 .dashGrid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: auto 1.4fr .8fr;
-  grid-template-areas: "greeting calc calc calc calc calc"
+  grid-template-areas: 
+    "greeting calc calc calc calc calc"
     "greeting lines lines lines pie pie"
     "greeting lines lines lines contractors project";
 }

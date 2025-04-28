@@ -40,16 +40,17 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
       return;
     }
 
-    const [ projects, contractors ] = await Promise.all([
-      getQueriedItems(query(
-        collection(db, "projects"),
-        where("team_id", "==", user?.team_id)
-      )),
-      getQueriedItems(query(
-        collection(db, "contractors"),
-        where("team_id", "==", user?.team_id)
-      ))
-    ])
+    const [projects, contractors] = await Promise.all([
+      getQueriedItems(
+        query(collection(db, "projects"), where("team_id", "==", user?.team_id))
+      ),
+      getQueriedItems(
+        query(
+          collection(db, "contractors"),
+          where("team_id", "==", user?.team_id)
+        )
+      ),
+    ]);
 
     projects?.length && setAllProjects(projects as Project[]);
 
@@ -60,7 +61,7 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
     allData();
   }, [user?.id ?? "guest"]);
 
-  // RETRIEVES CALCULATIONS OF REVISED CONTRACTS & PAYMENTS WITHIN AND OUTSIDE CONTRACTS  
+  // RETRIEVES CALCULATIONS OF REVISED CONTRACTS & PAYMENTS WITHIN AND OUTSIDE CONTRACTS
   async function totalAmount() {
     try {
       setLoading(true);
@@ -192,8 +193,14 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
           <div className="flex flex-col items-center">
             <div className="flex items-start gap-3">
               <Header2
-                text={`${allTotals.contracts -
-                  (allTotals.noncontractPayments + allTotals.contractPayments) < 0 ? "-" : ""}${convertCurrency(
+                text={`${
+                  allTotals.contracts -
+                    (allTotals.noncontractPayments +
+                      allTotals.contractPayments) <
+                  0
+                    ? "-"
+                    : ""
+                }${convertCurrency(
                   allTotals.contracts -
                     (allTotals.noncontractPayments + allTotals.contractPayments)
                 )}`}
@@ -284,13 +291,15 @@ function AmountDisplay({ user }: { readonly user: User | undefined }) {
             );
           })}
         </SelectBar>
-        <CheckedButton
-          clickedFn={totalAmount}
-          disabledLogic={
-            !contractorId.length || !projectId.length || !currencyCode.length
-          }
-        />
-        <Reset clickedFn={reset} />
+        <div className="flex gap-1.5">
+          <CheckedButton
+            clickedFn={totalAmount}
+            disabledLogic={
+              !contractorId.length || !projectId.length || !currencyCode.length
+            }
+          />
+          <Reset clickedFn={reset} />
+        </div>
       </div>
       {/* IF NOT LOADING, THEN DISPLAY "amountView" above*/}
       {loading ? (

@@ -28,7 +28,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
 
   let chartConfig = {
     amount: {
-      label: currency_list.find(i => i.code === currencyCode)?.symbol
+      label: currency_list.find((i) => i.code === currencyCode)?.symbol,
     },
   } satisfies ChartConfig;
 
@@ -89,8 +89,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
     // AN ARRAY OF PAYMENTS MADE FOR THE SELECTED PROJECT
     const projects = chartData?.filter(
       (item) =>
-        item?.project_id === projectId &&
-        item?.currency_code === currencyCode
+        item?.project_id === projectId && item?.currency_code === currencyCode
     );
 
     if (!projects?.length) {
@@ -152,12 +151,12 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
             }`}
           />
         </div>
-        <div className="flex-[2] flex justify-end">
+        <div className="flex-[2]">
           <div className="w-full">
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="grid grid-cols-2 gap-2 mt-2">
               <SelectBar
                 valueChange={setProjectId}
-                className="w-[150px]"
+                className=""
                 value={projectId}
                 placeholder="Select a project"
                 label="Project"
@@ -174,7 +173,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
               </SelectBar>
               <SelectBar
                 valueChange={setRange}
-                className="w-[150px]"
+                className=""
                 value={range}
                 placeholder="Select a range"
                 label="Project"
@@ -191,7 +190,7 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
               </SelectBar>
               <SelectBar
                 valueChange={setCurrencyCode}
-                className="w-[150px]"
+                className=""
                 value={currencyCode}
                 placeholder="Select a currency"
                 label="Currency"
@@ -204,13 +203,15 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
                   );
                 })}
               </SelectBar>
-              <CheckedButton
-                clickedFn={filterPayments}
-                disabledLogic={
-                  !projectId.length || !range.length || !currencyCode.length
-                }
-              />
-              <Reset clickedFn={reset} />
+              <div className="flex gap-1.5">
+                <CheckedButton
+                  clickedFn={filterPayments}
+                  disabledLogic={
+                    !projectId.length || !range.length || !currencyCode.length
+                  }
+                />
+                <Reset clickedFn={reset} />
+              </div>
             </div>
           </div>
         </div>

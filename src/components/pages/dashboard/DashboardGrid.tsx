@@ -13,7 +13,7 @@ function DashboardGrid() {
   const { userData } = useAuth()
 
   return (
-    <div className="dashGrid h-[80vh] gap-6">
+    <div className="dashGrid h-[80vh] gap-4">
       {/* Greeting */}
       <Card className="greeting">
         <Greeting user={userData}/>

@@ -8,7 +8,7 @@ function MainPage() {
     <main className="">
       <AuthContainer>
         <DashboardGrid />
-        <div className="mt-6">
+        <div className="mt-4">
           <PaymentDisplay />
         </div>
       </AuthContainer>

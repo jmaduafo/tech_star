@@ -130,7 +130,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
 
       setStagesData(stages as Stage[]);
 
-      setStageId(data?.stage_id);
+      setStageId(data?.stage_id ?? "");
       setContractCode(data.contract_code ?? "");
       setContractDate(new Date(data?.date?.seconds * 1000));
       setBankInputs([data.bank_name]);
@@ -381,7 +381,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
   // RETRIEVE ALL THE NAMES PERTAINING TO PROJECT, CONTRACTOR, AND STAGE
   async function getNames() {
     try {
-      if (!data) {
+      if (!data || !data?.stage_id) {
         return;
       }
 
@@ -770,7 +770,7 @@ function ActionDialog({ data, is_payment }: Dialog) {
                   value={userComment}
                 ></textarea>
               </Input>
-              <div className="flex justify-center mt-6 scale-75">
+              <div className="flex justify-end mt-6">
                 <Submit
                   loading={loadingEdit}
                   buttonClick={() =>
@@ -778,6 +778,10 @@ function ActionDialog({ data, is_payment }: Dialog) {
                       ? handleEditContract(data?.id)
                       : handleEditPayment(data?.id as string)
                   }
+                  width_height="w-[85px] h-[40px]"
+                  width="w-[40px]"
+                  arrow_width_height="w-6 h-6"
+                  disabledLogic={loadingEdit}
                 />
               </div>
             </Popover>
