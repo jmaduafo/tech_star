@@ -12,7 +12,7 @@ export type User = {
   bg_image_index: number;
   team_id: string;
   role: "admin" | "editor" | "viewer";
-  job_title: string | null,
+  job_title: string | null;
   hire_type: "employee" | "contractor" | "independent";
   is_online: boolean;
   location: string | null;
@@ -20,15 +20,17 @@ export type User = {
   updated_at: TimeStamp | null;
 };
 
+export type ChartData = { name: string; value: number };
+
 export type UserItem = {
   id: string;
   team_id?: string;
-}
+};
 
 export type Item = {
   id: string;
   team_id?: string;
-}
+};
 
 // When a new user logs in for the first time, they are put into a brand new team
 // and are automatically set as an admin. They are the only ones that can add, edit,
@@ -43,7 +45,7 @@ export type Team = {
 export type TimeStamp = {
   nanoseconds: number;
   seconds: number;
-}
+};
 
 export type Currencies = {
   id: string;

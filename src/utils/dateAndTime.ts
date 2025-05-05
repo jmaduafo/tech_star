@@ -82,7 +82,7 @@ export function formatChartDate(timestamp: TimeStamp) {
 }
 
 export function pastMonth() {
-  // GET CURRENT 
+  // GET CURRENT
   const now = new Date();
   const lastMonth = new Date();
 
@@ -95,6 +95,35 @@ export function pastMonth() {
 
   return {
     startTime: startTimestamp,
-    endTime: endTimestamp
-  }
+    endTime: endTimestamp,
+  };
+}
+
+export function filterByDateRange(
+  array: any[] | undefined,
+  range: string
+) {
+  const filter = array?.filter((item) => {
+    const date = new Date(item.date);
+    const referenceDate = new Date();
+
+    // For last 3 months
+    let daysToSubtract = 90;
+
+    // For last 1 month selected
+    if (range === "Last 1 month".toLowerCase()) {
+      daysToSubtract = 30;
+      // For last 7 days selected
+    } else if (range === "Last 7 days".toLowerCase()) {
+      daysToSubtract = 7;
+    }
+
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+
+    // RETURN THE ARRAY OF OBJECTS WITHIN THE DATE RANGE
+    return date >= startDate;
+  });
+
+  return filter
 }

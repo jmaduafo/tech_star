@@ -11,11 +11,9 @@ import PaymentTotal from "./monthly_summary/PaymentTotal";
 import TopContractor from "./monthly_summary/TopContractor";
 import ProjectExpenses from "./expense_overview/ProjectExpenses";
 import ContractorExpenses from "./expense_overview/ContractorExpenses";
-import ContractorChart from "./breakdown/ContractorChart";
-import PaymentChart from "./breakdown/PaymentChart";
-import StageChart from "./breakdown/StageChart";
 import { useAuth } from "@/context/AuthContext";
 import Header3 from "@/components/fontsize/Header3";
+import ChartDisplay from "./breakdown/ChartDisplay";
 
 function MainPage() {
   const reportRef = useRef<HTMLDivElement>(null);
@@ -58,19 +56,7 @@ function MainPage() {
           </div>
         </section>
         {/* CHARTS BREAKDOWN */}
-        <section className="mt-4">
-          <div className="summaryGrid h-[60vh] gap-4">
-            <div className="contractor">
-              <ContractorChart user={userData} />
-            </div>
-            <div className="payment">
-              <PaymentChart user={userData} />
-            </div>
-            <div className="stage">
-              <StageChart user={userData} />
-            </div>
-          </div>
-        </section>
+        <ChartDisplay user={userData}/>
         {/* EXPENSES OVERVIEW */}
         <section className="mt-4">
           <div>

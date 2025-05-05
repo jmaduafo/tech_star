@@ -11,7 +11,7 @@ import Reset from "@/components/ui/buttons/Reset";
 import { db } from "@/firebase/config";
 import { query, collection, where, orderBy } from "firebase/firestore";
 import { getQueriedItems } from "@/firebase/actions";
-import { formatChartDate } from "@/utils/dateAndTime";
+import { filterByDateRange, formatChartDate } from "@/utils/dateAndTime";
 import { ChartConfig } from "@/components/ui/chart";
 import LineChart from "../../ui/charts/LineChart";
 import NotAvailable from "@/components/ui/NotAvailable";
@@ -87,39 +87,19 @@ function LineChartDisplay({ user }: { readonly user: User | undefined }) {
     // FILTER ORIGINAL DATA WHERE THE PROJECT ID AND PROJECT CURRENCY CODE IS EQUAL TO
     // THE SELECTED PROJECT ID AND CURRENCY CODE TO GET
     // AN ARRAY OF PAYMENTS MADE FOR THE SELECTED PROJECT
-    const projects = chartData?.filter(
+    const payments = chartData?.filter(
       (item) =>
         item?.project_id === projectId && item?.currency_code === currencyCode
     );
 
-    if (!projects?.length) {
+    if (!payments?.length) {
       setFilteredData([]);
-    }
+    }    
 
     // IF THERE ARE PROJECTS FOUND, ADD THE ARRAY WITHIN THE SELECTED DATE RANGE
     // TO THE NEW FILTER ARRAY
     setFilteredData(
-      projects?.filter((item) => {
-        const date = new Date(item.date);
-        const referenceDate = new Date();
-
-        // For last 3 months
-        let daysToSubtract = 90;
-
-        // For last 1 month selected
-        if (range === "Last 1 month".toLowerCase()) {
-          daysToSubtract = 30;
-          // For last 7 days selected
-        } else if (range === "Last 7 days".toLowerCase()) {
-          daysToSubtract = 7;
-        }
-
-        const startDate = new Date(referenceDate);
-        startDate.setDate(startDate.getDate() - daysToSubtract);
-
-        // RETURN THE ARRAY OF OBJECTS WITHIN THE DATE RANGE
-        return date >= startDate;
-      })
+      filterByDateRange(payments, range)
     );
   }
 

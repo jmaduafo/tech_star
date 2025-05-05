@@ -4,7 +4,7 @@ import { User } from "@/types/types";
 import { collection, doc, getDoc, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { getQueriedItems } from "@/firebase/actions";
-import { mostFrequent } from "@/utils/mostFrequent";
+import { mostFrequent } from "@/utils/chartHelpers";
 import { pastMonth } from "@/utils/dateAndTime";
 
 function TopContractor({ user }: { readonly user: User | undefined }) {
