@@ -14,11 +14,11 @@ function BarChart({ data }: { readonly data: ChartData[] }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarContainer data={data}>
-        <XAxis dataKey="name" stroke="#ececec"/>
+        <XAxis dataKey="name" stroke="rgba(236, 236, 236, 0.8)"/>
         <YAxis stroke="#ececec" hide />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#000",
+            backgroundColor: "#141414",
             borderRadius: "5px",
             padding: "6px 12px",
             border: "none",
@@ -30,7 +30,7 @@ function BarChart({ data }: { readonly data: ChartData[] }) {
           dataKey="value"
           activeBar={false}
           fill="#ececec"
-          radius={[4, 4, 0, 0]}
+          radius={[16, 16, 0, 0]}
         />
       </BarContainer>
     </ResponsiveContainer>

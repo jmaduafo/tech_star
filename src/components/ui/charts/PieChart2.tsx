@@ -32,19 +32,36 @@ function PieChart2({ data }: { readonly data: ChartData[] }) {
         <Legend
           wrapperStyle={{
             fontSize: 13.5,
-            color: "#ececec"
+            color: "#ececec",
           }}
           content={({ payload }) => (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            <ul
+              style={{
+                listStyle: "none",
+                padding: 0,
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+              }}
+            >
               {payload?.map((entry, index) => (
-                <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                <li
+                  key={`item-${index}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: 4,
+                  }}
+                >
                   <div
                     style={{
                       width: 7,
                       height: 7,
-                      borderRadius: '50%', // circle instead of square
+                      borderRadius: "50%", // circle instead of square
                       backgroundColor: entry.color,
-                      marginRight: 5
+                      marginRight: 5,
                     }}
                   />
                   <span>{entry.value}</span>
