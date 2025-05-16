@@ -161,3 +161,11 @@ export type Chart = {
   project_id: string;
   currency_code: string;
 };
+
+export type ProjectReport = {
+  name: string;
+  total_payments: number;
+  total_contracts: number;
+  contracts: Contract[];
+  expenses: Payment[];
+};

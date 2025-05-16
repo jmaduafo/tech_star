@@ -1,7 +1,7 @@
 "use client";
 
-import { Contract, Payment, TimeStamp, User } from "@/types/types";
-import { formatCurrency } from "@/utils/currencies";
+import { Contract, Payment, ProjectReport, TimeStamp, User } from "@/types/types";
+import { convertCurrency, formatCurrency, totalSum } from "@/utils/currencies";
 import { formatDate } from "@/utils/dateAndTime";
 import { ColumnDef } from "@tanstack/react-table";
 import Banner from "../Banner";
@@ -439,6 +439,102 @@ export const teamColumns: ColumnDef<User>[] = [
       const team = row.original;
 
       return team?.is_owner ? <UserAction data={team} /> : null;
+    },
+  },
+];
+
+export const projectReportColumns: ColumnDef<ProjectReport>[] = [
+  {
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Project Name
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
+    accessorKey: "name",
+  },
+  {
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            No. of Contracts
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
+    accessorKey: "total_contracts",
+    // cell: ({ row }) => {
+      
+    // },
+  },
+  {
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            No. of Payments
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
+    accessorKey: "total_payments",
+  },
+  {
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Total contract sum
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
+    accessorKey: "contracts",
+    cell: ({ row }) => {
+      const contracts: Contract[] = row.getValue("contracts");
+      
+      return <div>{convertCurrency(totalSum(contracts.map(item => item.currency_amount !== "Unlimited" ? item.currency_amount : 0)))}</div>
+    },
+  },
+  {
+    header: ({ column }) => {
+      return (
+        <div className="">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="flex items-center gap-1"
+          >
+            Total expenses
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+      );
+    },
+    accessorKey: "expenses",
+    cell: ({ row }) => {
+      const expenses: Payment[] = row.getValue("expenses");
+      
+      return <div>{convertCurrency(totalSum(expenses.map(item => item.currency_amount !== "Unlimited" ? item.currency_amount : 0)))}</div>
     },
   },
 ];

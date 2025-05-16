@@ -20,6 +20,8 @@ export const mostFrequent = (array: string[] | number[]) => {
   return maxKey;
 };
 
+// RETURNS APPROPRIATE FORMAT FOR CHART GRAPHING 
+// => [{name: "Reas", value" 18}, {name: "Opal", value: 90}, ...]
 export const chartFormat = (array: any[], key: string | number) => {
   let count = array.reduce<Record<string, number>>((acc, curr) => {
     acc[curr[key]] = (acc[curr[key]] || 0) + 1;
