@@ -27,34 +27,39 @@ function SearchQuery({ value, dataMap, findData }: Search) {
     const [ open, setOpen ] = useState(false)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-      <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-            {/* Ex: findData: frameworks.find((framework) => framework.value === value)?.label */}
-            {value
-            ? findData
-            : "Select framework..."}      
-            {open ? <HiChevronUp className='ml-2 h-4 w-4 shrink-0 opacity-50'/> : <HiChevronDown className='ml-2 h-4 w-4 shrink-0 opacity-50'/>}    
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandInput placeholder="Search framework..." />
-          <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
-            <CommandGroup>
-                {/* CommandItem */}
-              {dataMap}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    // <Popover open={open} onOpenChange={setOpen}>
+    //   <PopoverTrigger>
+    //   <Button
+    //       variant="outline"
+    //       role="combobox"
+    //       aria-expanded={open}
+    //       className="w-[200px] justify-between"
+    //     >
+    //         {/* Ex: findData: frameworks.find((framework) => framework.value === value)?.label */}
+    //         {value
+    //         ? findData
+    //         : "Select framework..."}      
+    //         {open ? <HiChevronUp className='ml-2 h-4 w-4 shrink-0 opacity-50'/> : <HiChevronDown className='ml-2 h-4 w-4 shrink-0 opacity-50'/>}    
+    //     </Button>
+    //   </PopoverTrigger>
+    //   <PopoverContent className="w-[200px] p-0">
+    //     <Command>
+    //       <>
+    //       <CommandInput placeholder="Search framework..." />
+    //       <CommandList>
+    //         <CommandEmpty>No framework found.</CommandEmpty>
+    //         <CommandGroup>
+    //             {/* CommandItem */}
+    //           {dataMap}
+    //         </CommandGroup>
+    //       </CommandList>
+    //       </>
+    //     </Command>
+    //   </PopoverContent>
+    // </Popover>
+    <div>
+      
+    </div>
   )
 }
 
