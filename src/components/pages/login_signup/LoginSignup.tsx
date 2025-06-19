@@ -13,7 +13,7 @@ function LoginSignup() {
       <div className="">
         <FormSwitch isLogin={isLogin} setIsLogin={setIsLogin} />
       </div>
-      <div className="mt-[7.5em] duration-300">{isLogin ? <Login /> : <SignUp />}</div>
+      <div className="mt-[5em] xs:mt-[7.5em] duration-300">{isLogin ? <Login /> : <SignUp />}</div>
     </div>
   );
 }

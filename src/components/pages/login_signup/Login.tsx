@@ -46,7 +46,7 @@ function Login() {
       <form className="mt-10" action={action}>
         <div>
           <IconInput
-            icon={<CiMail className="w-6 h-6" />}
+            icon={<CiMail className="w-5 h-5 sm:w-6 sm:h-6" />}
             input={
               <input
                 placeholder="Email"
@@ -60,7 +60,7 @@ function Login() {
         </div>
         <div className="mt-4">
           <IconInput
-            icon={<CiLock className="w-6 h-6" />}
+            icon={<CiLock className="w-5 h-5 sm:w-6 sm:h-6" />}
             input={
               <input
                 placeholder="Password"

@@ -53,7 +53,7 @@ function SignUp() {
           <div>
             <IconInput
               icon={
-                <div className="w-6 h-6 flex justify-center items-center">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 flex justify-center items-center">
                   <p>A</p>
                 </div>
               }
@@ -71,7 +71,7 @@ function SignUp() {
           <div>
             <IconInput
               icon={
-                <div className="w-6 h-6 flex justify-center items-center">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 flex justify-center items-center">
                   <p>Z</p>
                 </div>
               }
@@ -89,7 +89,7 @@ function SignUp() {
         </div>
         <div className="mt-4">
           <IconInput
-            icon={<CiMail className="w-6 h-6" />}
+            icon={<CiMail className="w-5 h-5 sm:w-6 sm:h-6" />}
             input={
               <input
                 placeholder="Email"
@@ -103,7 +103,7 @@ function SignUp() {
         </div>
         <div className="mt-4">
           <IconInput
-            icon={<CiLock className="w-6 h-6" />}
+            icon={<CiLock className="w-5 h-5 sm:w-6 sm:h-6" />}
             input={
               <input
                 placeholder="Password"
