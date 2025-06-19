@@ -76,7 +76,7 @@ export function getAllItems(collectionName: string) {
   }
 }
 
-export async function getQueriedItems<T = DocumentData>(ref: Query<DocumentData, DocumentData>): Promise<T[]> {
+export async function getQueriedItems<T = DocumentData>(ref: Query<DocumentData>): Promise<T[]> {
   try {
     const snap = await getDocs(ref);
     return snap.docs.map((item) => ({
@@ -119,7 +119,7 @@ export async function getCount(collectionName: string) {
   }
 }
 
-export async function getQueriedCount(ref: Query<DocumentData, DocumentData>) {
+export async function getQueriedCount(ref: Query<DocumentData>) {
   try {
     // Display only projects by a specific team
     const snapshot = await getCountFromServer(ref);
@@ -167,7 +167,7 @@ export async function deleteItem(collectionName: string, id: string) {
 }
 
 export async function updateQueriedItem(
-  ref: DocumentReference<DocumentData, object>,
+  ref: DocumentReference<DocumentData>,
   items: object
 ) {
   try {
