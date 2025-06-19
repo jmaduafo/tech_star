@@ -38,9 +38,9 @@ function Login() {
 
   return (
     <div>
-      <Header1 text="Welcome back!" />
+      <Header1 text="Welcome back!" className="text-darkText"/>
       <Header6
-        className="mt-4"
+        className="mt-4 text-darkText"
         text="Sign in to access your account and stay on top of  your company finances effortlessly."
       />
       <form className="mt-10" action={action}>

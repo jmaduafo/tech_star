@@ -43,13 +43,13 @@ function SignUp() {
 
   return (
     <div>
-      <Header1 text="Join us today!" />
+      <Header1 text="Join us today!" className="text-darkText"/>
       <Header6
-        className="mt-4"
+        className="mt-4 text-darkText"
         text="Create an account to streamline your workflow and manage projects with ease."
       />
       <form className="mt-10" action={action}>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div>
             <IconInput
               icon={
